@@ -769,3 +769,40 @@ ALTER TABLE skill_rel_user ADD validation_status INT NOT NULL, CHANGE acquired_s
 // You need add a new option called "confirmation" to the registration settings
 //INSERT INTO settings_options (variable, value, display_text) VALUES ('allow_registration', 'confirmation', 'MailConfirmation');
 // ------ (End) Custom DB changes
+
+// Show the alternative certificate
+// Requires DB change:
+/*
+ CREATE TABLE gradebook_certificate_alternative (
+ id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+ c_id INT NOT NULL,
+ session_id INT NOT NULL,
+ content_course longtext NOT NULL,
+ contents_type int(11) NOT NULL,
+ contents longtext NOT NULL,
+ date_change int(11) NOT NULL,
+ date_start date DEFAULT NULL,
+ date_end date DEFAULT NULL,
+ type_date_expediction int(11) NOT NULL,
+ place varchar(255) NOT NULL,
+ day varchar(50) NOT NULL,
+ month varchar(50) NOT NULL,
+ year varchar(50) NOT NULL,
+ logo_left varchar(255) NOT NULL,
+ logo_center varchar(255) NOT NULL,
+ logo_right varchar(255) NOT NULL,
+ seal varchar(255) NOT NULL,
+ signature1 varchar(255) NOT NULL,
+ signature2 varchar(255) NOT NULL,
+ signature3 varchar(255) NOT NULL,
+ signature4 varchar(255) NOT NULL,
+ signature_text1 varchar(255) NOT NULL,
+ signature_text2 varchar(255) NOT NULL,
+ signature_text3 varchar(255) NOT NULL,
+ signature_text4 varchar(255) NOT NULL,
+ background varchar(255) NOT NULL,
+ margin int(11) NOT NULL,
+ certificate_default int(11) NOT NULL
+ );
+ */
+//$_configuration['alternative_certificate'] = true;

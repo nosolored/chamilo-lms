@@ -467,7 +467,8 @@ class PDF
         $saveInFile = false,
         $fileToSave = null,
         $returnHtml = false,
-        $addDefaultCss = false
+        $addDefaultCss = false,
+        $completeHeader = true
     ) {
         $urlAppend = api_get_configuration_value('url_append');
 
@@ -484,7 +485,7 @@ class PDF
         // Formatting the pdf
         $course_data = api_get_course_info($course_code);
 
-        self::format_pdf($course_data);
+        self::format_pdf($course_data, $completeHeader);
 
         $document_html = preg_replace($clean_search, '', $document_html);
 

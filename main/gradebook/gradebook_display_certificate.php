@@ -127,17 +127,21 @@ switch ($action) {
         $content = $form->returnForm();
         break;
     case 'export_all_certificates':
-        if (api_is_student_boss()) {
-            $userGroup = new UserGroup();
-            $userList = $userGroup->getGroupUsersByUser(api_get_user_id());
+        if (api_get_configuration_value('alternative_certificate') == true) {
+            $url = api_get_path(WEB_PATH)."main/gradebook/gradebook_print_certificate.php?export_all=1";
         } else {
-            $userList = [];
-            if (!empty($filterOfficialCodeGet)) {
-                $userList = UserManager::getUsersByOfficialCode($filterOfficialCodeGet);
+            if (api_is_student_boss()) {
+                $userGroup = new UserGroup();
+                $userList = $userGroup->getGroupUsersByUser(api_get_user_id());
+            } else {
+                $userList = [];
+                if (!empty($filterOfficialCodeGet)) {
+                    $userList = UserManager::getUsersByOfficialCode($filterOfficialCodeGet);
+                }
             }
+    
+            Category::exportAllCertificates($categoryId, $userList);
         }
-
-        Category::exportAllCertificates($categoryId, $userList);
         header('Location: '.$url);
         exit;
         break;

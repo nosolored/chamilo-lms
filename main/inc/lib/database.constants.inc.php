@@ -55,6 +55,7 @@ define('TABLE_MAIN_GRADEBOOK_LINK', 'gradebook_link');
 define('TABLE_MAIN_GRADEBOOK_SCORE_DISPLAY', 'gradebook_score_display');
 define('TABLE_MAIN_GRADEBOOK_CERTIFICATE', 'gradebook_certificate');
 define('TABLE_MAIN_GRADEBOOK_SCORE_LOG', 'gradebook_score_log');
+define('TABLE_MAIN_GRADEBOOK_CERTIFICATE_ALTERNATIVE', 'gradebook_certificate_alternative');
 
 // Profiling
 
