@@ -1,8 +1,6 @@
 <?php
 /* For licensing terms, see /license.txt */
 
-use ChamiloSession as Session;
-
 if (intval($_GET['default']) == 1) {
     $cidReset = true;
 }
@@ -62,7 +60,7 @@ if ($enable) {
         $infoCertificate = Database::select(
             '*',
             $table,
-            ['where'=> ['access_url_id = ? AND c_id = ? AND session_id = ?' => [$accessUrlId, $courseId, $sessionId]]],
+            ['where' => ['access_url_id = ? AND c_id = ? AND session_id = ?' => [$accessUrlId, $courseId, $sessionId]]],
             'first'
         );
         if (!is_array($infoCertificate)) {
@@ -74,7 +72,7 @@ if ($enable) {
             'post',
             api_get_self().$urlParams,
             null,
-            array('class' => 'form-vertical')
+            ['class' => 'form-vertical']
         );
         if (isset($_POST['formSent']) && $_POST['formSent'] == 1 && $form->validate()) {
             $formValues = $form->getSubmitValues();
@@ -109,7 +107,7 @@ if ($enable) {
                     'signature_text4' => $formValues['signature_text4'],
                     'margin_left' => intval($formValues['margin_left']),
                     'margin_right' => intval($formValues['margin_right']),
-                    'certificate_default' => 0
+                    'certificate_default' => 0,
                 ];
 
                 if (intval($_POST['default_certificate'] == 1)) {
@@ -326,7 +324,7 @@ if ($enable) {
                     $infoCertificateDefault = Database::select(
                         '*',
                         $table,
-                        ['where'=> ['certificate_default = ? ' => 1]],
+                        ['where' => ['certificate_default = ? ' => 1]],
                         'first'
                     );
 
@@ -447,12 +445,12 @@ if ($enable) {
             $infoCertificate = Database::select(
                 '*',
                 $table,
-                ['where'=> ['access_url_id = ? AND certificate_default = ? ' => [$accessUrlId, 1]]],
+                ['where' => ['access_url_id = ? AND certificate_default = ? ' => [$accessUrlId, 1]]],
                 'first'
             );
 
             if (!is_array($infoCertificate)) {
-                $infoCertificate = array();
+                $infoCertificate = [];
             }
             if (!empty($infoCertificate)) {
                 $useDefault = true;
@@ -467,7 +465,7 @@ if ($enable) {
         );
         echo Display::toolbarAction(
             'toolbar-document',
-            array($actionsLeft)
+            [$actionsLeft]
         );
 
         if ($useDefault && $courseId > 0) {
@@ -678,7 +676,7 @@ if ($enable) {
             'place',
             get_lang('ExpectionPlace'),
             false,
-            array('id' => 'place', 'cols-size' => [2, 5, 5], 'autofocus')
+            ['id' => 'place', 'cols-size' => [2, 5, 5], 'autofocus']
         );
 
         $group = [];
@@ -691,7 +689,7 @@ if ($enable) {
             [
                 'id' => 'type_date_expediction_0',
                 'onclick' => 'javascript: date_certificate_switch_radio_button_0();',
-                (($sessionId == 0) ? 'disabled' : '')
+                (($sessionId == 0) ? 'disabled' : ''),
             ]
         );
         $group[] = $option1;
@@ -795,12 +793,12 @@ if ($enable) {
         $form->addFile(
             'logo_left',
             get_lang('LogoLeft'),
-            array(
+            [
                 'id' => 'logo_left',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['logo_left'])) {
@@ -825,12 +823,12 @@ if ($enable) {
         $form->addFile(
             'logo_center',
             get_lang('LogoCenter'),
-            array(
+            [
                 'id' => 'logo_center',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['logo_center'])) {
@@ -855,12 +853,12 @@ if ($enable) {
         $form->addFile(
             'logo_right',
             get_lang('LogoRight'),
-            array(
+            [
                 'id' => 'logo_right',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['logo_right'])) {
@@ -884,12 +882,12 @@ if ($enable) {
         $form->addFile(
             'seal',
             get_lang('Seal'),
-            array(
+            [
                 'id' => 'seal',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['seal'])) {
@@ -917,17 +915,17 @@ if ($enable) {
             'signature_text1',
             get_lang('SignatureText1'),
             false,
-            array('cols-size' => [2, 10, 0], 'autofocus')
+            ['cols-size' => [2, 10, 0], 'autofocus']
         );
         $form->addFile(
             'signature1',
             get_lang('Signature1'),
-            array(
+            [
                 'id' => 'signature1',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['signature1'])) {
@@ -953,17 +951,17 @@ if ($enable) {
             'signature_text2',
             get_lang('SignatureText2'),
             false,
-            array('cols-size' => [2, 10, 0], 'autofocus')
+            ['cols-size' => [2, 10, 0], 'autofocus']
         );
         $form->addFile(
             'signature2',
             get_lang('Signature2'),
-            array(
+            [
                 'id' => 'signature2',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['signature2'])) {
@@ -989,17 +987,17 @@ if ($enable) {
             'signature_text3',
             get_lang('SignatureText3'),
             false,
-            array('cols-size' => [2, 10, 0], 'autofocus')
+            ['cols-size' => [2, 10, 0], 'autofocus']
         );
         $form->addFile(
             'signature3',
             get_lang('Signature3'),
-            array(
+            [
                 'id' => 'signature3',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['signature3'])) {
@@ -1025,17 +1023,17 @@ if ($enable) {
             'signature_text4',
             get_lang('SignatureText4'),
             false,
-            array('cols-size' => [2, 10, 0], 'autofocus')
+            ['cols-size' => [2, 10, 0], 'autofocus']
         );
         $form->addFile(
             'signature4',
             get_lang('Signature4'),
-            array(
+            [
                 'id' => 'signature4',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_scalable' => 'true'
-            )
+                'crop_scalable' => 'true',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['signature4'])) {
@@ -1062,12 +1060,12 @@ if ($enable) {
         $form->addFile(
             'background',
             get_lang('Background'),
-            array(
+            [
                 'id' => 'background',
                 'class' => 'picture-form',
                 'crop_image' => true,
-                'crop_ratio' => '297 / 210'
-            )
+                'crop_ratio' => '297 / 210',
+            ]
         );
         $form->addProgress();
         if (!empty($infoCertificate['background'])) {
@@ -1101,14 +1099,14 @@ if ($enable) {
             'margin_left',
             get_lang('MarginLeft'),
             $marginOptions,
-            array('cols-size' => [4, 8, 0])
+            ['cols-size' => [4, 8, 0]]
         );
         $form->addElement(
             'select',
             'margin_right',
             get_lang('MarginRight'),
             $marginOptions,
-            array('cols-size' => [4, 8, 0])
+            ['cols-size' => [4, 8, 0]]
         );
         $form->addElement('html', '</fieldset>');
         $form->addElement('html', '</div>');
