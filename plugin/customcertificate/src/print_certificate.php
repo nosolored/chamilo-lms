@@ -359,7 +359,7 @@ foreach ($userList as $userInfo) {
         $categoryTest->setName($plugin->get_lang('WithOutCategory'));
         $categoryTest->setPosition(0);
         $categories = [
-            $categoryTest
+            $categoryTest,
         ];
         if (!empty($categoriesTempList)) {
             $categories = array_merge($categories, $categoriesTempList);
@@ -473,7 +473,8 @@ $params = [
 $pdf = new PDF($params['format'], $params['orientation'], $params);
 $pdf->content_to_pdf($htmlText, '', $fileName, null, 'I', false, null, false, true, false);
 
-function getIndexFiltered($indice) {
+function getIndexFiltered($indice)
+{
     $txt = strip_tags($indice, "<b><strong><i>");
     $txt = str_replace(chr(13).chr(10).chr(13).chr(10), chr(13).chr(10), $txt);
     $lines = explode(chr(13).chr(10), $txt);
