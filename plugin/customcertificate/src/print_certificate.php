@@ -6,7 +6,7 @@ use Chamilo\CourseBundle\Entity\CLpCategory;
 if (intval($_GET['default']) == 1) {
     $cidReset = true;
 }
-    
+
 $course_plugin = 'customcertificate';
 require_once __DIR__.'/../config.php';
 
@@ -463,7 +463,8 @@ $params = [
 $pdf = new PDF($params['format'], $params['orientation'], $params);
 $pdf->content_to_pdf($htmlText, '', $fileName, null, 'I', false, null, false, true, false);
 
-function getIndexFiltered($indice) {
+function getIndexFiltered($indice)
+{
     $txt = strip_tags($indice, "<b><strong><i>");
     $txt = str_replace(chr(13).chr(10).chr(13).chr(10), chr(13).chr(10), $txt);
     $lines = explode(chr(13).chr(10), $txt);
