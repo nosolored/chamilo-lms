@@ -225,7 +225,7 @@ class CustomCertificatePlugin extends Plugin
 
         return [];
     }
-    
+
     public function redirectCheck($certificate, $certId)
     {
         $certId = (int) $certId;
@@ -247,7 +247,7 @@ class CustomCertificatePlugin extends Plugin
                         $extraFieldValue->saveFieldValues($params);
                     }
                 }
-                
+
                 $url = api_get_path(WEB_PLUGIN_PATH).'customcertificate/src/print_certificate.php'.
                     '?student_id='.$infoCertificate['user_id'].
                     '&course_code='.$infoCertificate['course_code'].
