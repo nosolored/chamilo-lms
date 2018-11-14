@@ -826,7 +826,7 @@ if ($form->validate()) {
                 $emailsubject = get_lang('NoticeForNewAccount').': '.$values['username'];
                 $emailbody = get_lang('NoticeForNewAccount')."<br>";
                 $emailbody .= get_lang('UserName').': '.$values['username']."<br>";
-                
+
                 if (api_is_western_name_order()) {
                     $emailbody .= get_lang('FirstName').': '.$values['firstname']."<br>";
                     $emailbody .= get_lang('LastName').': '.$values['lastname']."<br>";
@@ -845,7 +845,7 @@ if ($form->validate()) {
                 );
 
                 $emailbody .= get_lang('ManageUser').": $url_edit";
-                
+
                 $admins = UserManager::get_all_administrators();
                 foreach ($admins as $admin_info) {
                     $userInfo = api_get_user_info($user_id);
