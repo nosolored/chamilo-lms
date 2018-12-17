@@ -6794,10 +6794,10 @@ class Tracking
     }
 
     /**
-     * @param int  $userId
-     * @param int  $courseId
-     * @param int  $sessionId
-     * @param int  $toolId
+     * @param int $userId
+     * @param int $courseId
+     * @param int $sessionId
+     * @param int $toolId
      *
      * @return array
      */
