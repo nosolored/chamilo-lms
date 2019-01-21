@@ -5799,7 +5799,7 @@ class Tracking
                     if (!$learnpath['lp_visibility']) {
                         continue;
                     }
-                    
+
                     $progress = self::get_avg_student_progress(
                         $user_id,
                         $course,
