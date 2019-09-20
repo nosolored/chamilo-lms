@@ -305,7 +305,7 @@ class CustomCertificatePlugin extends Plugin
         if (Database::num_rows($result) > 0) {
             $result_array = Database::fetch_array($result);
         }
-        
+
         return $result_array;
     }
 
@@ -326,7 +326,7 @@ class CustomCertificatePlugin extends Plugin
         if (Database::num_rows($result) > 0) {
             $result_array = Database::fetch_array($result);
         }
-        
+
         return $result_array;
     }
 }
