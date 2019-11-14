@@ -1461,8 +1461,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Convert the course info to array with necessary course data for save item.
      *
-     * @param Course $course
-     * @param array  $defaultCurrency Optional. Currency data
+     * @param array $defaultCurrency Optional. Currency data
      *
      * @return array
      */
@@ -2603,8 +2602,6 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
-     * @param Session $session
-     *
      * @return array
      */
     public function getBuyCoursePluginPrice(Session $session)
@@ -2627,8 +2624,6 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
-     * @param array $saleInfo
-     *
      * @return string
      */
     public function getSubscriptionSuccessMessage(array $saleInfo)
