@@ -215,7 +215,7 @@ class Rest extends WebService
         return $messages;
     }
 
-     /**
+    /**
      * @return array
      */
     public function getUserReceivedMessages()
@@ -951,8 +951,7 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $postValues
-     * @param int   $forumId
+     * @param int $forumId
      *
      * @return array
      */
@@ -1026,7 +1025,6 @@ class Rest extends WebService
     /**
      * @param string $subject
      * @param string $text
-     * @param array  $receivers
      *
      * @return array
      */
@@ -1095,8 +1093,7 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $values
-     * @param int   $forumId
+     * @param int $forumId
      *
      * @return array
      */
@@ -1115,8 +1112,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function getUsersCampus(array $params)
@@ -1141,8 +1136,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function getCoursesCampus(array $params)
@@ -1164,8 +1157,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function addSession(array $params)
@@ -1217,8 +1208,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $courseParam
-     *
      * @return array
      */
     public function addCourse(array $courseParam)
@@ -1517,8 +1506,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @throws Exception
      *
      * @return array
@@ -1549,8 +1536,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function addUsersSession(array $params)

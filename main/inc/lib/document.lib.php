@@ -5783,9 +5783,8 @@ class DocumentManager
     /**
      * Create users shared folder for course.
      *
-     * @param int   $userId
-     * @param array $courseInfo
-     * @param int   $sessionId
+     * @param int $userId
+     * @param int $sessionId
      */
     public static function createUserSharedFolder($userId, array $courseInfo, $sessionId = 0)
     {
@@ -6741,7 +6740,6 @@ class DocumentManager
      * Get the button to edit document.
      *
      * @param bool   $isReadOnly
-     * @param array  $documentData
      * @param string $extension
      * @param bool   $isCertificateMode
      *
@@ -6827,10 +6825,9 @@ class DocumentManager
     /**
      * Get the button to move document.
      *
-     * @param bool  $isReadOnly
-     * @param array $documentData
-     * @param bool  $isCertificateMode
-     * @param int   $parentId
+     * @param bool $isReadOnly
+     * @param bool $isCertificateMode
+     * @param int  $parentId
      *
      * @return string
      */
@@ -6869,11 +6866,10 @@ class DocumentManager
     /**
      * Get the button to set visibility to document.
      *
-     * @param bool  $isReadOnly
-     * @param int   $visibility
-     * @param array $documentData
-     * @param bool  $isCertificateMode
-     * @param int   $parentId
+     * @param bool $isReadOnly
+     * @param int  $visibility
+     * @param bool $isCertificateMode
+     * @param int  $parentId
      *
      * @return string|null
      */
@@ -6916,7 +6912,6 @@ class DocumentManager
      * GEt the button to delete a document.
      *
      * @param bool   $isReadOnly
-     * @param array  $documentData
      * @param bool   $isCertificateMode
      * @param string $curDirPath
      * @param int    $parentId
