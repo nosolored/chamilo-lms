@@ -105,7 +105,7 @@ class PTestCategory
                     api_get_user_id()
                 );
             }
-            
+
             return $newId;
         } else {
             return false;
@@ -182,9 +182,9 @@ class PTestCategory
 
     /**
      * Gets the number of categories of exercise id=in_id.
-     * 
+     *
      * @param int $exerciseId
-     * 
+     *
      * @return int
      */
     public function getCategoriesExerciseNumber($exerciseId)
@@ -338,8 +338,6 @@ class PTestCategory
     }
 
     /**
-     * @param Exercise $exercise
-     *
      * @return array
      */
     public static function getListOfCategoriesIDForTestObject(Exercise $exercise)
@@ -398,8 +396,6 @@ class PTestCategory
     }
 
     /**
-     * @param Exercise $exercise
-     *
      * @return array
      */
     public static function getListOfCategoriesForTest(Exercise $exercise)
@@ -950,8 +946,6 @@ class PTestCategory
 
     /**
      * Returns the category form.
-     *
-     * @param Exercise $exercise
      *
      * @return string
      */
