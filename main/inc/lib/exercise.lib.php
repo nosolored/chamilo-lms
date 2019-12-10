@@ -600,7 +600,7 @@ class ExerciseLib
                         });
                     });
                 </script>";
-                
+
                 $header = Display::tag(
                     'th',
                     get_lang('Option'),
@@ -1583,7 +1583,7 @@ HTML;
                 $s .= '</div>';
                 $s .= '<div class="col-sm-2"></div>';
                 $s .= '</div>';
-                
+
                 $s .= '<div class="form-group">';
                 $s .= '<label for="choice-disagree-'.$questionId.'" class="col-sm-2 control-label">'.get_lang('LeastAgree').': </label>';
                 $s .= '<div class="col-sm-8">';
@@ -3291,8 +3291,7 @@ HOTSPOT;
     }
 
     /**
-     * @param FormValidator $form
-     * @param string        $name
+     * @param string $name
      * @param $weight
      * @param $selected
      *
@@ -4461,11 +4460,10 @@ EOT;
                         $answerValue = json_decode($row['answer'], true);
                         $sum += $answerValue[$answer_id];
                         $count++;
-
                     }
 
                     if ($count > 0) {
-                        return round(($sum / $count),1);
+                        return round(($sum / $count), 1);
                     }
 
                     return 0;
@@ -4491,7 +4489,7 @@ EOT;
                     }
 
                     if ($count > 0) {
-                        return round(($sum / $count),1);
+                        return round(($sum / $count), 1);
                     }
 
                     return 0;
@@ -5619,11 +5617,10 @@ EOT;
     }
 
     /**
-     * @param Exercise $objExercise
-     * @param float    $score
-     * @param float    $weight
-     * @param bool     $checkPassPercentage
-     * @param int      $countPendingQuestions
+     * @param float $score
+     * @param float $weight
+     * @param bool  $checkPassPercentage
+     * @param int   $countPendingQuestions
      *
      * @return string
      */
@@ -5861,10 +5858,9 @@ EOT;
     }
 
     /**
-     * @param DateTime $time
-     * @param int      $userId
-     * @param int      $courseId
-     * @param int      $sessionId
+     * @param int $userId
+     * @param int $courseId
+     * @param int $sessionId
      *
      * @throws \Doctrine\ORM\Query\QueryException
      *
@@ -5971,12 +5967,11 @@ EOT;
      * Generate a certificate linked to current quiz and.
      * Return the HTML block with links to download and view the certificate.
      *
-     * @param float    $totalScore
-     * @param float    $totalWeight
-     * @param Exercise $objExercise
-     * @param int      $studentId
-     * @param string   $courseCode
-     * @param int      $sessionId
+     * @param float  $totalScore
+     * @param float  $totalWeight
+     * @param int    $studentId
+     * @param string $courseCode
+     * @param int    $sessionId
      *
      * @return string
      */

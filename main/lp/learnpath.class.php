@@ -4511,8 +4511,6 @@ class learnpath
     /**
      * Check if the learnpath category is visible for a user.
      *
-     * @param CLpCategory $category
-     * @param User        $user
      * @param int
      * @param int
      *
@@ -4609,8 +4607,7 @@ class learnpath
     /**
      * Check if a learnpath category is published as course tool.
      *
-     * @param CLpCategory $category
-     * @param int         $courseId
+     * @param int $courseId
      *
      * @return bool
      */
@@ -13509,9 +13506,6 @@ EOD;
         return $value;
     }
 
-    /**
-     * @param FormValidator $form
-     */
     public function setItemTitle(FormValidator $form)
     {
         if (api_get_configuration_value('save_titles_as_html')) {
