@@ -2266,7 +2266,7 @@ class Event
             'login_user_id' => $userId,
             'login_date' => $loginDate,
             'user_ip' => api_get_real_ip(),
-            'logout_date' => $logoutDate
+            'logout_date' => $logoutDate,
         ];
         $platformTrackingTable = Database::get_main_table(TABLE_STATISTIC_TRACK_E_LOGIN);
         Database::insert($platformTrackingTable, $params);
@@ -2354,6 +2354,7 @@ class Event
             $sql = "DELETE FROM $platformTrackingTable 
                     WHERE login_id = $loginAccessId";
             $result = Database::query($sql);
+
             return $result;
         }
 

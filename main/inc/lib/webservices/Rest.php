@@ -219,7 +219,7 @@ class Rest extends WebService
         return $messages;
     }
 
-     /**
+    /**
      * @return array
      */
     public function getUserReceivedMessages()
@@ -642,8 +642,7 @@ class Rest extends WebService
                 'title' => $forumInfo['forum_title'],
                 'description' => $forumInfo['forum_comment'],
                 'image' => $forumInfo['forum_image'] ? ($webCoursePath.$forumInfo['forum_image']) : '',
-                'numberOfThreads' =>
-                    isset($forumInfo['number_of_threads']) ? intval($forumInfo['number_of_threads']) : 0,
+                'numberOfThreads' => isset($forumInfo['number_of_threads']) ? intval($forumInfo['number_of_threads']) : 0,
                 'lastPost' => null,
             ];
 
@@ -956,8 +955,7 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $postValues
-     * @param int   $forumId
+     * @param int $forumId
      *
      * @return array
      */
@@ -1031,7 +1029,6 @@ class Rest extends WebService
     /**
      * @param string $subject
      * @param string $text
-     * @param array  $receivers
      *
      * @return array
      */
@@ -1100,8 +1097,7 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $values
-     * @param int   $forumId
+     * @param int $forumId
      *
      * @return array
      */
@@ -1120,8 +1116,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function getUsersCampus(array $params)
@@ -1146,8 +1140,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function getCoursesCampus(array $params)
@@ -1169,8 +1161,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function addSession(array $params)
@@ -1222,8 +1212,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $courseParam
-     *
      * @return array
      */
     public function addCourse(array $courseParam)
@@ -1522,8 +1510,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @throws Exception
      *
      * @return array
@@ -1554,8 +1540,6 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $params
-     *
      * @return array
      */
     public function addUsersSession(array $params)
@@ -1581,31 +1565,16 @@ class Rest extends WebService
     }
 
     /**
-     * @param array $additionalParams Optional
-     *
-     * @return string
-     */
-    private function encodeParams(array $additionalParams = [])
-    {
-        $params = array_merge($additionalParams, [
-            'api_key' => $this->apiKey,
-            'username' => $this->user->getUsername(),
-        ]);
-        $encoded = json_encode($params);
-
-        return $encoded;
-    }
-
-    /**
-     * Creates a session from a model session
+     * Creates a session from a model session.
      *
      * @param $modelSessionId
      * @param $sessionName
      * @param $startDate
      * @param $endDate
-     * @param array $extraFields
-     * @return int, the id of the new session
+     *
      * @throws Exception
+     *
+     * @return int, the id of the new session
      */
     public function createSessionFromModel($modelSessionId, $sessionName, $startDate, $endDate, array $extraFields = [])
     {
@@ -1699,12 +1668,14 @@ class Rest extends WebService
     }
 
     /**
-     * subscribes a user to a session
+     * subscribes a user to a session.
      *
-     * @param int $sessionId the session id
+     * @param int    $sessionId the session id
      * @param string $loginName the user's login name
-     * @return boolean, whether it worked
+     *
      * @throws Exception
+     *
+     * @return boolean, whether it worked
      */
     public function subscribeUserToSessionFromUsername($sessionId, $loginName)
     {
@@ -1713,7 +1684,7 @@ class Rest extends WebService
         }
 
         $userId = UserManager::get_user_id_from_username($loginName);
-        if (False === $userId) {
+        if (false === $userId) {
             throw new Exception(get_lang('UserNotFound'));
         }
 
@@ -1730,12 +1701,14 @@ class Rest extends WebService
     }
 
     /**
-     * finds the session which has a specific value in a specific extra field
+     * finds the session which has a specific value in a specific extra field.
      *
      * @param $fieldName
      * @param $fieldValue
-     * @return int, the matching session id
+     *
      * @throws Exception when no session matched or more than one session matched
+     *
+     * @return int, the matching session id
      */
     public function getSessionFromExtraField($fieldName, $fieldValue)
     {
@@ -1759,11 +1732,13 @@ class Rest extends WebService
     }
 
     /**
-     * updates a user identified by its login name
+     * updates a user identified by its login name.
      *
      * @param array $parameters
-     * @return boolean, true on success
+     *
      * @throws Exception on failure
+     *
+     * @return boolean, true on success
      */
     public function updateUserFromUserName($parameters)
     {
@@ -1894,8 +1869,7 @@ class Rest extends WebService
                                     $fieldValue = $field['field_value'];
                                     if (!isset($fieldName) || !isset($fieldValue) ||
                                         !UserManager::update_extra_field_value($userId, $fieldName, $fieldValue)) {
-                                        throw new Exception(
-                                            get_lang('CouldNotUpdateExtraFieldValue').': '.print_r($field, true));
+                                        throw new Exception(get_lang('CouldNotUpdateExtraFieldValue').': '.print_r($field, true));
                                     }
                                 }
                             } else {
@@ -1951,5 +1925,21 @@ class Rest extends WebService
         }
 
         return true;
+    }
+
+    /**
+     * @param array $additionalParams Optional
+     *
+     * @return string
+     */
+    private function encodeParams(array $additionalParams = [])
+    {
+        $params = array_merge($additionalParams, [
+            'api_key' => $this->apiKey,
+            'username' => $this->user->getUsername(),
+        ]);
+        $encoded = json_encode($params);
+
+        return $encoded;
     }
 }

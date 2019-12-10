@@ -4,7 +4,6 @@
 require_once __DIR__.'/functions.inc.php';
 
 /** @var array $uData */
-
 $plugin = AzureActiveDirectory::create();
 
 if ('true' !== $plugin->get(AzureActiveDirectory::SETTING_ENABLE)) {

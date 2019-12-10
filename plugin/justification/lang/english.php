@@ -9,6 +9,3 @@ $strings['ValidityDuration'] = "Validity Duration";
 $strings['DateManualOn'] = "Date Manual On";
 
 $strings['JustificationCode'] = "Justification code";
-
-
-
