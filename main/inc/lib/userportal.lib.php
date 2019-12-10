@@ -2282,8 +2282,6 @@ class IndexManager
     /**
      * Generate the HTML code for items when displaying the right-side blocks.
      *
-     * @param array $items
-     *
      * @return string
      */
     private static function returnRightBlockItems(array $items)
