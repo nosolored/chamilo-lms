@@ -2189,9 +2189,8 @@ abstract class Question
     /**
      * Shows question title an description.
      *
-     * @param Exercise $exercise
-     * @param int      $counter
-     * @param array    $score
+     * @param int   $counter
+     * @param array $score
      *
      * @return string HTML string with the header of the question (before the answers table)
      */

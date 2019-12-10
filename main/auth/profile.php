@@ -706,9 +706,9 @@ if ($allowJustification) {
     $formValidator = new FormValidator('justification');
     $formValidator->addHeader($plugin->get_lang('Justification'));
     foreach ($fields as $field) {
-        $formValidator->addFile($field['code'].'[file]', [$field['name'], $field['comment']] );
+        $formValidator->addFile($field['code'].'[file]', [$field['name'], $field['comment']]);
         if ($field['date_manual_on']) {
-            $formValidator->addDatePicker($field['code'].'date',get_lang('DateValidity') );
+            $formValidator->addDatePicker($field['code'].'date', get_lang('DateValidity'));
         }
         $formValidator->addHtml('<hr>');
     }

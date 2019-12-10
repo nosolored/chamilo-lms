@@ -9537,10 +9537,6 @@ function api_unserialize_content($type, $serialized, $ignoreErrors = false)
 /**
  * Set the From and ReplyTo properties to PHPMailer instance.
  *
- * @param PHPMailer $mailer
- * @param array     $sender
- * @param array     $replyToAddress
- *
  * @throws phpmailerException
  */
 function api_set_noreply_and_from_address_to_mailer(PHPMailer $mailer, array $sender, array $replyToAddress = [])
@@ -9581,7 +9577,7 @@ function api_set_noreply_and_from_address_to_mailer(PHPMailer $mailer, array $se
         isset($platformEmail['SMTP_UNIQUE_SENDER']) &&
         $platformEmail['SMTP_UNIQUE_SENDER']
     ) {
-	$senderName = $notification->getDefaultPlatformSenderName();
+        $senderName = $notification->getDefaultPlatformSenderName();
         $senderEmail = $notification->getDefaultPlatformSenderEmail();
 
         if (PHPMailer::ValidateAddress($senderEmail)) {
