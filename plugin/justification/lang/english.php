@@ -15,9 +15,5 @@ $strings['MyJustifications'] = "My justifications";
 
 $strings['JustificationSaved'] = "Justification saved";
 
-
 $strings['default_course_id'] = "Course id";
 $strings['SetCourse'] = "Set course";
-
-
-

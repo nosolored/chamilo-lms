@@ -3013,9 +3013,10 @@ class learnpath
     }
 
     /**
-     * Returns the CSS class name associated with a given item status
+     * Returns the CSS class name associated with a given item status.
      *
      * @param $status string an item status
+     *
      * @return string CSS class name
      */
     public static function getStatusCSSClassName($status)
@@ -3023,6 +3024,7 @@ class learnpath
         if (array_key_exists($status, self::STATUS_CSS_CLASS_NAME)) {
             return self::STATUS_CSS_CLASS_NAME[$status];
         }
+
         return '';
     }
 
@@ -3032,12 +3034,11 @@ class learnpath
      * (title and descriptions as secured)
      * and clues for CSS class composition:
      *  - booleans is_current, is_parent_of_current, is_chapter
-     *  - string status_css_class_name
+     *  - string status_css_class_name.
      *
      * @param $parentId int restrict returned list to children of this parent
      *
      * @return array TOC as a table
-     *
      */
     public function getTOCTree($parentId = 0)
     {
@@ -4565,8 +4566,6 @@ class learnpath
     /**
      * Check if the learnpath category is visible for a user.
      *
-     * @param CLpCategory $category
-     * @param User        $user
      * @param int
      * @param int
      *
@@ -4663,8 +4662,7 @@ class learnpath
     /**
      * Check if a learnpath category is published as course tool.
      *
-     * @param CLpCategory $category
-     * @param int         $courseId
+     * @param int $courseId
      *
      * @return bool
      */
@@ -13563,9 +13561,6 @@ EOD;
         return $value;
     }
 
-    /**
-     * @param FormValidator $form
-     */
     public function setItemTitle(FormValidator $form)
     {
         if (api_get_configuration_value('save_titles_as_html')) {
