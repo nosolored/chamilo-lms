@@ -18,6 +18,3 @@ $strings['SetNewCourse'] = "Set new course";
 $strings['SubscribeToASession'] = "Subscribe to a session";
 $strings['JustificationName'] = "Justification name";
 $strings['JustificationDate'] = "Justification date";
-
-
-

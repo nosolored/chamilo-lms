@@ -347,10 +347,10 @@ class DocumentManager
      * This function streams a file to the client.
      *
      * @param string $full_file_name
-     * @param bool   $forced Whether to force the browser to download the file
+     * @param bool   $forced              Whether to force the browser to download the file
      * @param string $name
      * @param bool   $fixLinksHttpToHttps change file content from http to https
-     * @param array  $extraHeaders Additional headers to be sent
+     * @param array  $extraHeaders        Additional headers to be sent
      *
      * @return false if file doesn't exist, true if stream succeeded
      */
@@ -5792,9 +5792,8 @@ class DocumentManager
     /**
      * Create users shared folder for course.
      *
-     * @param int   $userId
-     * @param array $courseInfo
-     * @param int   $sessionId
+     * @param int $userId
+     * @param int $sessionId
      */
     public static function createUserSharedFolder($userId, array $courseInfo, $sessionId = 0)
     {
@@ -6750,7 +6749,6 @@ class DocumentManager
      * Get the button to edit document.
      *
      * @param bool   $isReadOnly
-     * @param array  $documentData
      * @param string $extension
      * @param bool   $isCertificateMode
      *
@@ -6836,10 +6834,9 @@ class DocumentManager
     /**
      * Get the button to move document.
      *
-     * @param bool  $isReadOnly
-     * @param array $documentData
-     * @param bool  $isCertificateMode
-     * @param int   $parentId
+     * @param bool $isReadOnly
+     * @param bool $isCertificateMode
+     * @param int  $parentId
      *
      * @return string
      */
@@ -6878,11 +6875,10 @@ class DocumentManager
     /**
      * Get the button to set visibility to document.
      *
-     * @param bool  $isReadOnly
-     * @param int   $visibility
-     * @param array $documentData
-     * @param bool  $isCertificateMode
-     * @param int   $parentId
+     * @param bool $isReadOnly
+     * @param int  $visibility
+     * @param bool $isCertificateMode
+     * @param int  $parentId
      *
      * @return string|null
      */
@@ -6925,7 +6921,6 @@ class DocumentManager
      * GEt the button to delete a document.
      *
      * @param bool   $isReadOnly
-     * @param array  $documentData
      * @param bool   $isCertificateMode
      * @param string $curDirPath
      * @param int    $parentId
