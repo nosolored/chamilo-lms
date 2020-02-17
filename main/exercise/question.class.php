@@ -1698,12 +1698,12 @@ abstract class Question
 
         $form->addButtonAdvancedSettings('advanced_params');
         $form->addElement('html', '<div id="advanced_params_options" style="display:none">');
-        
+
         if (isset($zoomOptions['options'])) {
             $form->addElement('text', 'imageZoom', 'URL imagen');
             $form->addElement('text', 'imageWidth', 'Ancho en px');
 
-            $form->addButton('btn_create_img','Añadir al editor', 'plus', 'info', 'small', 'create_img_link');
+            $form->addButton('btn_create_img', 'Añadir al editor', 'plus', 'info', 'small', 'create_img_link');
         }
 
         $form->addHtmlEditor(
