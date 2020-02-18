@@ -278,7 +278,7 @@ if ($is_allowedToEdit || $is_tutor) {
             'width' => '50',
             'align' => 'left',
             'formatter' => 'action_formatter',
-            'search' => 'true'
+            'search' => 'true',
         ],
         [
             'name' => 'login',
@@ -314,7 +314,7 @@ if ($is_allowedToEdit || $is_tutor) {
             'width' => '60',
             'align' => 'left',
             'search' => 'false',
-            'sortable' => 'false'
+            'sortable' => 'false',
         ],
     ];
 
@@ -324,7 +324,7 @@ if ($is_allowedToEdit || $is_tutor) {
             'index' => 'official_code',
             'width' => '50',
             'align' => 'left',
-            'search' => 'true'
+            'search' => 'true',
         ];
         $column_model = array_merge([$officialCodeRow], $column_model);
     }
@@ -467,7 +467,8 @@ $gridJs = Display::grid_js(
                     $('#results').trigger('reloadGrid');
                 });
             });
-        <?php } ?>
+        <?php
+        } ?>
         });
     // datepicker functions
     var datapickerInputModified = false;
