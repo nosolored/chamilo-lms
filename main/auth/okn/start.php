@@ -90,7 +90,8 @@ if (isset($_GET['sso'])) {
         !isset($attributes['lastname2'])
     ) {
         var_dump($attributes);
-        echo 'Not enough parameters'; exit;
+        echo 'Not enough parameters';
+        exit;
     }
 
     foreach ($attributes as &$attribute) {
