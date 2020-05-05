@@ -148,15 +148,9 @@ EOT;
     }
 
     /**
-     * <div class="col-md-12">
-    <div class="row">
-    <fieldset>
-    {content}
-    </fieldset>
-    </div>
+     * <div class="col-md-12">.
     </div>
      */
-
 
     /**
      * @todo this function should be added in the element class
