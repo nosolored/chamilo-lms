@@ -1,9 +1,9 @@
 <?php
 /**
  * This script initiates a video conference session, calling the BigBlueButton API.
+ *
  * @package chamilo.plugin.bigbluebutton
  */
-
 $course_plugin = 'bbb'; //needed in order to load the plugin lang variables
 require_once __DIR__.'/config.php';
 
