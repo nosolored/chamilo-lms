@@ -1,9 +1,9 @@
 <?php
 /**
- * This script initiates a video conference session, calling the BigBlueButton API
+ * This script initiates a video conference session, calling the BigBlueButton API.
+ *
  * @package chamilo.plugin.bigbluebutton
  */
-
 $course_plugin = 'bbb'; //needed in order to load the plugin lang variables
 require_once __DIR__.'/config.php';
 
@@ -25,17 +25,17 @@ if ($bbb->pluginEnabled) {
             $meetingBBB = $bbb->getMeetingInfo(
                 [
                     'meetingId' => $value['remote_id'],
-                    'password' => $value['moderator_pw']
+                    'password' => $value['moderator_pw'],
                 ]
             );
 
             if ($meetingBBB === false) {
                 //checking with the remote_id didn't work, so just in case and
                 // to provide backwards support, check with the id
-                $params = array(
+                $params = [
                     'meetingId' => $value['id'],
-                    'password' => $value['moderator_pw']
-                );
+                    'password' => $value['moderator_pw'],
+                ];
                 $meetingBBB = $bbb->getMeetingInfo($params);
             }
 
@@ -55,7 +55,7 @@ if ($bbb->pluginEnabled) {
                                     $roomTable,
                                     [
                                         'where' => [
-                                            'meeting_id = ? AND participant_id = ?' => [$meetingId, $participantId]
+                                            'meeting_id = ? AND participant_id = ?' => [$meetingId, $participantId],
                                         ],
                                         'order' => 'id DESC',
                                     ],
