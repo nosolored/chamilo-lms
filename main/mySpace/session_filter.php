@@ -7,7 +7,6 @@ $cidReset = true;
 require_once __DIR__.'/../inc/global.inc.php';
 $this_section = SECTION_TRACKING;
 
-
 if (!api_is_allowed_to_create_course()) {
     api_not_allowed(true);
 }
@@ -89,8 +88,8 @@ if (isset($_POST['formSent'])) {
         "$tbl_course c INNER JOIN  $tblSessionRelCourse r ON c.id = r.c_id",
         [
             'where' => [
-                "r.session_id = ? " => [$sessionId]
-            ]
+                "r.session_id = ? " => [$sessionId],
+            ],
         ]
     );
 
