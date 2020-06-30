@@ -465,6 +465,18 @@ switch ($action) {
                 $attemptList = Event::getAllExerciseEventByExeId($exeId);
             }
 
+            // No exe id? Can't save answer.
+            if (empty($exeId)) {
+                // Fires an error.
+                echo 'error';
+                if ($debug) {
+                    error_log('exe_id is empty');
+                }
+                exit;
+            }
+
+            Session::write('exe_id', $exeId);
+
             // Updating Reminder algorithm.
             if ($objExercise->type == ONE_PER_PAGE) {
                 $bd_reminder_list = explode(',', $exercise_stat_info['questions_to_check']);
@@ -487,21 +499,9 @@ switch ($action) {
                 }
             }
 
-            // No exe id? Can't save answer.
-            if (empty($exeId)) {
-                // Fires an error.
-                echo 'error';
-                if ($debug) {
-                    error_log('exe_id is empty');
-                }
-                exit;
-            }
-
-            Session::write('exe_id', $exeId);
-
             // Getting the total weight if the request is simple
             $total_weight = 0;
-            if ($type == 'simple') {
+            if ($type === 'simple') {
                 foreach ($question_list as $my_question_id) {
                     $objQuestionTmp = Question::read($my_question_id, $objExercise->course, true, $ptest);
                     $total_weight += $objQuestionTmp->selectWeighting();
@@ -515,7 +515,7 @@ switch ($action) {
                     error_log("Saving question_id = $my_question_id ");
                 }
 
-                if ($type == 'simple' && $question_id != $my_question_id) {
+                if ($type === 'simple' && $question_id != $my_question_id) {
                     continue;
                 }
 
@@ -542,7 +542,7 @@ switch ($action) {
                         : null;
                 }
 
-                if ($type == 'all') {
+                if ($type === 'all') {
                     $total_weight += $objQuestionTmp->selectWeighting();
                 }
 
@@ -696,7 +696,7 @@ switch ($action) {
 
                 $duration = 0;
                 $now = time();
-                if ($type == 'all') {
+                if ($type === 'all') {
                     $exercise_stat_info = $objExercise->get_stat_track_exercise_info_by_exe_id($exeId);
                 }
 
@@ -849,6 +849,18 @@ switch ($action) {
 
         header('Content-Type: application/json');
         echo json_encode($result);
+        break;
+    case 'browser_test':
+        $quizCheckButtonEnabled = api_get_configuration_value('quiz_check_button_enable');
+
+        if ($quizCheckButtonEnabled) {
+            if (isset($_POST['sleep'])) {
+                sleep(2);
+            }
+
+            echo 'ok';
+        }
+
         break;
     default:
         echo '';

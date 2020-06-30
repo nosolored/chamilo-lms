@@ -199,40 +199,6 @@ class SequenceResourceRepository extends EntityRepository
     }
 
     /**
-     * Get sessions from vertices.
-     *
-     * @param Vertices $verticesEdges The vertices
-     * @param int      $type
-     *
-     * @return array
-     */
-    protected function findVerticesEdges(Vertices $verticesEdges, $type)
-    {
-        $sessionVertices = [];
-        $em = $this->getEntityManager();
-
-        foreach ($verticesEdges as $supVertex) {
-            $vertexId = $supVertex->getId();
-            switch ($type) {
-                case SequenceResource::SESSION_TYPE:
-                    $resource = $em->getRepository('ChamiloCoreBundle:Session')->find($vertexId);
-                    break;
-                case SequenceResource::COURSE_TYPE:
-                    $resource = $em->getRepository('ChamiloCoreBundle:Course')->find($vertexId);
-                    break;
-            }
-
-            if (empty($resource)) {
-                continue;
-            }
-
-            $sessionVertices[$vertexId] = $resource;
-        }
-
-        return $sessionVertices;
-    }
-
-    /**
      * Check if the ser has completed the requirements for the sequences.
      *
      * @param array $sequences The sequences
@@ -366,8 +332,6 @@ class SequenceResourceRepository extends EntityRepository
                 true
             );
 
-            //var_dump($gradebook, $userFinishedCourse);
-
             if (0 === $sessionId) {
                 if (false === $userFinishedCourse) {
                     $status = false;
@@ -412,24 +376,31 @@ class SequenceResourceRepository extends EntityRepository
      * Get sessions from vertices.
      *
      * @param Vertices $verticesEdges The vertices
+     * @param int      $type
      *
      * @return array
      */
-    protected function findSessionFromVerticesEdges(Vertices $verticesEdges)
+    protected function findVerticesEdges(Vertices $verticesEdges, $type)
     {
         $sessionVertices = [];
+        $em = $this->getEntityManager();
+
         foreach ($verticesEdges as $supVertex) {
             $vertexId = $supVertex->getId();
-            $session = $this->getEntityManager()->getReference(
-                'ChamiloCoreBundle:Session',
-                $vertexId
-            );
+            switch ($type) {
+                case SequenceResource::SESSION_TYPE:
+                    $resource = $em->getRepository('ChamiloCoreBundle:Session')->find($vertexId);
+                    break;
+                case SequenceResource::COURSE_TYPE:
+                    $resource = $em->getRepository('ChamiloCoreBundle:Course')->find($vertexId);
+                    break;
+            }
 
-            if (empty($session)) {
+            if (empty($resource)) {
                 continue;
             }
 
-            $sessionVertices[$vertexId] = $session;
+            $sessionVertices[$vertexId] = $resource;
         }
 
         return $sessionVertices;
