@@ -35,6 +35,7 @@ if (!api_is_allowed_to_edit()) {
 $category = new TestCategory();
 $courseId = api_get_course_int_id();
 $sessionId = api_get_session_id();
+$parentId = isset($_GET['parent_id']) ? (int) $_GET['parent_id'] : 0;
 
 // breadcrumbs
 $interbreadcrumb[] = [
@@ -59,11 +60,11 @@ switch ($action) {
         $archiveFile = 'export_exercise_categories_'.api_get_course_id().'_'.api_get_local_time();
         $categories = $category->getCategories($courseId, $sessionId);
         $export = [];
-        $export[] = ['title', 'description'];
+        $export[] = ['title', 'description', 'parent_id'];
 
         if (!empty($categories)) {
             foreach ($categories as $category) {
-                $export[] = [$category['title'], $category['description']];
+                $export[] = [$category['title'], $category['description'], $category['parent_id']];
             }
         }
 
@@ -79,6 +80,7 @@ switch ($action) {
                     $cat = new TestCategory();
                     $cat->name = $item['title'];
                     $cat->description = $item['description'];
+                    $cat->parent_id = $item['parent_id'];
                     $cat->save();
                 }
                 Display::addFlash(Display::return_message(get_lang('Imported')));
@@ -91,7 +93,7 @@ switch ($action) {
 Display::display_header(get_lang('Category'));
 displayActionBar();
 echo $content;
-echo $category->displayCategories($courseId, $sessionId);
+echo $category->displayCategories($courseId, $sessionId, $parentId);
 Display::display_footer();
 
 /**
@@ -131,6 +133,10 @@ function edit_category_form($action)
         $form->addElement('header', get_lang('EditCategory'));
         $form->addElement('hidden', 'category_id');
         $form->addElement('text', 'category_name', get_lang('CategoryName'), ['size' => '95']);
+        $options = [];
+        $options['0'] = '';
+        $options = array_merge($options, get_category_quiz(0));
+        $form->addElement('select', 'category_parent_id', get_lang('Category'), $options);
         $form->addHtmlEditor(
             'category_description',
             get_lang('CategoryDescription'),
@@ -145,6 +151,7 @@ function edit_category_form($action)
         $defaults['category_id'] = $objcat->id;
         $defaults['category_name'] = $objcat->name;
         $defaults['category_description'] = $objcat->description;
+        $defaults['category_parent_id'] = $objcat->parent_id;
         $form->setDefaults($defaults);
 
         // setting the rules
@@ -161,6 +168,7 @@ function edit_category_form($action)
                 if ($category) {
                     $category->name = $values['category_name'];
                     $category->description = $values['category_description'];
+                    $category->parent_id = $values['category_parent_id'];
                     $category->modifyCategory();
                     Display::addFlash(Display::return_message(get_lang('Updated')));
                 } else {
@@ -212,6 +220,10 @@ function add_category_form($action)
     // Setting the form elements
     $form->addElement('header', get_lang('AddACategory'));
     $form->addElement('text', 'category_name', get_lang('CategoryName'), ['size' => '95']);
+    $options = [];
+    $options['0'] = '';
+    $options = $options + get_category_quiz(0);
+    $form->addElement('select', 'category_parent_id', get_lang('Category'), $options);
     $form->addHtmlEditor(
         'category_description',
         get_lang('CategoryDescription'),
@@ -230,6 +242,7 @@ function add_category_form($action)
             $category = new TestCategory();
             $category->name = $values['category_name'];
             $category->description = $values['category_description'];
+            $category->parent_id = $values['category_parent_id'];
             if ($category->save()) {
                 Display::addFlash(Display::return_message(get_lang('AddCategoryDone')));
             } else {
@@ -246,11 +259,46 @@ function add_category_form($action)
     }
 }
 
+function get_category_quiz($categoryId, $i = 0) {
+    $courseId = api_get_course_int_id();
+    $table = Database::get_course_table(TABLE_QUIZ_QUESTION_CATEGORY);
+    $categoryData = Database::select(
+        '*',
+        $table,
+        [
+            'where' => ['parent_id = ? AND c_id = ?' => [$categoryId, $courseId]],
+            'order' => 'title ASC',
+        ]
+    );
+
+    if (count($categoryData) == 0) {
+        return [];
+    }
+
+    $prefix = '';
+    for ($j = 0; $j < $i; $j++) {
+        $prefix .= '-';
+    }
+    $i++;
+
+    $listCategory = [];
+    foreach ($categoryData as $categoryItem) {
+        $listCategory[$categoryItem['id']] = $prefix.' '.$categoryItem['title'];
+        $listCategory += get_category_quiz($categoryItem['id'], $i);
+    }
+
+    return $listCategory;
+}
+
 // Display add category button
 function displayActionBar()
 {
     echo '<div class="actions">';
-    echo '<a href="'.api_get_path(WEB_CODE_PATH).'exercise/exercise.php?'.api_get_cidreq().'">'.
+    $urlBack = api_get_path(WEB_CODE_PATH).'exercise/exercise.php?'.api_get_cidreq();
+    if (isset($_GET['parent_id'])) {
+        $urlBack = api_get_self().'?'.api_get_cidreq();
+    }
+    echo '<a href="'.$urlBack.'">'.
             Display::return_icon('back.png', get_lang('GoBackToQuestionList'), '', ICON_SIZE_MEDIUM).'</a>';
 
     echo '<a href="'.api_get_self().'?action=addcategory&'.api_get_cidreq().'">'.

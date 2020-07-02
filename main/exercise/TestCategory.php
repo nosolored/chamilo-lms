@@ -17,6 +17,7 @@ class TestCategory
     public $id;
     public $name;
     public $description;
+    public $parent_id;
 
     /**
      * Constructor of the class Category.
@@ -25,6 +26,7 @@ class TestCategory
     {
         $this->name = '';
         $this->description = '';
+        $this->parent_id = 0;
     }
 
     /**
@@ -50,6 +52,7 @@ class TestCategory
             $this->id = $row['id'];
             $this->name = $row['title'];
             $this->description = $row['description'];
+            $this->parent_id = $row['parent_id'];
 
             return $this;
         }
@@ -85,6 +88,7 @@ class TestCategory
                 'c_id' => $courseId,
                 'title' => $this->name,
                 'description' => $this->description,
+                'parent_id' => $this->parent_id,
             ];
             $newId = Database::insert($table, $params);
 
@@ -124,6 +128,18 @@ class TestCategory
         $category = $this->getCategory($id);
 
         if ($category) {
+            $categoryData = Database::select(
+                '*',
+                $table,
+                [
+                    'where' => ['parent_id = ?' => [$id]],
+                ]
+            );
+            
+            foreach ($categoryData as $categoryItem) {
+                $result = self::removeCategory($categoryItem['id']);
+            }
+            
             $sql = "DELETE FROM $table
                     WHERE id= $id AND c_id=".$course_id;
             Database::query($sql);
@@ -161,6 +177,7 @@ class TestCategory
         $id = intval($this->id);
         $name = Database::escape_string($this->name);
         $description = Database::escape_string($this->description);
+        $parent_id = (int) $this->parent_id;
         $cat = $this->getCategory($id, $courseId);
         $courseId = empty($courseId) ? api_get_course_int_id() : (int) $courseId;
         $courseInfo = api_get_course_info_by_id($courseId);
@@ -171,7 +188,8 @@ class TestCategory
         if ($cat) {
             $sql = "UPDATE $table SET
                         title = '$name',
-                        description = '$description'
+                        description = '$description',
+                        parent_id = $parent_id
                     WHERE id = $id AND c_id = ".$courseId;
             Database::query($sql);
 
@@ -246,6 +264,48 @@ class TestCategory
         return $categories;
     }
 
+    /**
+     * Return an array of all category sequentially ordered.
+     *
+     * @param int    $courseId
+     * @param int    $categoryId
+     * @param int    $i
+     *
+     * @return array
+     */
+    public static function getCategoryListInfoRecursive($courseId = 0, $categoryId = 0, $i = 0)
+    {
+        $courseId = empty($courseId) ? api_get_course_int_id() : (int) $courseId;
+     
+        $table = Database::get_course_table(TABLE_QUIZ_QUESTION_CATEGORY);
+        $categoryData = Database::select(
+            '*',
+            $table,
+            [
+                'where' => ['parent_id = ? AND c_id = ?' => [$categoryId, $courseId]],
+                'order' => 'title ASC',
+            ]
+        );
+
+        if (count($categoryData) == 0) {
+            return [];
+        }
+
+        $prefix = '';
+        for ($j = 0; $j < $i; $j++) {
+            $prefix .= '-';
+        }
+        $i++;
+
+        $result = [];
+        foreach ($categoryData as $categoryItem) {
+            $result[$categoryItem['id']] = $prefix.' '.$categoryItem['title'];
+            $result += self::getCategoryListInfoRecursive($courseId, $categoryItem['id'], $i);
+        }
+
+        return $result;
+    }
+    
     /**
      * Return the TestCategory id for question with question_id = $questionId
      * In this version, a question has only 1 TestCategory.
@@ -389,8 +449,7 @@ class TestCategory
             if (!empty($categoryId)) {
                 $result[$categoryId] = [
                     'title' => $catInfo['title'],
-                    //'parent_id' =>  $catInfo['parent_id'],
-                    'parent_id' => '',
+                    'parent_id' =>  $catInfo['parent_id'],
                     'c_id' => $catInfo['c_id'],
                 ];
             }
@@ -486,15 +545,23 @@ class TestCategory
      *
      * @return array
      */
-    public static function getCategoriesIdAndName($courseId = 0)
+    public static function getCategoriesIdAndName($courseId = 0, $prefix = false)
     {
         if (empty($courseId)) {
             $courseId = api_get_course_int_id();
         }
-        $categories = self::getCategoryListInfo('', $courseId);
+        
         $result = ['0' => get_lang('NoCategorySelected')];
-        for ($i = 0; $i < count($categories); $i++) {
-            $result[$categories[$i]->id] = $categories[$i]->name;
+        if (!$prefix) {
+            $categories = self::getCategoryListInfo('', $courseId);
+            for ($i = 0; $i < count($categories); $i++) {
+                $result[$categories[$i]->id] = $categories[$i]->name;
+            }
+        } else {
+            $categories = self::getCategoryListInfoRecursive($courseId, 0);
+            foreach ($categories as $key => $value) {
+                $result[$key] = $value;
+            }
         }
 
         return $result;
@@ -1090,7 +1157,7 @@ class TestCategory
      *
      * @return array
      */
-    public function getCategories($courseId, $sessionId = 0)
+    public function getCategories($courseId, $sessionId = 0, $parentId = null)
     {
         $table = Database::get_course_table(TABLE_QUIZ_QUESTION_CATEGORY);
         $itemProperty = Database::get_course_table(TABLE_ITEM_PROPERTY);
@@ -1117,6 +1184,12 @@ class TestCategory
             return [];
         }
 
+        $parentCondition = '';
+        if (!empty($parentId)) {
+            $parentId = (int) $parentId;
+            $parentCondition = "AND parent_id = $parentId";
+        }
+
         $sql = "SELECT c.* FROM $table c
                 INNER JOIN $itemProperty i
                 ON c.c_id = i.c_id AND i.ref = c.id
@@ -1124,6 +1197,7 @@ class TestCategory
                     c.c_id = $courseId AND
                     i.tool = '".TOOL_TEST_CATEGORY."'
                     $sessionCondition
+                    $parentCondition
                 ORDER BY title";
         $result = Database::query($sql);
 
@@ -1136,10 +1210,10 @@ class TestCategory
      *
      * @return string
      */
-    public function displayCategories($courseId, $sessionId = 0)
+    public function displayCategories($courseId, $sessionId = 0, $parentId = null)
     {
         $sessionId = (int) $sessionId;
-        $categories = $this->getCategories($courseId, $sessionId);
+        $categories = $this->getCategories($courseId, $sessionId, $parentId);
         $html = '';
         foreach ($categories as $category) {
             $tmpobj = new TestCategory();
@@ -1151,6 +1225,15 @@ class TestCategory
             $content .= '<div class="sectioncomment">';
             $content .= $category['description'];
             $content .= '</div>';
+            $footer = '';
+            if (!empty($category['parent_id'])) {
+                $auxobj = new TestCategory();
+                $auxobj = $auxobj->getCategory($category['parent_id']);
+                $footer = get_lang('MainCategory').': ';
+                $footer .= '<a href="'.api_get_self().'?parent_id='.$category['parent_id'].'&'.api_get_cidreq().'">';
+                $footer .= $auxobj->name;
+                $footer .= '</a>';
+            }
             $links = '';
 
             if (!$sessionId) {
@@ -1161,7 +1244,7 @@ class TestCategory
                 $links .= Display::return_icon('delete.png', get_lang('Delete'), [], ICON_SIZE_SMALL).'</a>';
             }
 
-            $html .= Display::panel($content, $category['title'].$links);
+            $html .= Display::panel($content, $category['title'].$links, $footer);
         }
 
         return $html;

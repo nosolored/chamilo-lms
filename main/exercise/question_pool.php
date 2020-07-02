@@ -375,7 +375,7 @@ if ($course_id_changed) {
 }
 
 // Get category list for the course $selected_course
-$categoryList = TestCategory::getCategoriesIdAndName($selected_course);
+$categoryList = TestCategory::getCategoriesIdAndName($selected_course, true);
 
 // Get exercise list for this course
 $exercise_list = ExerciseLib::get_all_exercises_for_course_id(
@@ -418,6 +418,11 @@ $levels = [
     3 => 3,
     4 => 4,
     5 => 5,
+    6 => 6,
+    7 => 7,
+    8 => 8,
+    9 => 9,
+    10 => 10,
 ];
 
 // Answer type
