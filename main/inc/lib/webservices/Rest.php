@@ -110,7 +110,7 @@ class Rest extends WebService
         $this->course = $course;
     }
 
-    /** Set the current session
+    /** Set the current session.
      * @param int $id
      *
      * @throws Exception

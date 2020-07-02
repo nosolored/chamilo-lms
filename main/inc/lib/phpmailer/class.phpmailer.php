@@ -1426,6 +1426,7 @@ class PHPMailer
             } // end of for
             $output .= $newline.$eol;
         } // end of while
+
         return $output;
     }
 

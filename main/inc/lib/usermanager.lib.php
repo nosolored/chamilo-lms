@@ -3041,7 +3041,7 @@ class UserManager
         return $extra_data;
     }
 
-    /** Get extra user data by field
+    /** Get extra user data by field.
      * @param int    user ID
      * @param string the internal variable name of the field
      *
