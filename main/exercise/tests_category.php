@@ -135,7 +135,7 @@ function edit_category_form($action)
         $form->addElement('text', 'category_name', get_lang('CategoryName'), ['size' => '95']);
         $options = [];
         $options['0'] = '';
-        $options = array_merge($options, get_category_quiz(0));
+        $options = $options + get_category_quiz(0);
         $form->addElement('select', 'category_parent_id', get_lang('Category'), $options);
         $form->addHtmlEditor(
             'category_description',
