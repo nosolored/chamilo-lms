@@ -135,11 +135,11 @@ class TestCategory
                     'where' => ['parent_id = ?' => [$id]],
                 ]
             );
-            
+
             foreach ($categoryData as $categoryItem) {
                 $result = self::removeCategory($categoryItem['id']);
             }
-            
+
             $sql = "DELETE FROM $table
                     WHERE id= $id AND c_id=".$course_id;
             Database::query($sql);
@@ -267,16 +267,16 @@ class TestCategory
     /**
      * Return an array of all category sequentially ordered.
      *
-     * @param int    $courseId
-     * @param int    $categoryId
-     * @param int    $i
+     * @param int $courseId
+     * @param int $categoryId
+     * @param int $i
      *
      * @return array
      */
     public static function getCategoryListInfoRecursive($courseId = 0, $categoryId = 0, $i = 0)
     {
         $courseId = empty($courseId) ? api_get_course_int_id() : (int) $courseId;
-     
+
         $table = Database::get_course_table(TABLE_QUIZ_QUESTION_CATEGORY);
         $categoryData = Database::select(
             '*',
@@ -305,7 +305,7 @@ class TestCategory
 
         return $result;
     }
-    
+
     /**
      * Return the TestCategory id for question with question_id = $questionId
      * In this version, a question has only 1 TestCategory.
@@ -449,7 +449,7 @@ class TestCategory
             if (!empty($categoryId)) {
                 $result[$categoryId] = [
                     'title' => $catInfo['title'],
-                    'parent_id' =>  $catInfo['parent_id'],
+                    'parent_id' => $catInfo['parent_id'],
                     'c_id' => $catInfo['c_id'],
                 ];
             }
@@ -550,7 +550,7 @@ class TestCategory
         if (empty($courseId)) {
             $courseId = api_get_course_int_id();
         }
-        
+
         $result = ['0' => get_lang('NoCategorySelected')];
         if (!$prefix) {
             $categories = self::getCategoryListInfo('', $courseId);
