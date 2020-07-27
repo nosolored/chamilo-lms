@@ -278,12 +278,12 @@ class PtestAgreeScale extends Question
     /**
      * Saves one answer to the database.
      *
-     * @param int    $id          The ID of the answer (has to be calculated for this course)
+     * @param int    $id         The ID of the answer (has to be calculated for this course)
      * @param int    $questionId The question ID (to which the answer is attached)
-     * @param string $title       The text of the answer
-     * @param string $comment     The feedback for the answer
-     * @param float  $score       The score you get when picking this answer
-     * @param int    $correct     Whether this answer is considered *the* correct one (this is the unique answer type)
+     * @param string $title      The text of the answer
+     * @param string $comment    The feedback for the answer
+     * @param float  $score      The score you get when picking this answer
+     * @param int    $correct    Whether this answer is considered *the* correct one (this is the unique answer type)
      */
     public function addAnswer(
         $id,
