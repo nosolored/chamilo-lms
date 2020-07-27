@@ -21,6 +21,10 @@ class BBBPlugin extends Plugin
     const LAUNCH_TYPE_SET_BY_TEACHER = 1;
     const LAUNCH_TYPE_SET_BY_STUDENT = 2;
 
+    const ROOM_OPEN = 0;
+    const ROOM_CLOSE = 1;
+    const ROOM_CHECK = 2;
+
     public $isCoursePlugin = true;
 
     // When creating a new course this settings are added to the course
@@ -45,8 +49,8 @@ class BBBPlugin extends Plugin
     protected function __construct()
     {
         parent::__construct(
-            '2.8.1',
-            'Julio Montoya, Yannick Warnier, Angel Fernando Quiroz Campos',
+            '2.8.2',
+            'Julio Montoya, Yannick Warnier, Angel Fernando Quiroz Campos, Jose Angel Ruiz',
             [
                 'tool_enable' => 'boolean',
                 'host' => 'text',
@@ -70,8 +74,8 @@ class BBBPlugin extends Plugin
                 'interface' => [
                     'type' => 'select',
                     'options' => [
-                        self::INTERFACE_FLASH => 'Flash',
                         self::INTERFACE_HTML5 => 'HTML5',
+                        self::INTERFACE_FLASH => 'Flash',
                     ],
                 ],
                 'launch_type' => [
@@ -89,6 +93,7 @@ class BBBPlugin extends Plugin
                 'bbb_enable_conference_in_groups' => 'checkbox',
                 'bbb_force_record_generation' => 'checkbox',
                 'disable_course_settings' => 'boolean',
+                'meeting_duration' => 'text',
             ]
         );
 
@@ -203,7 +208,8 @@ class BBBPlugin extends Plugin
                 participant_id int(11) NOT NULL,
                 in_at datetime,
                 out_at datetime,
-                interface int NOT NULL DEFAULT 0
+                interface int NOT NULL DEFAULT 0,
+                close INT NOT NULL DEFAULT 0
             );"
         );
         $fieldLabel = 'plugin_bbb_course_users_limit';
@@ -323,6 +329,28 @@ class BBBPlugin extends Plugin
 
             // Deleting course settings
             $this->uninstall_course_fields_in_all_courses($this->course_settings);
+        }
+    }
+
+    /**
+     * Update
+     */
+    public function update()
+    {
+        $sql = "SHOW COLUMNS FROM plugin_bbb_room WHERE Field = 'close'";
+        $res = Database::query($sql);
+
+        if (Database::num_rows($res) === 0) {
+            $sql = "ALTER TABLE plugin_bbb_room ADD close int unsigned NULL";
+            $res = Database::query($sql);
+            if (!$res) {
+                echo Display::return_message($this->get_lang('ErrorUpdateFieldDB'), 'warning');
+            }
+
+            Database::update(
+                'plugin_bbb_room',
+                ['close' => BBBPlugin::ROOM_CLOSE]
+            );
         }
     }
 

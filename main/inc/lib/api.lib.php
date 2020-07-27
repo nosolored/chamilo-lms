@@ -757,7 +757,10 @@ function api_get_path($path = '', $configuration = [])
 
     $course_folder = 'courses/';
     static $root_web = '';
-    $root_sys = $_configuration['root_sys'];
+    $root_sys = null;
+    if ($_configuration) {
+        $root_sys = $_configuration['root_sys'];
+    }
 
     // If no $root_web has been set so far *and* no custom config has been passed to the function
     // then re-use the previously-calculated (run-specific) $root_web and skip this complex calculation
@@ -2341,10 +2344,10 @@ function api_format_course_array($course_data)
             'course.png',
             null,
             null,
-            ICON_SIZE_BIG,
+            ICON_SIZE_LARGE,
             null,
             true,
-            false
+            true
         );
     }
     $_course['course_image'] = $url_image;
@@ -3456,14 +3459,15 @@ function api_is_allowed_to_edit(
     $check_student_view = true
 ) {
     $allowSessionAdminEdit = api_get_configuration_value('session_admins_edit_courses_content') === true;
+
     // Admins can edit anything.
     if (api_is_platform_admin($allowSessionAdminEdit)) {
         //The student preview was on
         if ($check_student_view && api_is_student_view_active()) {
             return false;
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     $sessionId = api_get_session_id();
@@ -6571,8 +6575,9 @@ function api_get_current_access_url_id()
 {
     static $id;
     if (!empty($id)) {
-        return $id;
+        return (int) $id;
     }
+
     if (!api_get_multiple_access_url()) {
         // If the feature is not enabled, assume 1 and return before querying
         // the database
@@ -7858,11 +7863,19 @@ function api_check_ip_in_range($ip, $range)
     return false;
 }
 
-function api_check_user_access_to_legal($course_visibility)
+function api_check_user_access_to_legal($courseInfo)
 {
-    $course_visibility_list = [COURSE_VISIBILITY_OPEN_WORLD, COURSE_VISIBILITY_OPEN_PLATFORM];
+    if (empty($courseInfo)) {
+        return false;
+    }
 
-    return in_array($course_visibility, $course_visibility_list) || api_is_drh();
+    $visibility = (int) $courseInfo['visibility'];
+    $visibilityList = [COURSE_VISIBILITY_OPEN_WORLD, COURSE_VISIBILITY_OPEN_PLATFORM];
+
+    return
+        in_array($visibility, $visibilityList) ||
+        api_is_drh() ||
+        (COURSE_VISIBILITY_REGISTERED === $visibility && 1 === (int) $courseInfo['subscribe']);
 }
 
 /**

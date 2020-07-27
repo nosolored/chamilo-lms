@@ -3,7 +3,10 @@
 
 namespace Chamilo\UserBundle\Entity;
 
+use Chamilo\CoreBundle\Entity\CourseRelUser;
 use Chamilo\CoreBundle\Entity\ExtraFieldValues;
+use Chamilo\CoreBundle\Entity\Session;
+use Chamilo\CoreBundle\Entity\SessionRelCourseRelUser;
 use Chamilo\CoreBundle\Entity\Skill;
 use Chamilo\CoreBundle\Entity\UsergroupRelUser;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -263,7 +266,7 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     protected $portals;
 
     /**
-     * @var ArrayCollection
+     * @var ArrayCollection|Session[]
      * @ORM\OneToMany(targetEntity="Chamilo\CoreBundle\Entity\Session", mappedBy="generalCoach")
      */
     protected $sessionAsGeneralCoach;
@@ -528,6 +531,8 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setDropBoxSentFiles($value)
     {
         $this->dropBoxSentFiles = $value;
+
+        return $this;
     }
 
     /**
@@ -536,6 +541,8 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setDropBoxReceivedFiles($value)
     {
         $this->dropBoxReceivedFiles = $value;
+
+        return $this;
     }
 
     /**
@@ -544,10 +551,12 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setCourses($courses)
     {
         $this->courses = $courses;
+
+        return $this;
     }
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|CourseRelUser[]
      */
     public function getCourses()
     {
@@ -655,6 +664,8 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setPortals($value)
     {
         $this->portals = $value;
+
+        return $this;
     }
 
     /**
@@ -746,7 +757,7 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     }
 
     /**
-     * @return ArrayCollection
+     * @return ArrayCollection|UsergroupRelUser[]
      */
     public function getClasses()
     {
@@ -1437,7 +1448,7 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
      *
      * @return User
      */
-    public function setLastLogin(\DateTime $lastLogin)
+    public function setLastLogin(\DateTime $lastLogin = null)
     {
         $this->lastLogin = $lastLogin;
 
@@ -1485,6 +1496,8 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setExtraFields($extraFields)
     {
         $this->extraFields = $extraFields;
+
+        return $this;
     }
 
     /**
@@ -1566,7 +1579,7 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     /**
      * Get sessionCourseSubscription.
      *
-     * @return ArrayCollection
+     * @return ArrayCollection|SessionRelCourseRelUser[]
      */
     public function getSessionCourseSubscriptions()
     {
@@ -1576,6 +1589,8 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
     public function setSessionCourseSubscriptions($value)
     {
         $this->sessionCourseSubscriptions = $value;
+
+        return $this;
     }
 
     /**
@@ -2309,6 +2324,11 @@ class User implements UserInterface //implements ParticipantInterface, ThemeUser
         $this->plainPassword = $password;
 
         return $this;
+    }
+
+    public function getLocked()
+    {
+        return $this->locked;
     }
 
     public function setLocked($boolean)

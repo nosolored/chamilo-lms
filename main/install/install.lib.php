@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManager;
 
 /* CONSTANTS */
 define('SYSTEM_CONFIG_FILENAME', 'configuration.dist.php');
+define('USERNAME_MAX_LENGTH', 50);
 
 /**
  * This function detects whether the system has been already installed.
@@ -1670,9 +1671,37 @@ function display_configuration_parameter(
     $html = '<div class="form-group">';
     $html .= '<label class="col-sm-6 control-label">'.$parameterName.'</label>';
     if ($installType == INSTALL_TYPE_UPDATE && $displayWhenUpdate) {
-        $html .= '<input type="hidden" name="'.$formFieldName.'" value="'.api_htmlentities($parameterValue, ENT_QUOTES).'" />'.$parameterValue;
+        $html .= Display::input(
+            'hidden',
+            $formFieldName,
+            api_htmlentities($parameterValue, ENT_QUOTES)
+        ).$parameterValue;
     } else {
-        $html .= '<div class="col-sm-6"><input class="form-control" type="text" size="'.FORM_FIELD_DISPLAY_LENGTH.'" maxlength="'.MAX_FORM_FIELD_LENGTH.'" name="'.$formFieldName.'" value="'.api_htmlentities($parameterValue, ENT_QUOTES).'" />'."</div>";
+        $hiddenPasswordClass = '';
+        $eyeForPassword = '';
+        $inputType = 'text';
+        if ($formFieldName == 'passForm') {
+            /* show/hide admin password in step 5*/
+            $hiddenPasswordClass = 'inputShowPwd';
+            $inputType = 'password';
+            $eyeForPassword = PHP_EOL
+                .'<input type="checkbox" id="showPassword" class="hidden">'
+                .'<label for="showPassword" style="cursor: pointer;">'
+                .Display::returnFontAwesomeIcon('eye', null, true, 'showPasswordEye')
+                .'</label> ';
+        }
+        $html .= '<div class="col-sm-6 '.$hiddenPasswordClass.'">'
+            .Display::input(
+                $inputType,
+                $formFieldName,
+                api_htmlentities($parameterValue, ENT_QUOTES),
+                [
+                    'class' => 'form-control',
+                    'size' => FORM_FIELD_DISPLAY_LENGTH,
+                    'maxlength' => MAX_FORM_FIELD_LENGTH,
+                ]
+            )
+            .$eyeForPassword."</div>";
     }
     $html .= "</div>";
 
@@ -1770,7 +1799,7 @@ function display_configuration_settings_form(
 
     //Second parameter: Chamilo URL
     $html .= '<div class="form-group">';
-    $html .= '<label class="col-sm-6 control-label">'.get_lang('ChamiloURL').get_lang('ThisFieldIsRequired').'</label>';
+    $html .= '<label class="col-sm-6 control-label"><span class="form_required">*</span>'.get_lang('ChamiloURL').'</label>';
 
     if ($installType == 'update') {
         $html .= api_htmlentities($urlForm, ENT_QUOTES)."\n";
@@ -3203,7 +3232,7 @@ function finishInstallation(
         'Joe',
         'Anonymous',
         6,
-        'anonymous@localhost',
+        'anonymous@example.com',
         'anon',
         'anon',
         'anonymous', //$official_code = '',

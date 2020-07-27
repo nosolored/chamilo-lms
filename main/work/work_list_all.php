@@ -105,6 +105,8 @@ switch ($action) {
                 );
             }
         }
+        header('Location: '.api_get_self().'?'.api_get_cidreq().'&id='.$workId);
+        exit;
         break;
     case 'delete_correction':
         $result = get_work_user_list(null, null, null, null, $workId);
@@ -121,7 +123,6 @@ switch ($action) {
         exit;
         break;
     case 'make_visible':
-        /* Visible */
         if ($is_allowed_to_edit) {
             if (!empty($itemId)) {
                 if (isset($itemId) && $itemId == 'all') {
@@ -133,9 +134,10 @@ switch ($action) {
                 }
             }
         }
+        header('Location: '.api_get_self().'?'.api_get_cidreq().'&id='.$workId);
+        exit;
         break;
     case 'make_invisible':
-        /* Invisible */
         if (!empty($itemId)) {
             if (isset($itemId) && $itemId == 'all') {
             } else {
@@ -145,6 +147,8 @@ switch ($action) {
                 );
             }
         }
+        header('Location: '.api_get_self().'?'.api_get_cidreq().'&id='.$workId);
+        exit;
         break;
     case 'export_pdf':
         exportAllStudentWorkFromPublication(
@@ -565,13 +569,13 @@ if ($allowAntiPlagiarism) {
             if (isWorkFolder()) {
                 searchAdvancement();
                 setInterval("searchAdvancement()", refreshDelaisAfter);
-                if (!clickTrigger) {
-                    clickTrigger = true;
+                //if (!clickTrigger) {
+                    //clickTrigger = true;
                     $('.getSingleCompilatio').on('click', function () {
                         var parts = $(this).parent().attr('id').split('id_avancement');
                         getSingleCompilatio(parts[1]);
                     });
-                }
+                //}
             }
         }
 
@@ -609,6 +613,9 @@ if ($allowAntiPlagiarism) {
                 url: compilationWebUrl + "upload.php?<?php echo api_get_cidreq(); ?>&doc=" + itemId,
                 type: "get",
                 dataType: "html",
+                beforeSend: function() {
+                    $('#id_avancement' + itemId + ' a').addClass('disabled');
+                },
                 success: function (message) {
                     allWorkId += itemId + "a";
                     compilatioInit();

@@ -1,4 +1,5 @@
 <?php
+
 /* For licensing terms, see /license.txt */
 
 /**
@@ -260,7 +261,7 @@ class GradebookUtils
 
             if (api_is_allowed_to_edit(null, true)) {
                 // Locking button
-                if (api_get_setting('gradebook_locking_enabled') == 'true') {
+                if (api_get_setting('gradebook_locking_enabled') === 'true') {
                     if ($cat->is_locked()) {
                         if (api_is_platform_admin()) {
                             $modify_icons .= '&nbsp;<a onclick="javascript:if (!confirm(\''.addslashes(get_lang('ConfirmToUnlockElement')).'\')) return false;" href="'.api_get_self().'?'.api_get_cidreq().'&category_id='.$cat->get_id().'&action=unlock">'.
@@ -444,7 +445,6 @@ class GradebookUtils
         $cat = new Category();
         $message_link = $cat->show_message_resource_delete($link->get_course_code());
         $is_locked = $link->is_locked();
-
         $modify_icons = null;
 
         if (!api_is_allowed_to_edit(null, true)) {
@@ -513,7 +513,10 @@ class GradebookUtils
                         ICON_SIZE_SMALL
                     );
             } else {
-                $modify_icons .= '&nbsp;<a href="'.api_get_self().'?deletelink='.$link->get_id().'&selectcat='.$selectcat.' &'.$courseParams.'" onclick="return confirmation();">'.
+                $modify_icons .= '&nbsp;
+                <a
+                    href="'.api_get_self().'?deletelink='.$link->get_id().'&selectcat='.$selectcat.' &'.$courseParams.'"
+                    onclick="return confirmation();">'.
                     Display::return_icon(
                         'delete.png',
                         get_lang('Delete'),
@@ -759,34 +762,6 @@ class GradebookUtils
         return $list_users;
     }
 
-    public static function getTotalCertificates($urlId)
-    {
-        $urlId = (int) $urlId;
-        $table_certificate = Database::get_main_table(TABLE_MAIN_GRADEBOOK_CERTIFICATE);
-        $table_user = Database::get_main_table(TABLE_MAIN_USER);
-        $sql = 'SELECT DISTINCT u.user_id, u.lastname, u.firstname, u.username
-                FROM '.$table_user.' u
-                INNER JOIN '.$table_certificate.' gc
-                ON u.user_id=gc.user_id ';
-        if (!is_null($cat_id) && $cat_id > 0) {
-            $sql .= ' WHERE cat_id='.intval($cat_id);
-        }
-        if (!empty($userList)) {
-            $userList = array_map('intval', $userList);
-            $userListCondition = implode("','", $userList);
-            $sql .= " AND u.user_id IN ('$userListCondition')";
-        }
-        $sql .= ' ORDER BY '.(api_sort_by_first_name() ? 'u.firstname' : 'u.lastname');
-        $rs = Database::query($sql);
-
-        $list_users = [];
-        while ($row = Database::fetch_array($rs)) {
-            $list_users[] = $row;
-        }
-
-        return $list_users;
-    }
-
     /**
      * Gets the certificate list by user id.
      *
@@ -903,7 +878,7 @@ class GradebookUtils
             $session_id = api_get_session_id();
 
             $t = Database::get_main_table(TABLE_MAIN_GRADEBOOK_CATEGORY);
-            $sql = "SELECT * FROM $t 
+            $sql = "SELECT * FROM $t
                     WHERE course_code = '".Database::escape_string($course_code)."' ";
             if (!empty($session_id)) {
                 $sql .= " AND session_id = ".$session_id;
@@ -932,7 +907,6 @@ class GradebookUtils
                 $cat->set_weight($default_weight);
                 $cat->set_grade_model_id($gradebook_model_id);
                 $cat->set_certificate_min_score(75);
-
                 $cat->set_visible(0);
                 $cat->add();
                 $category_id = $cat->get_id();
@@ -980,15 +954,14 @@ class GradebookUtils
                     $grade_model_id = $my_cat->get_grade_model_id();
                     if (empty($grade_model_id)) {
                         if ($my_cat->get_parent_id() == 0) {
-                            //$default_weight = $my_cat->get_weight();
-                            $select_gradebook->addoption(get_lang('Default'), $my_cat->get_id());
+                            $select_gradebook->addOption(get_lang('Default'), $my_cat->get_id());
                             $cats_added[] = $my_cat->get_id();
                         } else {
-                            $select_gradebook->addoption($my_cat->get_name(), $my_cat->get_id());
+                            $select_gradebook->addOption($my_cat->get_name(), $my_cat->get_id());
                             $cats_added[] = $my_cat->get_id();
                         }
                     } else {
-                        $select_gradebook->addoption(get_lang('Select'), 0);
+                        $select_gradebook->addOption(get_lang('Select'), 0);
                     }
                 }
             }
@@ -1059,9 +1032,11 @@ class GradebookUtils
 
         if ($use_grade_model) {
             if ($parent_id == 0) {
-                $title = api_strtoupper(get_lang('Average')).'<br />'.get_lang('Detailed');
+                $title = api_strtoupper(get_lang('Average')).
+                    '<br />'.get_lang('Detailed');
             } else {
-                $title = api_strtoupper(get_lang('Average')).'<br />'.$cat[0]->get_description().' - ('.$cat[0]->get_name().')';
+                $title = api_strtoupper(get_lang('Average')).
+                    '<br />'.$cat[0]->get_description().' - ('.$cat[0]->get_name().')';
             }
         } else {
             if ($parent_id == 0) {
@@ -1182,10 +1157,10 @@ class GradebookUtils
 
         if (!empty($current_session)) {
             $sql = "SELECT user.user_id, user.username, lastname, firstname, official_code
-                    FROM $tbl_session_course_user as scru 
+                    FROM $tbl_session_course_user as scru
                     INNER JOIN $tbl_user as user
                     ON (scru.user_id = user.user_id)
-                    WHERE                        
+                    WHERE
                         scru.status = 0 AND
                         scru.c_id='$courseId' AND
                         session_id ='$current_session'
@@ -1332,9 +1307,8 @@ class GradebookUtils
         }
 
         $result = Database::query($sql);
-        $users = Database::store_result($result);
 
-        return $users;
+        return Database::store_result($result);
     }
 
     /**
@@ -1354,7 +1328,7 @@ class GradebookUtils
         $tbl_forum_thread = Database::get_course_table(TABLE_FORUM_THREAD);
         $tbl_attendance = Database::get_course_table(TABLE_ATTENDANCE);
 
-        $sql = 'UPDATE '.$table_link.' 
+        $sql = 'UPDATE '.$table_link.'
                 SET weight = '."'".Database::escape_string($weight)."'".'
                 WHERE id = '.$linkId;
 
@@ -1367,13 +1341,13 @@ class GradebookUtils
         $rs_attendance = Database::query($sql);
         if (Database::num_rows($rs_attendance) > 0) {
             $row_attendance = Database::fetch_array($rs_attendance);
-            $sql = 'UPDATE '.$tbl_attendance.' SET 
+            $sql = 'UPDATE '.$tbl_attendance.' SET
                     attendance_weight ='.api_float_val($weight).'
                     WHERE c_id = '.$course_id.' AND  id = '.intval($row_attendance['ref_id']);
             Database::query($sql);
         }
         // Update weight into forum thread
-        $sql = 'UPDATE '.$tbl_forum_thread.' SET 
+        $sql = 'UPDATE '.$tbl_forum_thread.' SET
                 thread_weight = '.api_float_val($weight).'
                 WHERE
                     c_id = '.$course_id.' AND
@@ -1672,9 +1646,6 @@ class GradebookUtils
 
         if ($saveToHtmlFile) {
             return $result;
-            file_put_contents($file, $result);
-
-            return $file;
         }
 
         return $file;

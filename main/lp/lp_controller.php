@@ -536,14 +536,11 @@ switch ($action) {
             $layoutContent = $tplContent->get_template('mail/content_ending_learnpath.tpl');
             $emailBody = $tplContent->fetch($layoutContent);
 
-            api_mail_html(
-                $recipientName,
-                $email,
+            MessageManager::send_message_simple(
+                $coachInfo['user_id'],
                 sprintf(get_lang('StudentXFinishedLp'), $studentInfo['complete_name']),
                 $emailBody,
-                $studentInfo['complete_name'],
-                $studentInfo['email'],
-                true
+                $studentInfo['user_id']
             );
         }
         Display::addFlash(Display::return_message(get_lang('MessageSent')));
@@ -675,7 +672,8 @@ switch ($action) {
 
                 // Remove audio
                 if (isset($_GET['delete_file']) && $_GET['delete_file'] == 1) {
-                    $lp_item_obj->remove_audio();
+                    $lp_item_obj->removeAudio();
+                    Display::addFlash(Display::return_message(get_lang('FileDeleted')));
 
                     $url = api_get_self().'?action=add_audio&lp_id='.intval($_SESSION['oLP']->lp_id).'&id='.$lp_item_obj->get_id().'&'.api_get_cidreq();
                     header('Location: '.$url);
@@ -686,16 +684,17 @@ switch ($action) {
                 if (isset($_FILES['file']) && !empty($_FILES['file'])) {
                     // Updating the lp.modified_on
                     $_SESSION['oLP']->set_modified_on();
-                    $lp_item_obj->add_audio();
+                    $lp_item_obj->addAudio();
+                    Display::addFlash(Display::return_message(get_lang('UplUploadSucceeded')));
                 }
 
                 //Add audio file from documents
                 if (isset($_REQUEST['document_id']) && !empty($_REQUEST['document_id'])) {
                     $_SESSION['oLP']->set_modified_on();
                     $lp_item_obj->add_audio_from_documents($_REQUEST['document_id']);
+                    Display::addFlash(Display::return_message(get_lang('Updated')));
                 }
 
-                // Display.
                 require 'lp_add_audio.php';
             } else {
                 require 'lp_add_audio.php';
@@ -886,6 +885,11 @@ switch ($action) {
                 if (isset($_POST['content_lp'])) {
                     $_SESSION['oLP']->edit_document($_course);
                 }
+                $is_success = true;
+
+                $extraFieldValues = new ExtraFieldValue('lp_item');
+                $extraFieldValues->saveFieldValues($_POST);
+
                 Display::addFlash(Display::return_message(get_lang('Updated')));
                 $url = api_get_self().'?action=add_item&type=step&lp_id='.intval($_SESSION['oLP']->lp_id).'&'.api_get_cidreq();
                 header('Location: '.$url);

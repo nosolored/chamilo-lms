@@ -306,7 +306,7 @@ class IndexManager
                 'title' => get_lang('MyCertificates'),
             ];
         }
-        if (api_get_setting('allow_public_certificates') == 'true') {
+        if (api_get_setting('allow_public_certificates') === 'true') {
             $items[] = [
                 'icon' => Display::return_icon('search_graduation.png', get_lang('Search')),
                 'link' => api_get_path(WEB_CODE_PATH).'gradebook/search.php',
@@ -346,6 +346,22 @@ class IndexManager
                     'title' => get_lang('ManageSkills'),
                 ];
             }
+        }
+
+        return $items;
+    }
+
+    public static function studentPublicationBlock()
+    {
+        $allow = api_get_configuration_value('allow_my_student_publication_page');
+        $items = [];
+
+        if ($allow) {
+            $items[] = [
+                'icon' => Display::return_icon('lp_student_publication.png', get_lang('StudentPublication')),
+                'link' => api_get_path(WEB_CODE_PATH).'work/publications.php',
+                'title' => get_lang('MyStudentPublications'),
+            ];
         }
 
         return $items;
@@ -936,7 +952,16 @@ class IndexManager
             ];
         }
 
-        if (true === api_get_configuration_value('whispeak_auth_enabled')) {
+        if ('true' === api_get_plugin_setting('zoom', 'tool_enable')) {
+            foreach (ZoomPlugin::getProfileBlockItems() as $item) {
+                $items[] = $item;
+            }
+        }
+
+        if (
+            true === api_get_configuration_value('whispeak_auth_enabled') &&
+            !WhispeakAuthPlugin::checkUserIsEnrolled($userId)
+        ) {
             $itemTitle = WhispeakAuthPlugin::create()->get_title();
 
             $items[] = [
@@ -2157,7 +2182,6 @@ class IndexManager
                                             isset($session_box['duration']) ? $session_box['duration'] : null
                                         );
                                     }
-
                                     $this->tpl->assign('session', $sessionParams);
                                     $this->tpl->assign('show_tutor', api_get_setting('show_session_coach') === 'true');
                                     $this->tpl->assign('gamification_mode', $gameModeIsActive);
@@ -2268,6 +2292,16 @@ class IndexManager
             'session_count' => $sessionCount,
             'course_count' => $courseCount,
         ];
+    }
+
+    /**
+     * Wrapper to CourseManager::returnPopularCoursesHandPicked().
+     *
+     * @return array
+     */
+    public function returnPopularCoursesHandPicked()
+    {
+        return CourseManager::returnPopularCoursesHandPicked();
     }
 
     /**

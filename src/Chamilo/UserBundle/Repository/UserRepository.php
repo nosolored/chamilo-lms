@@ -6,7 +6,6 @@ namespace Chamilo\UserBundle\Repository;
 
 use Chamilo\CoreBundle\Entity\AccessUrlRelUser;
 use Chamilo\CoreBundle\Entity\Course;
-use Chamilo\CoreBundle\Entity\CourseRelUser;
 use Chamilo\CoreBundle\Entity\GradebookCertificate;
 use Chamilo\CoreBundle\Entity\GradebookResult;
 use Chamilo\CoreBundle\Entity\Message;
@@ -26,7 +25,6 @@ use Chamilo\CoreBundle\Entity\TrackEOnline;
 use Chamilo\CoreBundle\Entity\TrackEUploads;
 use Chamilo\CoreBundle\Entity\UserApiKey;
 use Chamilo\CoreBundle\Entity\UserCourseCategory;
-use Chamilo\CoreBundle\Entity\UsergroupRelUser;
 use Chamilo\CoreBundle\Entity\UserRelCourseVote;
 use Chamilo\CourseBundle\Entity\CAttendanceResult;
 use Chamilo\CourseBundle\Entity\CAttendanceSheet;
@@ -51,9 +49,6 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
-
-//use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-//use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 
 /**
  * Class UserRepository.
@@ -485,8 +480,10 @@ class UserRepository extends EntityRepository
         $dateFormat = \Datetime::ATOM;
 
         /** @var User $user */
-        $user = $this->find($userId);
+        $dbUser = $this->find($userId);
 
+        $user = new User();
+        $user->setUserId($userId);
         $user->setPassword($substitutionTerms['password']);
         $user->setSalt($substitutionTerms['salt']);
         $noDataLabel = $substitutionTerms['empty'];
@@ -511,12 +508,60 @@ class UserRepository extends EntityRepository
         $user->setWebsite($noDataLabel);
         $user->setToken($noDataLabel);
 
-        $courses = $user->getCourses();
+        $user->setFirstname($dbUser->getFirstname());
+        $user->setLastname($dbUser->getLastname());
+        $user->setAuthSource($dbUser->getAuthSource());
+        $user->setEmail($dbUser->getEmail());
+        $user->setStatus($dbUser->getStatus());
+        $user->setOfficialCode($dbUser->getOfficialCode());
+        $user->setPhone($dbUser->getPhone());
+        $user->setAddress($dbUser->getAddress());
+        $user->setPictureUri($dbUser->getPictureUri());
+        $user->setCreatorId($dbUser->getCreatorId());
+        $user->setCompetences($dbUser->getCompetences());
+        $user->setDiplomas($dbUser->getDiplomas());
+        $user->setOpenarea($dbUser->getOpenarea());
+        $user->setTeach($dbUser->getTeach());
+        $user->setProductions($dbUser->getProductions());
+        $user->setLanguage($dbUser->getLanguage());
+        $user->setRegistrationDate($dbUser->getRegistrationDate());
+        $user->setExpirationDate($dbUser->getExpirationDate());
+        $user->setActive($dbUser->getActive());
+        $user->setOpenid($dbUser->getOpenid());
+        $user->setTheme($dbUser->getTheme());
+        $user->setHrDeptId($dbUser->getHrDeptId());
+        $user->setSlug($dbUser->getSlug());
+        $user->setLastLogin($dbUser->getLastLogin());
+        //$user->setExtraFieldList($dbUser->getExtraFields());
+        $user->setUsername($dbUser->getUsername());
+        $user->setPasswordRequestedAt($dbUser->getPasswordRequestedAt());
+        $user->setCreatorId($dbUser->getCreatorId());
+        $user->setUpdatedAt($dbUser->getUpdatedAt());
+
+        if ($dbUser->getExpiresAt()) {
+            $user->setExpiresAt($dbUser->getExpiresAt());
+        }
+
+        $user->setExpirationDate($dbUser->getExpirationDate());
+        $user->setCredentialsExpireAt($dbUser->getCredentialsExpireAt());
+        //$user->setBiography($dbUser->getBiography());
+        //$user->setDateOfBirth($dbUser->getDateOfBirth());
+        //$user->setGender($dbUser->getGender());
+        //$user->setLocale($dbUser->getLocale());
+        //$user->setTimezone($dbUser->getTimezone());
+        //$user->setWebsite($dbUser->getWebsite());
+        $user->setUsernameCanonical($dbUser->getUsernameCanonical());
+        $user->setEmailCanonical($dbUser->getEmailCanonical());
+        $user->setRoles($dbUser->getRoles());
+        $user->setLocked($dbUser->getLocked());
+        $user->setProfileCompleted($dbUser->isProfileCompleted());
+
+        $courses = $dbUser->getCourses();
         $list = [];
         $chatFiles = [];
-        /** @var CourseRelUser $course */
         foreach ($courses as $course) {
             $list[] = $course->getCourse()->getCode();
+            $course->getCourse()->setToolList(null);
             $courseDir = api_get_path(SYS_COURSE_PATH).$course->getCourse()->getDirectory();
             $documentDir = $courseDir.'/document/chat_files/';
             if (is_dir($documentDir)) {
@@ -532,25 +577,22 @@ class UserRepository extends EntityRepository
 
         $user->setCourses($list);
 
-        $classes = $user->getClasses();
+        $classes = $dbUser->getClasses();
         $list = [];
-        /** @var UsergroupRelUser $class */
         foreach ($classes as $class) {
             $name = $class->getUsergroup()->getName();
             $list[$class->getUsergroup()->getGroupType()][] = $name.' - Status: '.$class->getRelationType();
         }
         $user->setClasses($list);
 
-        $collection = $user->getSessionCourseSubscriptions();
+        $collection = $dbUser->getSessionCourseSubscriptions();
         $list = [];
-        /** @var SessionRelCourseRelUser $item */
         foreach ($collection as $item) {
             $list[$item->getSession()->getName()][] = $item->getCourse()->getCode();
         }
         $user->setSessionCourseSubscriptions($list);
 
         $documents = \DocumentManager::getAllDocumentsCreatedByUser($userId);
-
         $friends = \SocialManager::get_friends($userId);
         $friendList = [];
         if (!empty($friends)) {
@@ -1173,7 +1215,6 @@ class UserRepository extends EntityRepository
                 'Friends' => $friendList,
                 'Events' => $eventList,
                 'GradebookCertificate' => $gradebookCertificate,
-
                 'TrackECourseAccess' => $trackECourseAccessList,
                 'TrackELogin' => $trackELoginList,
                 'TrackEAccess' => $trackEAccessList,
@@ -1212,17 +1253,15 @@ class UserRepository extends EntityRepository
 
                 'Wiki' => $cWiki,
                 // Tickets
-
                 'Ticket' => $ticket,
                 'TicketMessage' => $ticketMessage,
             ]
         );
 
         $user->setDropBoxReceivedFiles([]);
-        //$user->setGroups([]);
         $user->setCurriculumItems([]);
 
-        $portals = $user->getPortals();
+        $portals = $dbUser->getPortals();
         if (!empty($portals)) {
             $list = [];
             /** @var AccessUrlRelUser $portal */
@@ -1233,7 +1272,7 @@ class UserRepository extends EntityRepository
         }
         $user->setPortals($list);
 
-        $coachList = $user->getSessionAsGeneralCoach();
+        $coachList = $dbUser->getSessionAsGeneralCoach();
         $list = [];
         /** @var Session $session */
         foreach ($coachList as $session) {
@@ -1241,7 +1280,7 @@ class UserRepository extends EntityRepository
         }
         $user->setSessionAsGeneralCoach($list);
 
-        $skillRelUserList = $user->getAchievedSkills();
+        $skillRelUserList = $dbUser->getAchievedSkills();
         $list = [];
         /** @var SkillRelUser $skillRelUser */
         foreach ($skillRelUserList as $skillRelUser) {
@@ -1254,9 +1293,9 @@ class UserRepository extends EntityRepository
         $items = $extraFieldValues->getAllValuesByItem($userId);
         $user->setExtraFields($items);
 
-        $lastLogin = $user->getLastLogin();
+        $lastLogin = $dbUser->getLastLogin();
         if (empty($lastLogin)) {
-            $login = $this->getLastLogin($user);
+            $login = $this->getLastLogin($dbUser);
             if ($login) {
                 $lastLogin = $login->getLoginDate();
             }
@@ -1272,6 +1311,7 @@ class UserRepository extends EntityRepository
         });
 
         $ignore = [
+            'id',
             'twoStepVerificationCode',
             'biography',
             'dateOfBirth',
@@ -1300,10 +1340,9 @@ class UserRepository extends EntityRepository
         $dateNormalizer->setIgnoredAttributes($ignore);
 
         $callback = function ($dateTime) {
-            return $dateTime instanceof \DateTime
-                ? $dateTime->format(\DateTime::ISO8601)
-                : '';
+            return $dateTime instanceof \DateTime ? $dateTime->format(\DateTime::ISO8601) : '';
         };
+
         $dateNormalizer->setCallbacks(
             [
                 'createdAt' => $callback,
@@ -1313,12 +1352,9 @@ class UserRepository extends EntityRepository
             ]
         );
 
-        $normalizers = [$dateNormalizer];
-        $serializer = new Serializer($normalizers, [new JsonEncoder()]);
+        $serializer = new Serializer([$dateNormalizer], [new JsonEncoder()]);
 
-        $jsonContent = $serializer->serialize($user, 'json');
-
-        return $jsonContent;
+        return $serializer->serialize($user, 'json');
     }
 
     /**

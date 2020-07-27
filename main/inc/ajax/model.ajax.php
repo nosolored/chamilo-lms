@@ -50,6 +50,7 @@ if (!in_array(
         'get_hotpotatoes_exercise_results',
         'get_work_teacher',
         'get_work_student',
+        'get_all_work_student',
         'get_work_user_list',
         'get_work_user_list_others',
         'get_work_user_list_all',
@@ -547,6 +548,11 @@ switch ($action) {
         require_once api_get_path(SYS_CODE_PATH).'work/work.lib.php';
         $count = getWorkListStudent(0, $limit, $sidx, $sord, $whereCondition, true);
         break;
+    case 'get_all_work_student':
+        require_once api_get_path(SYS_CODE_PATH).'work/work.lib.php';
+        $withResults = isset($_REQUEST['with_results']) ? (int) $_REQUEST['with_results'] : 0;
+        $count = getAllWorkListStudent(0, $limit, $sidx, $sord, $whereCondition, true, $withResults);
+        break;
     case 'get_work_user_list_all':
         require_once api_get_path(SYS_CODE_PATH).'work/work.lib.php';
         $work_id = $_REQUEST['work_id'];
@@ -687,9 +693,23 @@ switch ($action) {
             $description = $keyword;
         }
 
-        if (api_is_drh() || api_is_session_admin()) {
+        if (api_is_drh()) {
             $count = SessionManager::get_sessions_followed_by_drh(
                 api_get_user_id(),
+                null,
+                null,
+                true,
+                false,
+                false,
+                null,
+                $keyword,
+                $description,
+                ['where' => $whereCondition, 'extra' => $extra_fields]
+            );
+        } elseif (api_is_session_admin()) {
+            $count = SessionManager::getSessionsFollowedByUser(
+                api_get_user_id(),
+                SESSIONADMIN,
                 null,
                 null,
                 true,
@@ -1281,6 +1301,27 @@ switch ($action) {
             $whereCondition
         );
         break;
+    case 'get_all_work_student':
+        $columns = [
+            'type',
+            'title',
+            'expires_on',
+        ];
+
+        if ($withResults) {
+            $columns[] = 'feedback';
+            $columns[] = 'last_upload';
+        }
+        $result = getAllWorkListStudent(
+            $start,
+            $limit,
+            $sidx,
+            $sord,
+            $whereCondition,
+            false,
+            $withResults
+        );
+        break;
     case 'get_work_user_list_all':
         $plagiarismColumns = [];
         if (api_get_configuration_value('allow_compilatio_tool')) {
@@ -1625,12 +1666,29 @@ switch ($action) {
         );
         break;
     case 'get_sessions_tracking':
-        if (api_is_drh() || api_is_session_admin()) {
+        if (api_is_drh()) {
             $orderByName = Database::escape_string($sidx);
             $orderByName = in_array($orderByName, ['name', 'access_start_date']) ? $orderByName : 'name';
             $orderBy = " ORDER BY $orderByName $sord";
             $sessions = SessionManager::get_sessions_followed_by_drh(
                 api_get_user_id(),
+                $start,
+                $limit,
+                false,
+                false,
+                false,
+                $orderBy,
+                $keyword,
+                $description,
+                ['where' => $whereCondition, 'extra' => $extra_fields]
+            );
+        } elseif (api_is_session_admin()) {
+            $orderByName = Database::escape_string($sidx);
+            $orderByName = in_array($orderByName, ['name', 'access_start_date']) ? $orderByName : 'name';
+            $orderBy = " ORDER BY $orderByName $sord";
+            $sessions = SessionManager::getSessionsFollowedByUser(
+                api_get_user_id(),
+                SESSIONADMIN,
                 $start,
                 $limit,
                 false,
@@ -2411,6 +2469,7 @@ $allowed_actions = [
     'get_hotpotatoes_exercise_results',
     'get_work_teacher',
     'get_work_student',
+    'get_all_work_student',
     'get_work_user_list',
     'get_work_user_list_others',
     'get_work_user_list_all',

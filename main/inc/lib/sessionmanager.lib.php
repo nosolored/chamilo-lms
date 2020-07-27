@@ -315,27 +315,16 @@ class SessionManager
                     $sessionFieldValue = new ExtraFieldValue('session');
                     $sessionFieldValue->saveFieldValues($extraFields);
 
-                    /*
-                      Sends a message to the user_id = 1
-
-                      $user_info = api_get_user_info(1);
-                      $complete_name = $user_info['firstname'].' '.$user_info['lastname'];
-                      $subject = api_get_setting('siteName').' - '.get_lang('ANewSessionWasCreated');
-                      $message = get_lang('ANewSessionWasCreated')." <br /> ".get_lang('NameOfTheSession').' : '.$name;
-                      api_mail_html($complete_name, $user_info['email'], $subject, $message);
-                     *
-                     */
                     // Adding to the correct URL
                     UrlManager::add_session_to_url($session_id, $accessUrlId);
 
                     // add event to system log
-                    $user_id = api_get_user_id();
                     Event::addEvent(
                         LOG_SESSION_CREATE,
                         LOG_SESSION_ID,
                         $session_id,
                         api_get_utc_datetime(),
-                        $user_id
+                        api_get_user_id()
                     );
                 }
 
@@ -3850,7 +3839,6 @@ class SessionManager
         $sessionConditions = null;
         $sessionQuery = '';
         $courseSessionQuery = null;
-
         switch ($status) {
             case DRH:
                 $sessionQuery = "SELECT sru.session_id
@@ -3867,6 +3855,10 @@ class SessionManager
                     WHERE (scu.status = 2 AND scu.user_id = $userId)";
 
                 $whereConditions = " OR (s.id_coach = $userId) ";
+                break;
+            case SESSIONADMIN:
+                $sessionQuery = '';
+                $sqlInjectJoins .= " AND s.session_admin_id = $userId ";
                 break;
             default:
                 $sessionQuery = "SELECT sru.session_id
@@ -3891,16 +3883,18 @@ class SessionManager
         $whereConditions .= $keywordCondition;
         $subQuery = $sessionQuery.$courseSessionQuery;
 
+        if (!empty($subQuery)) {
+            $subQuery = " AND s.id IN ($subQuery)";
+        }
+
         $sql = " $select
                 FROM $tbl_session s
                 INNER JOIN $tbl_session_rel_access_url a
                 ON (s.id = a.session_id)
                 $sqlInjectJoins
                 WHERE
-                    access_url_id = ".api_get_current_access_url_id()." AND
-                    s.id IN (
-                        $subQuery
-                    )
+                    access_url_id = ".api_get_current_access_url_id()."
+                    $subQuery
                     $whereConditions
                     $extraFieldsConditions
                     $sqlInjectWhere
@@ -3914,8 +3908,11 @@ class SessionManager
 
         if ($getCount) {
             $row = Database::fetch_array($result);
+            if ($row) {
+                return (int) $row['count'];
+            }
 
-            return $row['count'];
+            return 0;
         }
 
         $sessions = [];
@@ -4291,8 +4288,11 @@ class SessionManager
         $result = Database::query($sql);
         if ($getCount) {
             $count = Database::fetch_assoc($result);
+            if ($count) {
+                return (int) $count['count'];
+            }
 
-            return $count['count'];
+            return 0;
         }
 
         $return = [];
@@ -9451,7 +9451,7 @@ class SessionManager
     }
 
     /**
-     * @return array
+     * @return string
      */
     public static function getSessionListTabs($listType)
     {
@@ -9494,6 +9494,47 @@ class SessionManager
         }
 
         return Display::tabsOnlyLink($tabs, $default);
+    }
+
+    /**
+     * Check if a session is followed by human resources manager.
+     *
+     * @param int $sessionId
+     * @param int $userId
+     *
+     * @return bool
+     */
+    public static function isSessionFollowedByDrh($sessionId, $userId)
+    {
+        $userId = (int) $userId;
+        $sessionId = (int) $sessionId;
+
+        $tblSession = Database::get_main_table(TABLE_MAIN_SESSION);
+        $tblSessionRelUser = Database::get_main_table(TABLE_MAIN_SESSION_USER);
+
+        if (api_is_multiple_url_enabled()) {
+            $tblSessionRelAccessUrl = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_SESSION);
+
+            $sql = "SELECT s.id FROM $tblSession s
+                INNER JOIN $tblSessionRelUser sru ON (sru.session_id = s.id)
+                LEFT JOIN $tblSessionRelAccessUrl a ON (s.id = a.session_id)
+                WHERE
+                    sru.user_id = '$userId' AND
+                    sru.session_id = '$sessionId' AND
+                    sru.relation_type = '".SESSION_RELATION_TYPE_RRHH."' AND
+                    access_url_id = ".api_get_current_access_url_id();
+        } else {
+            $sql = "SELECT s.id FROM $tblSession s
+                INNER JOIN $tblSessionRelUser sru ON sru.session_id = s.id
+                WHERE
+                    sru.user_id = '$userId' AND
+                    sru.session_id = '$sessionId' AND
+                    sru.relation_type = '".SESSION_RELATION_TYPE_RRHH."'";
+        }
+
+        $result = Database::query($sql);
+
+        return Database::num_rows($result) > 0;
     }
 
     /**
