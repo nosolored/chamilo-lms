@@ -259,7 +259,8 @@ function add_category_form($action)
     }
 }
 
-function get_category_quiz($categoryId, $i = 0) {
+function get_category_quiz($categoryId, $i = 0)
+{
     $courseId = api_get_course_int_id();
     $table = Database::get_course_table(TABLE_QUIZ_QUESTION_CATEGORY);
     $categoryData = Database::select(

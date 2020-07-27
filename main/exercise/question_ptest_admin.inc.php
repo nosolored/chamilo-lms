@@ -21,7 +21,7 @@ if (isset($_GET['editQuestion'])) {
     $objQuestion = Question::getInstance($_REQUEST['answerType'], true);
     $action = api_get_self().'?'.http_build_query([
         'exerciseId' => $objExercise->id,
-        'modifyQuestion' => $modifyQuestion, 
+        'modifyQuestion' => $modifyQuestion,
         'newQuestion' => $newQuestion,
     ]).'&'.api_get_cidreq();
 }
