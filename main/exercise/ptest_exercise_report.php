@@ -508,8 +508,7 @@ $gridJs = Display::grid_js(
             // Format the date for confirm box
             var dateFormat = $( "#datepicker_start" ).datepicker( "option", "dateFormat" );
             var selectedDate = $.datepicker.formatDate(dateFormat, dateTypeVar);
-            if (confirm("
-                <?php echo convert_double_quote_to_single(get_lang('AreYouSureDeleteTestResultBeforeDateD')).' '; ?>"
+            if (confirm("<?php echo convert_double_quote_to_single(get_lang('AreYouSureDeleteTestResultBeforeDateD')).' '; ?>"
                  + selectedDate)
             ) {
                 self.location.href = "ptest_exercise_report.php?<?php echo api_get_cidreq(); ?>" +
