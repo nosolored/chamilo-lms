@@ -42,14 +42,14 @@ class Login
                     $reset_link = $portal_url."main/auth/lostPassword.php?reset=".$secret_word."&id=".$user['uid'];
                     $reset_link = Display::url($reset_link, $reset_link);
                 } else {
-                    $reset_link = get_lang('Pass')." : $user[password]";
+                    $reset_link = get_lang('Pass').": $user[password]";
                 }
-                $user_account_list = get_lang('YourRegistrationData')." : \n".
-                    get_lang('UserName').' : '.$user['loginName']."\n".
-                    get_lang('ResetLink').' : '.$reset_link;
+                $user_account_list = get_lang('YourRegistrationData').": <br>".
+                    get_lang('UserName').': '.$user['loginName']."<br>".
+                    get_lang('ResetLink').': '.$reset_link;
 
                 if ($user_account_list) {
-                    $user_account_list = "\n-----------------------------------------------\n".$user_account_list;
+                    $user_account_list = "<br>-----------------------------------------------<br>".$user_account_list;
                 }
             } else {
                 foreach ($user as $this_user) {
@@ -58,15 +58,15 @@ class Login
                         $reset_link = $portal_url."main/auth/lostPassword.php?reset=".$secret_word."&id=".$this_user['uid'];
                         $reset_link = Display::url($reset_link, $reset_link);
                     } else {
-                        $reset_link = get_lang('Pass')." : $this_user[password]";
+                        $reset_link = get_lang('Pass').": $this_user[password]";
                     }
                     $user_account_list[] =
-                        get_lang('YourRegistrationData')." : \n".
-                        get_lang('UserName').' : '.$this_user['loginName']."\n".
-                        get_lang('ResetLink').' : '.$reset_link;
+                        get_lang('YourRegistrationData').": <br>".
+                        get_lang('UserName').': '.$this_user['loginName']."<br>".
+                        get_lang('ResetLink').': '.$reset_link;
                 }
                 if ($user_account_list) {
-                    $user_account_list = implode("\n-----------------------------------------------\n", $user_account_list);
+                    $user_account_list = implode("<br>-----------------------------------------------<br>", $user_account_list);
                 }
             }
         } else {
@@ -75,8 +75,8 @@ class Login
             }
             $reset_link = get_lang('Pass')." : $user[password]";
             $user_account_list =
-                get_lang('YourRegistrationData')." : \n".
-                get_lang('UserName').' : '.$user['loginName']."\n".
+                get_lang('YourRegistrationData').": <br>".
+                get_lang('UserName').': '.$user['loginName']."<br>".
                 $reset_link.'';
         }
 
@@ -113,7 +113,7 @@ class Login
             }
         }
 
-        $email_body = get_lang('YourAccountParam')." ".$portal_url."\n\n$user_account_list";
+        $email_body = get_lang('YourAccountParam')." ".$portal_url."<br><br>$user_account_list";
         // SEND MESSAGE
         $sender_name = api_get_person_name(
             api_get_setting('administratorName'),
@@ -164,13 +164,13 @@ class Login
             $user_account_list = self::get_user_account_list($user, true); // BODY
             $email_to = $user[0]['email'];
         }
-        $email_body = get_lang('DearUser')." :\n".get_lang('password_request')."\n";
-        $email_body .= $user_account_list."\n-----------------------------------------------\n\n";
+        $email_body = get_lang('DearUser')." :<br>".get_lang('password_request')."<br>";
+        $email_body .= $user_account_list."<br>-----------------------------------------------<br><br>";
         $email_body .= get_lang('PasswordEncryptedForSecurity');
-        $email_body .= "\n\n".
-            get_lang('SignatureFormula').",\n".
+        $email_body .= "<br><br>".
+            get_lang('SignatureFormula').",<br>".
             api_get_setting('administratorName')." ".
-            api_get_setting('administratorSurname')."\n".
+            api_get_setting('administratorSurname')."<br>".
             get_lang('PlataformAdmin')." - ".
             api_get_setting('siteName');
 
