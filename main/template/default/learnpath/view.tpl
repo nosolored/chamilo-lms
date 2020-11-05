@@ -151,6 +151,40 @@
 
     {# Right zone #}
     <div id="learning_path_right_zone" class="{{ show_left_column == 1 ? 'content-scorm' : 'no-right-col' }}">
+        {% if data_list_app is not empty %}
+        <!-- NSR -->
+        <style>
+            #box-message-app {
+              height: 300px;
+              /*IMPORTANTE*/
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+
+            .hijo {
+              background: white;
+              z-index: 10;
+              /*width: 120px;*/
+            }
+        </style>
+        <div id="box-message-app" style="padding:15px;">
+            <div class="col-xs-12 navegation-bar text-primary hijo" style="font-weight: bold; border: 2px solid; line-height: 40px; padding: 5px 15px 5px 15px; font-size: 15px;">
+                Pulsa sobre las flechas <img src="/main/img/icons/48/icon_flechas.png" /> para navegar por las diferentes lecciones.<br>
+                Pulsa sobre el icono de la casa <img src="/main/img/icons/48/icon_home.png" /> cuando termines o decidas salir de las lecciones.<br>
+                <input type="button" id="btn-entendido" class="btn btn-primary" value="Entendido" />
+            </div>
+        </div>
+        <script>
+            $(function() {
+                $("#btn-entendido").on('click', function (e) {
+                    e.preventDefault();
+                    $("#box-message-app").hide(); 
+                });
+                
+            });
+        </script>
+        {% endif %}
         <div class="lp-view-zone-container">
             <div class="lp-view-tabs">
                 <div id="navTabsbar" class="nav-tabs-bar">

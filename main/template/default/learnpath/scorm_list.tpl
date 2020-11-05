@@ -24,6 +24,14 @@
             {% endfor %}
         </div>
     </div>
+    <!--  NSR -->
+    {% if data_list_app is not empty %}
+    <div class="scorm-body" style="padding:15px;">
+        <div class="col-xs-12 navegation-bar text-primary" style="font-weight: bold; border: 2px solid; line-height: 0; padding: 0px 15px 20px 15px; font-size: 15px;">
+            Pulsa sobre el Menú desplegable <img src="/main/img/icons/48/icon_lp.png" /> para poder realizar tu formación
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endif %}
 
@@ -87,5 +95,12 @@
             {{ tree(item) }}
         {% endfor %}
     </div>
+    
+    <!--  NSR -->
+    {% if data_panel_app is not empty %}
+    <div class="scorm-body">
+        <div class="col-xs-12 navegation-bar">Pulsa sobre el Menú desplegable <img src="/main/img/icons/48/icon_lp.png" /> para poder realizar tu formación</div>
+    </div>
+    {% endif %}
 </div>
 {% endif %}

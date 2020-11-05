@@ -509,6 +509,8 @@ class UserManager
                 );
                 // variables for the default template
                 $tplContent->assign('complete_name', stripslashes(api_get_person_name($firstName, $lastName)));
+                // NSR
+                $tplContent->assign('firstName', stripslashes($firstName));
                 $tplContent->assign('login_name', $loginName);
                 $tplContent->assign('original_password', stripslashes($original_password));
                 $tplContent->assign('mailWebPath', $url);
@@ -661,6 +663,8 @@ class UserManager
                     );
                     // variables for the default template
                     $tplContent->assign('complete_name', stripslashes(api_get_person_name($firstName, $lastName)));
+                    //  NSR
+                    $tplContent->assign('firstname', stripslashes($firstName));
                     $tplContent->assign('user_added', $user);
                     $renderer = FormValidator::getDefaultRenderer();
                     // Form template
@@ -1527,6 +1531,8 @@ class UserManager
             );
             // variables for the default template
             $tplContent->assign('complete_name', stripslashes(api_get_person_name($firstname, $lastname)));
+            // NSR
+            $tplContent->assign('firstname', stripslashes($firstname));
             $tplContent->assign('login_name', $username);
 
             $originalPassword = '';

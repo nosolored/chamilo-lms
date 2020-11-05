@@ -44,12 +44,20 @@ class Login
                 } else {
                     $reset_link = get_lang('Pass')." : $user[password]";
                 }
+                /* NSR
                 $user_account_list = get_lang('YourRegistrationData')." : \n".
                     get_lang('UserName').' : '.$user['loginName']."\n".
                     get_lang('ResetLink').' : '.$reset_link;
 
                 if ($user_account_list) {
                     $user_account_list = "\n-----------------------------------------------\n".$user_account_list;
+                }
+                */
+                // NSR
+                $user_account_list = get_lang('UserName').': '.$user['loginName']."\n".
+                    get_lang('ResetLink').' '.$reset_link;
+                if ($user_account_list) {
+                    $user_account_list = "\n".$user_account_list;
                 }
             } else {
                 foreach ($user as $this_user) {
@@ -60,6 +68,7 @@ class Login
                     } else {
                         $reset_link = get_lang('Pass')." : $this_user[password]";
                     }
+                    /* NSR
                     $user_account_list[] =
                         get_lang('YourRegistrationData')." : \n".
                         get_lang('UserName').' : '.$this_user['loginName']."\n".
@@ -68,16 +77,28 @@ class Login
                 if ($user_account_list) {
                     $user_account_list = implode("\n-----------------------------------------------\n", $user_account_list);
                 }
+                */
+                    // NSR
+                    $user_account_list[] = get_lang('UserName').': '.$this_user['loginName']."\n".
+                    get_lang('ResetLink').' '.$reset_link;
+                    if ($user_account_list) {
+                        $user_account_list = "\n".$user_account_list;
+                    }
+                }
             }
         } else {
             if (!$by_username) {
                 $user = $user[0];
             }
             $reset_link = get_lang('Pass')." : $user[password]";
+            /* NSR
             $user_account_list =
                 get_lang('YourRegistrationData')." : \n".
                 get_lang('UserName').' : '.$user['loginName']."\n".
                 $reset_link.'';
+            */
+            // NSR
+            $user_account_list = get_lang('UserName').': '.$user['loginName']."\n".$reset_link;
         }
 
         return $user_account_list;
@@ -99,9 +120,13 @@ class Login
         if ($by_username) { // Show only for lost password
             $user_account_list = self::get_user_account_list($user, false, $by_username); // BODY
             $email_to = $user['email'];
+            // NSR
+            $userdata = self::get_user_accounts_by_username($user["loginName"]);
         } else {
             $user_account_list = self::get_user_account_list($user); // BODY
             $email_to = $user[0]['email'];
+            // NSR
+            $userdata = self::get_user_accounts_by_username($user[0]["loginName"]);
         }
 
         $portal_url = api_get_path(WEB_PATH);
@@ -112,8 +137,16 @@ class Login
                 $portal_url = $url['url'];
             }
         }
-
+        
+        /* NSR 
         $email_body = get_lang('YourAccountParam')." ".$portal_url."\n\n$user_account_list";
+        */
+        // NSR
+        $uname = $userdata["firstName"];
+        $email_subject = "[".api_get_setting('siteName')."] ya restablecimos tu contraseña"; // SUBJECT
+        $email_body='<link href="https://www.conectaacademy.es/web/css/themes/Conectaacademy/default.css" rel="stylesheet" type="text/css">';
+        $email_body .= '<div style="font-family: \'CenturyGothic\', sans-serif;color:#000000;"><p>Estimado/a '.$uname.',</p><p>¡Ya hemos restablecido tu contraseña!<br/>Haz clic <a href="'.$portal_url.'">aquí</a> para acceder a la plataforma eLearning.</p><p>Tus datos de acceso son: <br/>'.str_replace("\n","<br/>",$user_account_list).'</p><p>Por cualquier consulta, no dudes en contactar con nosotros.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p></div>';
+
         // SEND MESSAGE
         $sender_name = api_get_person_name(
             api_get_setting('administratorName'),
@@ -160,10 +193,15 @@ class Login
             // Show only for lost password
             $user_account_list = self::get_user_account_list($user, true, $by_username); // BODY
             $email_to = $user['email'];
+            // NSR
+            $userdata = self::get_user_accounts_by_username($user["loginName"]);
         } else {
             $user_account_list = self::get_user_account_list($user, true); // BODY
             $email_to = $user[0]['email'];
+            // NSR
+            $userdata = self::get_user_accounts_by_username($user[0]["loginName"]);
         }
+        /* NSR
         $email_body = get_lang('DearUser')." :\n".get_lang('password_request')."\n";
         $email_body .= $user_account_list."\n-----------------------------------------------\n\n";
         $email_body .= get_lang('PasswordEncryptedForSecurity');
@@ -173,7 +211,14 @@ class Login
             api_get_setting('administratorSurname')."\n".
             get_lang('PlataformAdmin')." - ".
             api_get_setting('siteName');
-
+        */
+        // NSR
+        $uname = $userdata["firstName"];
+        $email_body = '<link href="https://www.conectaacademy.es/web/css/themes/Conectaacademy/default.css" rel="stylesheet" type="text/css">';
+        $email_body .= '<div style="font-family: \'CenturyGothic\', sans-serif;color:#000000;"><p>Estimado/a '.$uname.',</p><p>Recientemente has solicitado el restablecimiento de la contraseña en Conecta Academy.<br/>Recuerda que tu usuario es:';
+        $email_body .= $user_account_list.'<br/>-----------------------------------------------<br/>';
+        $email_body .= '<p>Tu contraseña está encriptada para tu seguridad. Por ello, cuando hayas pulsado en el enlace, se te remitirá un nuevo correo que contendrá la nueva contraseña.<br/>Si no has solicitado el restablecimiento de tu contraseña o ya la has recuperado, por favor, ignora este correo.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p></div>';
+        
         $sender_name = api_get_person_name(
             api_get_setting('administratorName'),
             api_get_setting('administratorSurname'),
@@ -227,8 +272,17 @@ class Login
 
         $url = api_get_path(WEB_CODE_PATH).'auth/reset.php?token='.$uniqueId;
         $mailSubject = get_lang('ResetPasswordInstructions');
+        /* NSR
         $mailBody = sprintf(
             get_lang('ResetPasswordCommentWithUrl'),
+            $url
+        );
+        */
+        // NSR
+        $fullname = UserManager::formatUserFullName($user);
+        $body = '<p>Estimado/a '.$fullname.',</p><p>Recientemente has solicitado el restablecimiento de la contraseña en Conecta Academy<br/>Para completar el proceso, haz clic en el siguiente enlace: %s</p><p>'.$user->getUsername().'</p><p>--------------------------------------------------------<br/>Tu contraseña está encriptada para tu seguridad. Por ello, cuando hayas pulsado en el enlace, se te remitirá un nuevo correo que contendrá la nueva contraseña.<br/>---------------------------------------------------------<br/>Si no has solicitado el restablecimiento de tu contraseña o ya la has recuperado, por favor, ignora este correo.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p>';
+        $mailBody = sprintf(
+            $body,
             $url
         );
 

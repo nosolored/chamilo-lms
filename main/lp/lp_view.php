@@ -417,6 +417,13 @@ if (Database::num_rows($res_media) > 0) {
 
 $is_allowed_to_edit = api_is_allowed_to_edit(false, true, true, false);
 
+$originApp == '';
+$origin = 'course';
+if (api_get_origin() === "noheader") {
+    //$originApp = 1;
+    //$origin = 'noheader';
+}
+
 global $interbreadcrumb;
 if ($is_allowed_to_edit) {
     $interbreadcrumb[] = [
@@ -432,12 +439,12 @@ if ($is_allowed_to_edit) {
         'url' => '#',
         'name' => get_lang('Preview'),
     ];
-    $buttonHomeUrl = 'lp_controller.php?'.api_get_cidreq(true, true, 'course').'&'.http_build_query([
+    $buttonHomeUrl = 'lp_controller.php?'.api_get_cidreq(true, true, $origin).'&'.http_build_query([
         'isStudentView' => 'false',
         'action' => 'return_to_course_homepage',
     ]);
 } else {
-    $buttonHomeUrl = 'lp_controller.php?'.api_get_cidreq(true, true, 'course').'&'.http_build_query([
+    $buttonHomeUrl = 'lp_controller.php?'.api_get_cidreq(true, true, $origin).'&'.http_build_query([
         'action' => 'return_to_course_homepage',
     ]);
 }
@@ -594,8 +601,10 @@ $template->assign('lp_mode', $lp->mode);
 $template->assign('lp_title_scorm', $lp->get_name());
 if (api_get_configuration_value('lp_view_accordion') === true && $lpType == 1) {
     $template->assign('data_panel', $lp->getTOCTree());
+    $template->assign('data_panel_app', $originApp);
 } else {
     $template->assign('data_list', $lp->getListArrayToc($get_toc_list));
+    $template->assign('data_list_app', $originApp);
 }
 $template->assign('lp_id', $lp->lp_id);
 $template->assign('lp_current_item_id', $lp->get_current_item_id());
