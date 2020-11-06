@@ -137,15 +137,15 @@ class Login
                 $portal_url = $url['url'];
             }
         }
-        
-        /* NSR 
+
+        /* NSR
         $email_body = get_lang('YourAccountParam')." ".$portal_url."\n\n$user_account_list";
         */
         // NSR
         $uname = $userdata["firstName"];
         $email_subject = "[".api_get_setting('siteName')."] ya restablecimos tu contraseña"; // SUBJECT
-        $email_body='<link href="https://www.conectaacademy.es/web/css/themes/Conectaacademy/default.css" rel="stylesheet" type="text/css">';
-        $email_body .= '<div style="font-family: \'CenturyGothic\', sans-serif;color:#000000;"><p>Estimado/a '.$uname.',</p><p>¡Ya hemos restablecido tu contraseña!<br/>Haz clic <a href="'.$portal_url.'">aquí</a> para acceder a la plataforma eLearning.</p><p>Tus datos de acceso son: <br/>'.str_replace("\n","<br/>",$user_account_list).'</p><p>Por cualquier consulta, no dudes en contactar con nosotros.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p></div>';
+        $email_body = '<link href="https://www.conectaacademy.es/web/css/themes/Conectaacademy/default.css" rel="stylesheet" type="text/css">';
+        $email_body .= '<div style="font-family: \'CenturyGothic\', sans-serif;color:#000000;"><p>Estimado/a '.$uname.',</p><p>¡Ya hemos restablecido tu contraseña!<br/>Haz clic <a href="'.$portal_url.'">aquí</a> para acceder a la plataforma eLearning.</p><p>Tus datos de acceso son: <br/>'.str_replace("\n", "<br/>", $user_account_list).'</p><p>Por cualquier consulta, no dudes en contactar con nosotros.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p></div>';
 
         // SEND MESSAGE
         $sender_name = api_get_person_name(
@@ -218,7 +218,7 @@ class Login
         $email_body .= '<div style="font-family: \'CenturyGothic\', sans-serif;color:#000000;"><p>Estimado/a '.$uname.',</p><p>Recientemente has solicitado el restablecimiento de la contraseña en Conecta Academy.<br/>Recuerda que tu usuario es:';
         $email_body .= $user_account_list.'<br/>-----------------------------------------------<br/>';
         $email_body .= '<p>Tu contraseña está encriptada para tu seguridad. Por ello, cuando hayas pulsado en el enlace, se te remitirá un nuevo correo que contendrá la nueva contraseña.<br/>Si no has solicitado el restablecimiento de tu contraseña o ya la has recuperado, por favor, ignora este correo.</p><p>Un saludo,<br/>Conecta Academy</p><p>Correo electrónico: webmaster@conectaacademy.es</p></div>';
-        
+
         $sender_name = api_get_person_name(
             api_get_setting('administratorName'),
             api_get_setting('administratorSurname'),
