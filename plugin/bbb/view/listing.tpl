@@ -100,6 +100,40 @@
                     <p>{{ 'MaxXUsersWarning' | get_plugin_lang('BBBPlugin') | format(max_users_limit) }}</p>
                 {% endif %}
             {% endif %}
+            {% if conference_manager == true %}
+                <table>
+                <tr>
+                    <td>
+                    <div class="well" style="margin-right:15px;">
+                        <p style="font-size:18px;"><strong>Importante!</strong> Una vez que haya creado la sala de la video-conferencia y haya finalizado la sesión,
+                        antes de cerrar la ventana de la videoconferencia deberá <strong><span style="color:red">finalizar la reunión</span></strong> para que la sala quede cerrada correctamente. 
+                        Para ello realice las indicaciones de la siguiente imagen.
+                        </p>
+                    </div>
+                    </td>
+                    <td>
+                        <img src="resources/end_session.jpg" alt="Recuerda al salir, cerrar sesión">
+                    </td>
+                </tr>
+                </table>
+            {% else %}
+                <table>
+                <tr>
+                    <td>
+                    <div class="well" style="margin-right:15px;">
+                        <p style="font-size:18px;"><strong>Importante!</strong> Una vez que accedas a la sala de la video-conferencia y hayas finalizado,
+                        antes de cerrar la ventana de la videoconferencia deberás cerrar la sesión para que contabilice 
+                        el tiempo correctamente. Para ello sigue las indicaciones de la siguiente imagen.
+                        </p>
+                    </div>
+                    </td>
+                    <td>
+                        <img src="resources/close_session.jpg" alt="Recuerda al salir, cerrar sesión">
+                    </td>
+                </tr>
+                </table>
+            {% endif %}
+            
         </div>
         {% elseif max_users_limit > 0 %}
             {% if conference_manager == true %}

@@ -94,7 +94,16 @@ class bbb
                 }
             }
         }
-        $this->maxUsersLimit = $this->plugin->get('max_users_limit');
+        
+        $max = api_get_course_plugin_setting('bbb', 'big_blue_button_max_students_allowed');
+        $maxFromPlugin = (int) $this->plugin->get('max_users_limit');
+
+        if(!$max && $maxFromPlugin > 0){
+            $max = $maxFromPlugin;
+        }elseif (!$max && !$maxFromPlugin){
+            $max = -1;
+        }
+        $this->maxUsersLimit = $max;
 
         if ($bbbPluginEnabled === 'true') {
             $userInfo = api_get_user_info();
@@ -373,7 +382,13 @@ class bbb
 
         $params['record'] = api_get_course_plugin_setting('bbb', 'big_blue_button_record_and_store') == 1;
         $max = api_get_course_plugin_setting('bbb', 'big_blue_button_max_students_allowed');
-        $max = isset($max) ? $max : -1;
+        $maxFromPlugin = (int) $this->plugin->get('max_users_limit');
+
+        if(!$max && $maxFromPlugin > 0){
+            $max = $maxFromPlugin;
+        }elseif (!$max && !$maxFromPlugin){
+            $max = -1;
+        }
 
         $params['status'] = 1;
         // Generate a pseudo-global-unique-id to avoid clash of conferences on
@@ -414,9 +429,14 @@ class bbb
             // to avoid lingering sessions on the video-conference server #6261
             $duration = 300;
             $meetingDuration = (int) $this->plugin->get('meeting_duration');
-            if (!empty($meetingDuration)) {
+            $meetingDurationFromPlugin = (int) api_get_course_plugin_setting('bbb', 'big_blue_button_meeting_duration');
+
+            if($meetingDurationFromPlugin){
+                $duration = $meetingDurationFromPlugin;
+            }elseif(!empty($meetingDuration)){
                 $duration = $meetingDuration;
             }
+            
             $bbbParams = array(
                 'meetingId' => $params['remote_id'], // REQUIRED
                 'meetingName' => $meetingName, // REQUIRED
@@ -1221,7 +1241,7 @@ class bbb
 
         // Update users with in_at y ou_at field equal
         $roomTable = Database::get_main_table('plugin_bbb_room');
-        $conditions['where'] = ['meeting_id=? AND in_at=out_at' => [$id]];
+        $conditions['where'] = ['meeting_id=? AND in_at=out_at AND close=?' => [$id, BBBPlugin::ROOM_OPEN]];
         $roomList = Database::select(
             '*',
             $roomTable,

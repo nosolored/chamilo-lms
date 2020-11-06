@@ -41,6 +41,14 @@ class BBBPlugin extends Plugin
             'name' => 'bbb_force_record_generation',
             'type' => 'checkbox',
         ],
+        [
+            'name' => 'big_blue_button_max_students_allowed',
+            'type' => 'input',
+        ],
+        [
+            'name' => 'big_blue_button_meeting_duration',
+            'type' => 'input',
+        ],
     ];
 
     /**
@@ -214,7 +222,7 @@ class BBBPlugin extends Plugin
         );
         $fieldLabel = 'plugin_bbb_course_users_limit';
         $fieldType = ExtraField::FIELD_TYPE_INTEGER;
-        $fieldTitle = $this->get_lang('MaxUsersInConferenceRoom');
+        $fieldTitle = 'MaxUsersInConferenceRoom';
         $fieldDefault = '0';
         $extraField = new ExtraField('course');
         $fieldId = CourseManager::create_course_extra_field(

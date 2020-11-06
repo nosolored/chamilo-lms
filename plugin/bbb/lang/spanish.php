@@ -47,6 +47,7 @@ $strings['enable_conference_in_course_groups'] = 'Activar las conferencias en gr
 $strings['enable_global_conference_link'] = 'Actvivar el enlace hacia la conferencia global desde la página principal';
 
 $strings['big_blue_button_record_and_store'] = 'Grabar las sesiones de videoconferencia.';
+$strings['big_blue_button_max_students_allowed'] = 'Cantidad máxima de usuarios';
 $strings['bbb_enable_conference_in_groups'] = 'Activar la creación de videoconferencia en los grupos.';
 $strings['plugin_tool_bbb'] = 'Videoconferencia';
 $strings['ThereAreNotRecordingsForTheMeetings'] = 'No hay grabaciones de sesiones de videoconferencia';
