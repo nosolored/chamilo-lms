@@ -315,7 +315,7 @@ if ($exportPdf) {
         'format' => 'A4',
         'orientation' => 'P',
     ];
-    
+
     Export::export_html_to_pdf($content, $params);
     exit;
 }
