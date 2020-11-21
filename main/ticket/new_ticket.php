@@ -56,7 +56,7 @@ function updateExerciseList(courseId, sessionId) {
     }, function (exerciseList) {
         $("<option>", {
             value: 0,
-            text: "' . get_lang('Select') . '"
+            text: "'.get_lang('Select').'"
         }).appendTo($selectExercise);
 
         if (exerciseList.length > 0) {
@@ -67,7 +67,7 @@ function updateExerciseList(courseId, sessionId) {
                 }).appendTo($selectExercise);
             });
 
-            $selectExercise.find("option[value=\'' . $exerciseId . '\']").attr("selected",true);
+            $selectExercise.find("option[value=\''.$exerciseId.'\']").attr("selected",true);
         }
 
         $selectExercise.selectpicker("refresh");
@@ -85,7 +85,7 @@ function updateLpList(courseId, sessionId) {
     }, function (lpList) {
         $("<option>", {
             value: 0,
-            text: "' . get_lang('Select') . '"
+            text: "'.get_lang('Select').'"
         }).appendTo($selectLp);
 
         if (lpList.length > 0) {
@@ -96,7 +96,7 @@ function updateLpList(courseId, sessionId) {
                 }).appendTo($selectLp);
             });
 
-            $selectLp.find("option[value=\'' . $lpId . '\']").attr("selected",true);
+            $selectLp.find("option[value=\''.$lpId.'\']").attr("selected",true);
         }
 
         $selectLp.selectpicker("refresh");

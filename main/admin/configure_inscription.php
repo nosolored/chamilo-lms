@@ -278,7 +278,7 @@ if ($display_all_form) {
             $form->addRule('diplomas', get_lang('ThisFieldIsRequired'), 'required');
         }
         // WHAT I AM ABLE TO TEACH
-       if (api_get_setting('extendedprofile_registrationrequired', 'myteach') == 'true') {
+        if (api_get_setting('extendedprofile_registrationrequired', 'myteach') == 'true') {
             $form->addRule('teach', get_lang('ThisFieldIsRequired'), 'required');
         }
     }

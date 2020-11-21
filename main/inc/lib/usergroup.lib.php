@@ -478,7 +478,7 @@ class UserGroup extends Model
      * </code>
      *
      * @param array $options
-     * @param int   $type    0 = classes / 1 = social groups
+     * @param int   $type        0 = classes / 1 = social groups
      * @param bool  $withClasses Return with clases
      *
      * @return array
