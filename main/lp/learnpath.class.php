@@ -1831,7 +1831,7 @@ class learnpath
     }
 
     /**
-     * Get the learning path name by id
+     * Get the learning path name by id.
      *
      * @param int $lpId
      *
