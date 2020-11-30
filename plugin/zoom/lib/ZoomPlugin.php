@@ -222,7 +222,7 @@ class ZoomPlugin extends Plugin
             $dest = $destinationDir.$icon;
             copy($src, $dest);
         }
-        
+
         $this->install_course_fields_in_all_courses(true, 'zoom_meet.png');
     }
 
@@ -257,7 +257,6 @@ class ZoomPlugin extends Plugin
             $dest = $destinationDir.$icon;
             unlink($dest);
         }
-
     }
 
     /**
