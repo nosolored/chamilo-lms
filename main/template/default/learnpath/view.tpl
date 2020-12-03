@@ -141,7 +141,11 @@
             <div id="toc_id" class="scorm-body" name="toc_name">
                 {# div#flab-mobile is to know when the user is on mobile view. Don't delete. #}
                 <div id="flag-mobile" class="visible-xs-block" aria-hidden="true"></div>
-                {% include 'learnpath/scorm_list.tpl'|get_template %}
+                {% if panel_left_default == 1 %}
+                    {% include 'learnpath/scorm_list.tpl'|get_template %}
+                {% else %}
+                    {% include 'learnpath/lp_list.tpl'|get_template %}
+                {% endif %}     
             </div>
             {# end TOC layout #}
         </div>

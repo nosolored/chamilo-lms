@@ -593,10 +593,298 @@ $template->assign('lp_accumulate_work_time', $lpMinTime);
 
 $template->assign('lp_mode', $lp->mode);
 $template->assign('lp_title_scorm', $lp->get_name());
-if (api_get_configuration_value('lp_view_accordion') === true && $lpType == 1) {
-    $template->assign('data_panel', $lp->getTOCTree());
+$showLpList = false;
+if (api_get_configuration_value('show_lp_list_in_lp_view')) {
+    $showLpList = true;
+}
+if ($showLpList) {
+    $allowCategory = true;
+    if (!empty($sessionId)) {
+        $allowCategory = false;
+        if (api_get_configuration_value('allow_session_lp_category')) {
+            $allowCategory = true;
+        }
+    }
+
+    $userId = api_get_user_id();
+    $subscriptionSettings = learnpath::getSubscriptionSettings();
+    $courseInfo = api_get_course_info();
+    $courseId = api_get_course_int_id();
+    $is_allowed_to_edit = api_is_allowed_to_edit(null, true);
+
+    $categoriesTempList = learnpath::getCategories($courseId);
+    $firstSessionCategoryId = 0;
+    if ($allowCategory) {
+        $newCategoryFiltered = [];
+        foreach ($categoriesTempList as $category) {
+            $categorySessionId = (int) learnpath::getCategorySessionId($category->getId());
+            if ($categorySessionId === $sessionId || $categorySessionId === 0) {
+                $newCategoryFiltered[] = $category;
+            }
+            if (!empty($sessionId) && empty($firstSessionCategoryId) && $categorySessionId == $sessionId) {
+                $firstSessionCategoryId = $category->getId();
+            }
+        }
+
+        $categoriesTempList = $newCategoryFiltered;
+    }
+
+    $categoryTest = new CLpCategory();
+    $categoryTest->setId(0);
+    $categoryTest->setName(get_lang('WithOutCategory'));
+    $categoryTest->setPosition(0);
+    $categories = [$categoryTest];
+
+    if (!empty($categoriesTempList)) {
+        $categories = array_merge($categories, $categoriesTempList);
+    }
+
+    $showBlockedPrerequisite = api_get_configuration_value('show_prerequisite_as_blocked');
+
+    $user = api_get_user_entity($userId);
+    $isInvitee = api_is_invitee();
+    $options = learnpath::getIconSelect();
+    $cidReq = api_get_cidreq();
+
+    $defaultLpIcon = Display::return_icon(
+        'learnpath.png',
+        get_lang('LPName')
+    );
+
+    $defaultDisableLpIcon = Display::return_icon(
+        'learnpath_na.png',
+        get_lang('LPName')
+    );
+
+    $courseSettingsIcon = Display::return_icon(
+        'settings.png',
+        get_lang('CourseSettings')
+        );
+
+    $courseSettingsDisableIcon = Display::return_icon(
+        'settings_na.png',
+        get_lang('CourseSettings')
+    );
+
+    $enableAutoLaunch = api_get_course_setting('enable_lp_auto_launch');
+    $gameMode = api_get_setting('gamification_mode');
+
+    $data = [];
+    $tableCategory = Database::get_course_table(TABLE_LP_CATEGORY);
+    /** @var CLpCategory $item */
+    foreach ($categories as $item) {
+        $categoryId = $item->getId();
+        if (!empty($sessionId) && $allowCategory) {
+            $categorySessionId = learnpath::getCategorySessionId($categoryId);
+            $item->setSessionId($categorySessionId);
+        }
+
+        if ($categoryId !== 0 && $subscriptionSettings['allow_add_users_to_lp_category'] == true) {
+            // "Without category" has id = 0
+            $categoryVisibility = api_get_item_visibility(
+                $courseInfo,
+                TOOL_LEARNPATH_CATEGORY,
+                $categoryId,
+                $sessionId
+            );
+
+            if (!$is_allowed_to_edit) {
+                if ($categoryVisibility !== 1 && $categoryVisibility != -1) {
+                    continue;
+                }
+            }
+
+            if ($allowCategory && !empty($sessionId)) {
+                // Check base course
+                if (0 === $item->getSessionId()) {
+                    $categoryVisibility = api_get_item_visibility(
+                        $courseInfo,
+                        TOOL_LEARNPATH_CATEGORY,
+                        $categoryId,
+                        0
+                    );
+                    if ($categoryVisibility == 0) {
+                        continue;
+                    }
+                }
+            }
+
+            if ($user && !learnpath::categoryIsVisibleForStudent($item, $user)) {
+                continue;
+            }
+        }
+
+        $list = new LearnpathList(
+            $userId,
+            $courseInfo,
+            $sessionId,
+            null,
+            false,
+            $categoryId
+        );
+
+        $flat_list = $list->get_flat_list();
+
+        // Hiding categories with out LPs (only for student)
+        if (empty($flat_list) && !$is_allowed_to_edit) {
+            continue;
+        }
+
+        $listData = [];
+
+        if (!empty($flat_list)) {
+            $max = count($flat_list);
+            $counter = 0;
+            $autolaunch_exists = false;
+
+            $progressList = learnpath::getProgressFromLpList(
+                array_column($flat_list, 'lp_old_id'),
+                $userId,
+                $courseId,
+                $sessionId
+            );
+
+            $now = time();
+            foreach ($flat_list as $id => $details) {
+                $id = $details['lp_old_id'];
+
+                if (!$is_allowed_to_edit && $details['lp_visibility'] == 0) {
+                    // This is a student and this path is invisible, skip.
+                    continue;
+                }
+
+                $lpVisibility = learnpath::is_lp_visible_for_student($id, $userId, $courseInfo);
+
+                // Check if the learnpath is visible for student.
+                if (!$is_allowed_to_edit) {
+                    $isBlocked = learnpath::isBlockedByPrerequisite(
+                        $userId,
+                        $details['prerequisite'],
+                        $courseInfo,
+                        $sessionId
+                    );
+                    if ($lpVisibility === false && $isBlocked && $showBlockedPrerequisite === false) {
+                        continue;
+                    }
+                }
+
+                $start_time = $end_time = '';
+                $time_limits = false;
+                // This is an old LP (from a migration 1.8.7) so we do nothing
+                if (empty($details['created_on']) && empty($details['modified_on'])) {
+                    $time_limits = false;
+                }
+
+                // Checking if expired_on is ON
+                if ($details['expired_on'] != '') {
+                    $time_limits = true;
+                }
+
+                if ($time_limits) {
+                    // Check if start time
+                    if (!empty($details['publicated_on']) && !empty($details['expired_on'])) {
+                        $start_time = api_strtotime($details['publicated_on'], 'UTC');
+                        $end_time = api_strtotime($details['expired_on'], 'UTC');
+                        $is_actived_time = false;
+                        if ($now > $start_time && $end_time > $now) {
+                            $is_actived_time = true;
+                        }
+
+                        if (!$is_actived_time) {
+                            continue;
+                        }
+                    }
+                }
+
+                $counter++;
+                $oddclass = 'row_even';
+                if (($counter % 2) == 0) {
+                    $oddclass = 'row_odd';
+                }
+
+                $url_start_lp = 'lp_controller.php?'.$cidReq.'&action=view&lp_id='.$id;
+                $name = trim(strip_tags(Security::remove_XSS($details['lp_name'])));
+
+                $my_title = $name;
+                $icon_learnpath = $defaultLpIcon;
+                if ($details['lp_visibility'] == 0) {
+                    $my_title = Display::tag(
+                        'font',
+                        $name,
+                        ['class' => 'text-muted']
+                    );
+                    $icon_learnpath = $defaultDisableLpIcon;
+                }
+
+                if (!empty($options)) {
+                    $icon = learnpath::getSelectedIconHtml($id);
+                    if (!empty($icon)) {
+                        $icon_learnpath = $icon;
+                    }
+                }
+
+                // Students can see the lp but is inactive
+                if (!$is_allowed_to_edit && $lpVisibility == false &&
+                        $showBlockedPrerequisite == true
+                ) {
+                    $my_title = Display::tag(
+                        'font',
+                        $name,
+                        ['class' => 'text-muted']
+                    );
+                    $icon_learnpath = $defaultDisableLpIcon;
+                    $url_start_lp = '#';
+                }
+
+                $progress = 0;
+                if (!$isInvitee) {
+                    $progress = isset($progressList[$id]) && !empty($progressList[$id]) ? $progressList[$id] : 0;
+                }
+
+                $dsp_progress = '';
+                if (!$isInvitee) {
+                    $dsp_progress = learnpath::get_progress_bar($progress, '%');
+                }
+
+                $sessionImage = api_get_session_image(
+                    $details['lp_session'],
+                    $userInfo['status']
+                );
+
+                $listData[] = [
+                    'learnpath_icon' => $icon_learnpath,
+                    'url_start' => $url_start_lp,
+                    'title' => $my_title,
+                    'session_image' => $sessionImage,
+                    'dsp_progress' => $dsp_progress,
+                    'lp_id' => $id,
+                ];
+            }
+        }
+
+        $data[] = [
+            'category' => $item,
+            'category_visibility' => api_get_item_visibility(
+                $courseInfo,
+                TOOL_LEARNPATH_CATEGORY,
+                $item->getId(),
+                $sessionId
+            ),
+            'category_is_published' => learnpath::categoryIsPublished($item, $courseInfo['real_id']),
+            'lp_list' => $listData,
+        ];
+    }
+
+    $template->assign('categories', $categories);
+    $template->assign('data_lp_list', $data);
+    $template->assign('panel_left_default', 0);
 } else {
-    $template->assign('data_list', $lp->getListArrayToc($get_toc_list));
+    $template->assign('panel_left_default', 1);
+    if (api_get_configuration_value('lp_view_accordion') === true && $lpType == 1) {
+        $template->assign('data_panel', $lp->getTOCTree());
+    } else {
+        $template->assign('data_list', $lp->getListArrayToc($get_toc_list));
+    }
 }
 $template->assign('lp_id', $lp->lp_id);
 $template->assign('lp_current_item_id', $lp->get_current_item_id());
