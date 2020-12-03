@@ -13203,6 +13203,7 @@ EOD;
                         return $linkInfo['url'];
                     }
                 }
+
                 return '';
             case TOOL_QUIZ:
                 if (empty($id)) {
