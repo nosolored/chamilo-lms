@@ -1612,13 +1612,22 @@ class learnpath
             $completedStatusList[] = 'failed';
         }
 
+        if ($this->debug) {
+            error_log('START - get_complete_items_count');
+            error_log('Counting steps with status in: '.print_r($completedStatusList, 1));
+        }
+
         foreach ($this->items as $id => $dummy) {
             // Trying failed and browsed considered "progressed" as well.
             if ($this->items[$id]->status_is($completedStatusList) &&
-                $this->items[$id]->get_type() != 'dir'
+                $this->items[$id]->get_type() !== 'dir'
             ) {
                 $i++;
             }
+        }
+
+        if ($this->debug) {
+            error_log('END - Count: '.$i);
         }
 
         return $i;
@@ -3174,7 +3183,7 @@ class learnpath
      *
      * @param int $lp_id
      *
-     * @return mixed Type ID or name, depending on the parameter
+     * @return mixed Returns the lp_type: 1 = Chamilo lms / 2 = SCORM
      */
     public static function get_type_static($lp_id = 0)
     {
@@ -3628,7 +3637,7 @@ class learnpath
                             }
                             break;
                         case 'dir':
-                            $file = 'lp_content.php?type=dir';
+                            $file = 'lp_content.php?type=dir&'.api_get_cidreq();
                             break;
                         case 'link':
                             if (Link::is_youtube_link($file)) {
@@ -3777,7 +3786,7 @@ class learnpath
                             $file .= (strstr($file, '?') === false ? '?' : '').$lp_item_params;
                         }
                     } else {
-                        $file = 'lp_content.php?type=dir';
+                        $file = 'lp_content.php?type=dir&'.api_get_cidreq();
                     }
                     break;
                 case 3:
@@ -3830,7 +3839,7 @@ class learnpath
                             $file .= $aicc_append;
                         }
                     } else {
-                        $file = 'lp_content.php?type=dir';
+                        $file = 'lp_content.php?type=dir&'.api_get_cidreq();
                     }
                     break;
                 case 4:
@@ -4304,6 +4313,9 @@ class learnpath
         }
 
         $currentItem = $this->getItem($itemId);
+        if ($debug > 0) {
+            error_log("Checking item id $itemId");
+        }
 
         if ($currentItem) {
             if ($this->type == 2) {
@@ -4341,12 +4353,13 @@ class learnpath
         } else {
             $result = true;
             if ($debug > 1) {
-                error_log('$this->items['.$itemId.'] was not an object', 0);
+                error_log('$this->items['.$itemId.'] was not an object');
             }
         }
 
         if ($debug > 1) {
-            error_log('End of prerequisites_match(). Error message is now '.$this->error, 0);
+            error_log('Result: '.$result);
+            error_log('End of prerequisites_match(). Error message is now '.$this->error);
         }
 
         return $result;
@@ -4865,10 +4878,6 @@ class learnpath
         if (isset($this->items[$item_id]) &&
             is_object($this->items[$item_id])
         ) {
-            if ($debug) {
-                error_log('Object exists');
-            }
-
             // Saving the item.
             $res = $this->items[$item_id]->save(
                 $from_outside,
@@ -4950,10 +4959,23 @@ class learnpath
                 return false;
             }
 
-            /*if ($course_id == 220 && $scoreAsProgress && $scoreAsProgressSetting) {
-                error_log("HOT FIX JULIO new score has been replaced from $progress to $score");
-                $progress = $score;
-            }*/
+            if ($scoreAsProgress && $scoreAsProgressSetting) {
+                $storedProgress = self::getProgress(
+                    $this->get_id(),
+                    $userId,
+                    $course_id,
+                    $this->get_lp_session_id()
+                );
+
+                // Check if the stored progress is higher than the new value
+                if ($storedProgress >= $progress) {
+                    if ($debug) {
+                        error_log("Return false: New progress value is lower than stored value - Current value: $storedProgress - New value: $progress [lp ".$this->get_id()." - user ".$userId."]");
+                    }
+
+                    return false;
+                }
+            }
 
             if ($progress >= 0 && $progress <= 100) {
                 // Check database.
@@ -5524,10 +5546,8 @@ class learnpath
             }
         }
         if ($debug) {
-            error_log('lp_view_session_id');
-            error_log($this->lp_view_session_id);
-            error_log('api session id');
-            error_log(api_get_session_id());
+            error_log('lp_view_session_id: '.$this->lp_view_session_id);
+            error_log('api_get_session_id: '.api_get_session_id());
             error_log('End of learnpath::start_current_item()');
         }
 
@@ -5543,7 +5563,7 @@ class learnpath
     {
         $debug = $this->debug;
         if ($debug) {
-            error_log('In learnpath::stop_previous_item()', 0);
+            error_log('In learnpath::stop_previous_item()');
         }
 
         if ($this->last != 0 && $this->last != $this->current &&
@@ -13174,10 +13194,15 @@ EOD;
                 return $main_dir_path.'announcements/announcements.php?ann_id='.$id.'&'.$extraParams;
             case TOOL_LINK:
                 $linkInfo = Link::getLinkInfo($id);
-                if (isset($linkInfo['url'])) {
-                    return $linkInfo['url'];
+                if ($linkInfo) {
+                    $itemPropertyInfo = api_get_item_property_info($course_id, TOOL_LINK, $id, $session_id);
+                    if ($itemPropertyInfo && 0 === (int) $itemPropertyInfo['visibility']) {
+                        return '';
+                    }
+                    if (isset($linkInfo['url'])) {
+                        return $linkInfo['url'];
+                    }
                 }
-
                 return '';
             case TOOL_QUIZ:
                 if (empty($id)) {

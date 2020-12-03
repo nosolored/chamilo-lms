@@ -8742,4 +8742,5 @@ $XQuestionsSelectedWithTotalScoreY = "Solo se seleccionarán %d preguntas según
 $QuestionAlsoUsedInTheFollowingTests = "Esta pregunta se usa también en los ejercicios siguientes";
 $LinkToTestEdition = "Vínculo a la edición del ejercicio";
 $lpIndice = "ÍNDICE DE LECCIONES";
+$MoveUsersFromCourseToSession = "Mover usuarios del curso base a una sesión";
 ?>

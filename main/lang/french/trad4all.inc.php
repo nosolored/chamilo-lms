@@ -8408,7 +8408,7 @@ $ErrorPluginOfficialCannotBeUploaded = "Votre plugin a le même nom qu'un plugin
 $AllSessionsShort = "Toutes";
 $ActiveSessionsShort = "Actives";
 $ClosedSessionsShort = "Fermées";
-$FirstnameLastnameCourses = "Cours de %s %s";
+$FirstnameLastnameCourses = "Cours choisis par %s %s";
 $CanNotSubscribeToCourseUserSessionExpired = "Vous ne pouvez plus vous inscrire à des cours car votre session a expiré.";
 $CertificateOfAchievement = "Certificat de réalisation";
 $CertificateOfAchievementByDay = "Certificat de réalisation par jour";
@@ -8645,4 +8645,5 @@ $HideCategoryTable = "Cacher le tableau de catégories";
 $XQuestionsSelectedWithTotalScoreY = "Seules %d questions seront sélectionnées d'après la configuration de l'exercice, pour un score total de %s.";
 $QuestionAlsoUsedInTheFollowingTests = "Question utilisée également dans les exercices suivants";
 $LinkToTestEdition = "Lien vers l'édition de l'exercice";
+$MoveUsersFromCourseToSession = "Déplacer les résultats utilisateurs dans/vers une session";
 ?>

@@ -8714,4 +8714,5 @@ $XQuestionsSelectedWithTotalScoreY = "Only %d questions will be selected based o
 $QuestionAlsoUsedInTheFollowingTests = "This question is also used in the following tests";
 $LinkToTestEdition = "Link to test edition";
 $lpIndice = "LEARNING PATHS";
+$MoveUsersFromCourseToSession = "Move users from base course to a session";
 ?>
