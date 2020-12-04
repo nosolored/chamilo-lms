@@ -1,17 +1,11 @@
 {% if data_lp_list is not empty %}
 <div id="learning_path_toc" class="scorm-list">
     <div class="scorm-title">
-        <h4>{{ lp_title_scorm }}</h4>
+        <h4>{{ course_title }}</h4>
     </div>
     <hr style="margin: -5px 0px 10px 0px;">
     <div class="scorm-body">
         <div id="inner_lp_toc" class="inner_lp_toc scrollbar-light">
-            <div class="row">
-                <div class="col-md-12">
-                    <h4 style="margin-left:15px">{{ 'lpIndice' | get_lang }}</h4>
-                </div>
-            </div>
-            
             {% for lp_data in data_lp_list %}
                 <!-- new view block accordeon -->
                 {% if lp_data.category.id == 0 %}
@@ -34,12 +28,15 @@
                                             <a href="{{ row.url_start }}">
                                                 {{ row.title }}
                                                 {{ row.session_image }}
+                                            </a>
                                         {% endif %}
                                     </div>
                                     
                                     <div class="col-md-3">
                                         {% if row.lp_id == lp_id %}
-                                            <strong>({{ 'InCourse' | get_lang | capitalize }})</strong>
+                                            <div style="height: 20px; margin-bottom: 20px;text-align: center;">
+                                                <strong>({{ 'InCourse' | get_lang | capitalize }})</strong>
+                                            </div>
                                         {% else %}
                                             {{ row.dsp_progress }}
                                         {% endif %}
@@ -85,12 +82,15 @@
                                                     <a href="{{ row.url_start }}">
                                                         {{ row.title }}
                                                         {{ row.session_image }}
+                                                    </a>
                                                     {% endif %}
                                                 </div>
                                                 
                                                 <div class="col-md-3">
                                                     {% if row.lp_id == lp_id %}
-                                                        <strong>({{ 'InCourse' | get_lang | capitalize }})</strong>
+                                                        <div style="height: 20px; margin-bottom: 20px;text-align: center;">
+                                                            <strong>({{ 'InCourse' | get_lang | capitalize }})</strong>
+                                                        </div>
                                                     {% else %}
                                                         {{ row.dsp_progress }}
                                                     {% endif %}

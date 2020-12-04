@@ -875,6 +875,7 @@ if ($showLpList) {
         ];
     }
 
+    $template->assign('course_title', api_htmlentities($courseInfo['name']));
     $template->assign('categories', $categories);
     $template->assign('data_lp_list', $data);
     $template->assign('panel_left_default', 0);
