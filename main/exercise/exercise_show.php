@@ -212,7 +212,6 @@ if ($action !== 'export') {
                 var oHidn = document.createElement("input");
                 oHidn.type = "hidden";
                 var selname = oHidn.name = "marks_" + m_id[i];
-
                 var elMarks = document.forms['marksform_' + m_id[i]].marks;
 
                 if (elMarks.tagName.toLowerCase() === 'select') {
@@ -269,6 +268,7 @@ if (!empty($track_exercise_info)) {
             break;
         case RESULT_DISABLE_DONT_SHOW_SCORE_ONLY_IF_USER_FINISHES_ATTEMPTS_SHOW_ALWAYS_FEEDBACK:
         case RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT:
+        case RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT_NO_FEEDBACK:
             $attempts = Event::getExerciseResultsByUser(
                 $currentUserId,
                 $objExercise->id,
@@ -289,6 +289,12 @@ if (!empty($track_exercise_info)) {
                 $show_only_total_score = true;
                 // Last attempt not reach don't show score/feedback
                 $showTotalScoreAndUserChoicesInLastAttempt = false;
+            }
+
+            if ($is_allowedToEdit &&
+                RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT_NO_FEEDBACK == $result_disabled
+            ){
+                $showTotalScoreAndUserChoicesInLastAttempt = true;
             }
             break;
     }
@@ -590,7 +596,7 @@ foreach ($questionList as $questionId) {
             $isFeedbackAllowed = false;
         }
         $marksname = '';
-        if ($isFeedbackAllowed && $action != 'export') {
+        if ($isFeedbackAllowed && $action !== 'export') {
             $name = 'fckdiv'.$questionId;
             $marksname = 'marksName'.$questionId;
             if (in_array($answerType, [FREE_ANSWER, ORAL_EXPRESSION, ANNOTATION])) {

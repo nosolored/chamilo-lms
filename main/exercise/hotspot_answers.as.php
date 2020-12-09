@@ -1,4 +1,5 @@
 <?php
+
 /* For licensing terms, see /license.txt */
 
 use Chamilo\CoreBundle\Entity\TrackEHotspot;
@@ -6,8 +7,6 @@ use Chamilo\CourseBundle\Entity\CQuizAnswer;
 
 /**
  * This file generates a json answer to the question preview.
- *
- * @package chamilo.exercise
  *
  * @author Toon Keppens, Julio Montoya adding hotspot "medical" support
  */
@@ -92,11 +91,12 @@ $data['image_width'] = $pictureWidth;
 $data['image_height'] = $pictureHeight;
 $data['courseCode'] = $_course['path'];
 $data['hotspots'] = [];
-
+$resultDisable = $objExercise->selectResultsDisabled();
 $showTotalScoreAndUserChoicesInLastAttempt = true;
 if (in_array(
-    $objExercise->selectResultsDisabled(), [
+    $resultDisable, [
         RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT,
+        RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT_NO_FEEDBACK,
         RESULT_DISABLE_DONT_SHOW_SCORE_ONLY_IF_USER_FINISHES_ATTEMPTS_SHOW_ALWAYS_FEEDBACK,
     ]
 )
@@ -128,19 +128,50 @@ if (in_array(
 
 $hideExpectedAnswer = false;
 if ($objExercise->getFeedbackType() == 0 &&
-    $objExercise->selectResultsDisabled() == RESULT_DISABLE_SHOW_SCORE_ONLY
+    $resultDisable == RESULT_DISABLE_SHOW_SCORE_ONLY
 ) {
     $hideExpectedAnswer = true;
 }
 
 if (in_array(
-    $objExercise->selectResultsDisabled(), [
+    $resultDisable, [
         RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT,
         RESULT_DISABLE_DONT_SHOW_SCORE_ONLY_IF_USER_FINISHES_ATTEMPTS_SHOW_ALWAYS_FEEDBACK,
     ]
 )
 ) {
     $hideExpectedAnswer = $showTotalScoreAndUserChoicesInLastAttempt ? false : true;
+}
+
+if (in_array(
+    $resultDisable, [
+        RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT_NO_FEEDBACK,
+    ]
+)
+) {
+    $hideExpectedAnswer = false;
+}
+
+$hotSpotWithAnswer = [];
+$data['answers'] = [];
+$rs = $em
+    ->getRepository('ChamiloCoreBundle:TrackEHotspot')
+    ->findBy(
+        [
+            'hotspotQuestionId' => $questionId,
+            'cId' => $courseId,
+            'hotspotExeId' => $exeId,
+        ],
+        ['hotspotAnswerId' => 'ASC']
+    );
+
+/** @var TrackEHotspot $row */
+foreach ($rs as $row) {
+    $data['answers'][] = $row->getHotspotCoordinate();
+
+    if ($row->getHotspotCorrect()) {
+        $hotSpotWithAnswer[] = $row->getHotspotAnswerId();
+    }
 }
 
 if (!$hideExpectedAnswer) {
@@ -163,9 +194,16 @@ if (!$hideExpectedAnswer) {
     }
 
     $result = $qb->getQuery()->getResult();
-
     /** @var CQuizAnswer $hotSpotAnswer */
     foreach ($result as $hotSpotAnswer) {
+        if (RESULT_DISABLE_SHOW_SCORE_ATTEMPT_SHOW_ANSWERS_LAST_ATTEMPT_NO_FEEDBACK == $resultDisable) {
+            if (false === $showTotalScoreAndUserChoicesInLastAttempt) {
+                if (!in_array($hotSpotAnswer->getIid(), $hotSpotWithAnswer)) {
+                    continue;
+                }
+            }
+        }
+
         $hotSpot = [];
         $hotSpot['id'] = $hotSpotAnswer->getIid();
         $hotSpot['answer'] = $hotSpotAnswer->getAnswer();
@@ -190,24 +228,6 @@ if (!$hideExpectedAnswer) {
         $hotSpot['coord'] = $hotSpotAnswer->getHotspotCoordinates();
         $data['hotspots'][] = $hotSpot;
     }
-}
-
-$data['answers'] = [];
-
-$rs = $em
-    ->getRepository('ChamiloCoreBundle:TrackEHotspot')
-    ->findBy(
-        [
-            'hotspotQuestionId' => $questionId,
-            'cId' => $courseId,
-            'hotspotExeId' => $exeId,
-        ],
-        ['hotspotAnswerId' => 'ASC']
-    );
-
-/** @var TrackEHotspot $row */
-foreach ($rs as $row) {
-    $data['answers'][] = $row->getHotspotCoordinate();
 }
 
 $data['done'] = 'done';
