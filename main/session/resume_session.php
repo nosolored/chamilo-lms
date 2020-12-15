@@ -26,6 +26,7 @@ if (empty($sessionId)) {
 
 SessionManager::protectSession($sessionId);
 $codePath = api_get_path(WEB_CODE_PATH);
+$pluginPath = api_get_path(WEB_PLUGIN_PATH);
 
 $tool_name = get_lang('SessionOverview');
 $interbreadcrumb[] = [
@@ -238,6 +239,14 @@ if ($session->getNbrCourses() === 0) {
             );
         }
         $courseItem .= $orderButtons;
+
+        $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
+        if ($allowZoom) {
+            $courseItem .= Display::url(
+                Display::return_icon('zoom_meet.png', get_lang('AddUsers')),
+                $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
+            );
+        }
 
         $courseItem .= Display::url(
             Display::return_icon('new_user.png', get_lang('AddUsers')),
