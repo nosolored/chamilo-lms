@@ -317,7 +317,7 @@ class XApiPlugin extends Plugin implements HookPluginInterface
             $this->get_lang('ToolTinCan'),
             $courseId,
             null,
-            'xapi/tincan/index.php'
+            'xapi/start.php'
         );
     }
 
@@ -326,7 +326,7 @@ class XApiPlugin extends Plugin implements HookPluginInterface
      *
      * @return mixed|string
      */
-    public static function extractVerbInLanguage(\Xabbuh\XApi\Model\LanguageMap $languageMap, $language)
+    public static function extractVerbInLanguage(Xabbuh\XApi\Model\LanguageMap $languageMap, $language)
     {
         $iso = self::findLanguageIso($languageMap->languageTags(), $language);
 
@@ -525,10 +525,6 @@ class XApiPlugin extends Plugin implements HookPluginInterface
     {
         Database::getManager()
             ->createQuery('DELETE FROM ChamiloCourseBundle:CTool t WHERE t.category = :category AND t.link LIKE :link')
-            ->execute(['category' => 'plugin', 'link' => 'xapi/tincan/index.php%']);
-
-        Database::getManager()
-            ->createQuery('DELETE FROM ChamiloCourseBundle:CTool t WHERE t.category = :category AND t.link LIKE :link')
-            ->execute(['category' => 'plugin', 'link' => 'xapi/cmi5/index.php%']);
+            ->execute(['category' => 'plugin', 'link' => 'xapi/start.php%']);
     }
 }

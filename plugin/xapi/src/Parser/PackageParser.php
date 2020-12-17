@@ -8,11 +8,11 @@ use Chamilo\CoreBundle\Entity\Course;
 use Chamilo\CoreBundle\Entity\Session;
 
 /**
- * Class AbstractParser.
+ * Class PackageParser.
  *
  * @package Chamilo\PluginBundle\XApi\Parser
  */
-abstract class AbstractParser
+abstract class PackageParser
 {
     /**
      * @var string
@@ -40,14 +40,21 @@ abstract class AbstractParser
     }
 
     /**
-     * @param string $filePath
+     * @throws \Exception
      *
      * @return mixed
      */
-    abstract public static function create($filePath, Course $course, Session $session = null);
+    public static function create(string $packageType, string $filePath, Course $course, Session $session = null)
+    {
+        switch ($packageType) {
+            case 'tincan':
+                return new TinCanParser($filePath, $course, $session);
+            case 'cmi5':
+                return new Cmi5Parser($filePath, $course, $session);
+            default:
+                throw new \Exception('Invalid package.');
+        }
+    }
 
-    /**
-     * @return \Chamilo\PluginBundle\Entity\XApi\ToolLaunch
-     */
-    abstract public function parse();
+    abstract public function parse(): \Chamilo\PluginBundle\Entity\XApi\ToolLaunch;
 }
