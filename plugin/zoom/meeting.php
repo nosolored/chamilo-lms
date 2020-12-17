@@ -55,8 +55,10 @@ $tpl = new Template($meeting->getMeetingId());
 if ($plugin->userIsConferenceManager($meeting)) {
     // user can edit, start and delete meeting
     $tpl->assign('isConferenceManager', true);
-    $tpl->assign('editMeetingForm', $plugin->getEditMeetingForm($meeting)->returnForm());
-    $tpl->assign('deleteMeetingForm', $plugin->getDeleteMeetingForm($meeting, $returnURL)->returnForm());
+    if (api_is_platform_admin(true)) {
+        $tpl->assign('editMeetingForm', $plugin->getEditMeetingForm($meeting)->returnForm());
+        $tpl->assign('deleteMeetingForm', $plugin->getDeleteMeetingForm($meeting, $returnURL)->returnForm());
+    }
 
     if (false === $meeting->isGlobalMeeting() && false == $meeting->isCourseMeeting()) {
         if ('true' === $plugin->get('enableParticipantRegistration') && $meeting->requiresRegistration()) {

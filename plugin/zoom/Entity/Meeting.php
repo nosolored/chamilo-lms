@@ -108,6 +108,13 @@ class Meeting
      * @ORM\Column(type="text", name="meeting_info_get_json", nullable=true)
      */
     protected $meetingInfoGetJson;
+    
+    /**
+     * @var User
+     * @ORM\ManyToOne(targetEntity="Chamilo\UserBundle\Entity\User")
+     * @ORM\JoinColumn(name="host_id", referencedColumnName="id", nullable=true)
+     */
+    protected $host;
 
     /** @var MeetingListItem */
     protected $meetingListItem;
@@ -185,6 +192,14 @@ class Meeting
     public function getUser()
     {
         return $this->user;
+    }
+    
+    /**
+     * @return User
+     */
+    public function getHost()
+    {
+        return $this->host;
     }
 
     /**
@@ -309,6 +324,18 @@ class Meeting
     {
         $this->user = $user;
 
+        return $this;
+    }
+    
+    /**
+     * @param User $user
+     *
+     * @return $this
+     */
+    public function setHost($host)
+    {
+        $this->host = $host;
+        
         return $this;
     }
 
@@ -562,6 +589,19 @@ class Meeting
         }
 
         return $introduction;
+    }
+    
+    /**
+     * Check starDateTime
+     *
+     * @return bool
+     */
+    public function checkStartDateTime()
+    {
+        $today = new DateTime();
+        $today->setTimezone(new DateTimeZone(api_get_timezone()));
+
+        return $this->startDateTime <= $today;
     }
 
     /**

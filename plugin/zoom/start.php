@@ -49,8 +49,9 @@ $tool_name = $plugin->get_lang('ZoomVideoConferences');
 $tpl = new Template($tool_name);
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-
-$isManager = $plugin->userIsCourseConferenceManager();
+$allowSessionAdmins = true;
+$allowCourseAdmin = false;
+$isManager = $plugin->userIsCourseConferenceManager($allowSessionAdmins, $allowCourseAdmin);
 if ($isManager) {
     $groupId = api_get_group_id();
     $groups = GroupManager::get_groups();

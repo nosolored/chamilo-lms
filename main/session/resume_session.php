@@ -243,7 +243,7 @@ if ($session->getNbrCourses() === 0) {
         $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
         if ($allowZoom) {
             $courseItem .= Display::url(
-                Display::return_icon('zoom_meet.png', get_lang('AddUsers')),
+                Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
                 $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
             );
         }

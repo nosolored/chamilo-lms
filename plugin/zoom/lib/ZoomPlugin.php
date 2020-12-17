@@ -767,6 +767,42 @@ class ZoomPlugin extends Plugin
         }
         $form = new FormValidator('scheduleMeetingForm', 'post', api_get_self().'?'.$extraUrl);
         $form->addHeader($this->get_lang('ScheduleAMeeting'));
+        
+        $userIdSelect = $form->addSelect('host_id', get_lang('Teacher'));
+        $users = [];
+        if (null === $session) {
+            if (null !== $course) {
+                /** @var CourseRelUser $courseRelUser */
+                foreach ($course->getTeachers() as $courseRelUser) {
+                    $users[] = $courseRelUser->getUser();
+                }
+            }
+        } else {
+            if (null !== $course) {
+                $subscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
+                if ($subscriptions) {
+                    /** @var SessionRelCourseRelUser $sessionCourseUser */
+                    foreach ($subscriptions as $sessionCourseUser) {
+                        $users[] = $sessionCourseUser->getUser();
+                    }
+                }
+            }
+        }
+        
+        $activeUsersWithEmail = [];
+        foreach ($users as $userItem) {
+            if ($user->isActive() && !empty($userItem->getEmail())) {
+                $userIdSelect->addOption(
+                        api_get_person_name(
+                            $userItem->getFirstname(),
+                            $userItem->getLastname()
+                        ).' ['.$userItem->getEmail().']',
+                    $userItem->getId()
+                );
+            }
+        }
+        $form->setRequired($userIdSelect);
+
         $startTimeDatePicker = $form->addDateTimePicker('startTime', get_lang('StartTime'));
         $form->setRequired($startTimeDatePicker);
 
@@ -857,6 +893,9 @@ class ZoomPlugin extends Plugin
             }
 
             try {
+                $em = Database::getManager();
+                /** @var User $host */
+                $host = $em->find('ChamiloUserBundle:User', (int) $form->getSubmitValue('host_id'));
                 $newMeeting = $this->createScheduleMeeting(
                     $user,
                     $course,
@@ -866,7 +905,8 @@ class ZoomPlugin extends Plugin
                     $form->getSubmitValue('duration'),
                     $form->getSubmitValue('topic'),
                     $form->getSubmitValue('agenda'),
-                    substr(uniqid('z', true), 0, 10)
+                    substr(uniqid('z', true), 0, 10),
+                    $host
                 );
 
                 Display::addFlash(
@@ -1053,7 +1093,7 @@ class ZoomPlugin extends Plugin
             return false;
         }
 
-        if (api_is_coach() || api_is_platform_admin()) {
+        if (api_is_coach() || api_is_platform_admin(true)) {
             return true;
         }
 
@@ -1068,13 +1108,13 @@ class ZoomPlugin extends Plugin
      * @return bool whether the logged-in user can manage conferences in this context, that is either
      *              the current course or session coach, the platform admin or the current course admin
      */
-    public function userIsCourseConferenceManager()
+    public function userIsCourseConferenceManager($allowSessionAdmins = false, $allowCourseAdmin = true)
     {
-        if (api_is_coach() || api_is_platform_admin()) {
+        if ((api_is_coach() && $allowCourseAdmin) || api_is_platform_admin($allowSessionAdmins)) {
             return true;
         }
 
-        if (api_get_course_id() && api_is_course_admin()) {
+        if (api_get_course_id() && api_is_course_admin() && $allowCourseAdmin) {
             return true;
         }
 
@@ -1136,7 +1176,7 @@ class ZoomPlugin extends Plugin
 
     public function getToolbar($returnUrl = '')
     {
-        if (!api_is_platform_admin()) {
+        if (!api_is_platform_admin(true)) {
             return '';
         }
 
@@ -1356,8 +1396,8 @@ class ZoomPlugin extends Plugin
         $meeting->getMeetingInfoGet()->settings->auto_recording = $this->getRecordingSetting();
         $meeting->getMeetingInfoGet()->settings->registrants_email_notification = false;
 
-        //$meeting->getMeetingInfoGet()->host_email = $currentUser->getEmail();
-        //$meeting->getMeetingInfoGet()->settings->alternative_hosts = $currentUser->getEmail();
+        $meeting->getMeetingInfoGet()->host_email = $meeting->getHost()->getEmail(); //$currentUser->getEmail();
+        $meeting->getMeetingInfoGet()->settings->alternative_hosts = $meeting->getHost()->getEmail(); //$currentUser->getEmail();
 
         // Send create to Zoom.
         $meeting->setMeetingInfoGet($meeting->getMeetingInfoGet()->create());
@@ -1416,7 +1456,8 @@ class ZoomPlugin extends Plugin
         $duration,
         $topic,
         $agenda,
-        $password
+        $password,
+        User $host = null
     ) {
         $meetingInfoGet = MeetingInfoGet::fromTopicAndType($topic, MeetingInfoGet::TYPE_SCHEDULED);
         $meetingInfoGet->duration = $duration;
@@ -1435,6 +1476,7 @@ class ZoomPlugin extends Plugin
                 ->setCourse($course)
                 ->setGroup($group)
                 ->setSession($session)
+                ->setHost($host)
         );
     }
 

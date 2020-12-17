@@ -40,6 +40,9 @@ try {
     $startJoinURL = $plugin->getStartOrJoinMeetingURL($meeting);
     $content .= $meeting->getIntroduction();
 
+    if (!api_is_platform_admin(true) && !$meeting->checkStartDateTime()) {
+        $startJoinURL = null;
+    }
     if (!empty($startJoinURL)) {
         $content .= Display::url($plugin->get_lang('EnterMeeting'), $startJoinURL, ['class' => 'btn btn-primary']);
     } else {
