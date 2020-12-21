@@ -97,8 +97,6 @@ class ScormScoTrackData implements TransformPropertyInterface
         if (empty($value)) {
             return 'none';
         }
-
-        $value;
     }
 
     /**
