@@ -767,7 +767,7 @@ class ZoomPlugin extends Plugin
         }
         $form = new FormValidator('scheduleMeetingForm', 'post', api_get_self().'?'.$extraUrl);
         $form->addHeader($this->get_lang('ScheduleAMeeting'));
-        
+
         $userIdSelect = $form->addSelect('host_id', get_lang('Teacher'));
         $users = [];
         if (null === $session) {
@@ -788,7 +788,7 @@ class ZoomPlugin extends Plugin
                 }
             }
         }
-        
+
         $activeUsersWithEmail = [];
         foreach ($users as $userItem) {
             if ($user->isActive() && !empty($userItem->getEmail())) {
