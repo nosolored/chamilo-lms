@@ -4455,9 +4455,19 @@ class CourseManager
                 }
 
                 if ($userInCourseStatus === COURSEMANAGER || $sessionCourseAvailable) {
+                    $zoomIcon = '';
+                    $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
+                    if ($allowZoom && api_is_platform_admin(true)) {
+                        $pluginPath = api_get_path(WEB_PLUGIN_PATH);
+                        $zoomIcon = Display::url(
+                            Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
+                                $pluginPath."zoom/start.php?id_session=".$course_info['id_session']."&cidReq=".$course_info['code']
+                        );
+                    }
+
                     $session_url = $course_info['course_public_url'].'?id_session='.$course_info['id_session'];
                     $session_title = '<a title="'.$course_info['name'].'" href="'.$session_url.'">'.
-                        $course_info['name'].'</a>'.PHP_EOL
+                        $course_info['name'].'</a><span class="pull-right">'.$zoomIcon.'</span>'.PHP_EOL
                         .'<div class="notifications">'.$notifications.'</div>';
                 } else {
                     $session_title = $course_info['name'];
