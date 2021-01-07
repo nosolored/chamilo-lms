@@ -771,7 +771,7 @@ class ExtraFieldValue extends Model
                 ON (s.field_id = sf.id)
                 WHERE
                     item_id = '$item_id'  AND
-                    variable = '".$field_variable."' AND
+                    variable = '$field_variable' AND
                     sf.extra_field_type = $extraFieldType
                 ";
         if ($filterByVisibility) {
@@ -799,14 +799,10 @@ class ExtraFieldValue extends Model
                 if ($result['field_type'] == ExtraField::FIELD_TYPE_SELECT_WITH_TEXT_FIELD) {
                     if (!empty($result['value'])) {
                         $options = explode('::', $result['value']);
-
                         $field_option = new ExtraFieldOption($this->type);
                         $result = $field_option->get($options[0]);
-
                         if (!empty($result)) {
-                            $result['value'] = $result['display_text']
-                                .'&rarr;'
-                                .$options[1];
+                            $result['value'] = $result['display_text'].'&rarr;'.$options[1];
                         }
                     }
                 }
@@ -818,7 +814,6 @@ class ExtraFieldValue extends Model
                         foreach ($optionIds as $optionId) {
                             $objEfOption = new ExtraFieldOption('user');
                             $optionInfo = $objEfOption->get($optionId);
-
                             $optionValues[] = $optionInfo['display_text'];
                         }
 

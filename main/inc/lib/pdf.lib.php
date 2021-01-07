@@ -89,6 +89,7 @@ class PDF
      * @param bool|false $saveToFile
      * @param bool|false $returnHtml
      * @param bool       $addDefaultCss (bootstrap/default/base.css)
+     * @param array
      *
      * @return string
      */
@@ -96,7 +97,8 @@ class PDF
         $content,
         $saveToFile = false,
         $returnHtml = false,
-        $addDefaultCss = false
+        $addDefaultCss = false,
+        $extraRows = []
     ) {
         if (empty($this->template)) {
             $tpl = new Template('', false, false, false, false, true, false);
@@ -141,6 +143,7 @@ class PDF
         $tpl->assign('pdf_student_info', $this->params['student_info']);
         $tpl->assign('show_grade_generated_date', $this->params['show_grade_generated_date']);
         $tpl->assign('add_signatures', $this->params['add_signatures']);
+        $tpl->assign('extra_rows', $extraRows);
 
         // Getting template
         $tableTemplate = $tpl->get_template('export/table_pdf.tpl');
@@ -671,6 +674,20 @@ class PDF
 
         $view = new Template('', false, false, false, true, false, false);
         $template = $view->get_template('export/pdf_footer.tpl');
+        $footerHTML = $view->fetch($template);
+
+        $this->pdf->SetHTMLFooter($footerHTML, 'E'); //Even pages
+        $this->pdf->SetHTMLFooter($footerHTML, 'O'); //Odd pages
+    }
+
+    public function setCertificateFooter()
+    {
+        $this->pdf->defaultfooterfontsize = 12; // in pts
+        $this->pdf->defaultfooterfontstyle = 'B'; // blank, B, I, or BI
+        $this->pdf->defaultfooterline = 1; // 1 to include line below header/above footer
+
+        $view = new Template('', false, false, false, true, false, false);
+        $template = $view->get_template('export/pdf_certificate_footer.tpl');
         $footerHTML = $view->fetch($template);
 
         $this->pdf->SetHTMLFooter($footerHTML, 'E'); //Even pages

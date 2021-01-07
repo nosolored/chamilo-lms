@@ -6668,20 +6668,7 @@ class learnpath
             );
         }
 
-        /*if ($backToBuild) {
-            $back = Display::url(
-                Display::return_icon(
-                    'back.png',
-                    get_lang('GoBack'),
-                    '',
-                    ICON_SIZE_MEDIUM
-                ),
-                "lp_controller.php?action=add_item&type=step&lp_id=$lpId&".api_get_cidreq()
-            );
-        }*/
-
         $actionsLeft = $back;
-
         $actionsLeft .= Display::url(
             Display::return_icon(
                 'preview_view.png',
@@ -6711,7 +6698,6 @@ class learnpath
         );
 
         $subscriptionSettings = self::getSubscriptionSettings();
-
         $request = api_request_uri();
         if (strpos($request, 'edit') === false) {
             $actionsLeft .= Display::url(
@@ -6804,22 +6790,19 @@ class learnpath
             );
         }
 
-        // see  BT#17943
-        if (api_is_platform_admin()) {
-            if (isset($extraField['authorlp'])) {
-                $actionsLeft .= Display::url(
-                    Display::return_icon(
-                        'add-groups.png',
-                        get_lang('Author'),
-                        '',
-                        ICON_SIZE_MEDIUM
-                    ),
-                    'lp_controller.php?'.api_get_cidreq().'&'.http_build_query([
-                        'action' => 'author_view',
-                        'lp_id' => $lpId,
-                    ])
-                );
-            }
+        if (api_is_platform_admin() && isset($extraField['authorlp'])) {
+            $actionsLeft .= Display::url(
+                Display::return_icon(
+                    'add-groups.png',
+                    get_lang('Author'),
+                    '',
+                    ICON_SIZE_MEDIUM
+                ),
+                'lp_controller.php?'.api_get_cidreq().'&'.http_build_query([
+                    'action' => 'author_view',
+                    'lp_id' => $lpId,
+                ])
+            );
         }
 
         $toolbar = Display::toolbarAction(
@@ -7333,10 +7316,8 @@ class learnpath
      *
      * @return string
      */
-    public function display_edit_item(
-        $item_id,
-        $excludeExtraFields = []
-    ) {
+    public function display_edit_item($item_id, $excludeExtraFields = [])
+    {
         $course_id = api_get_course_int_id();
         $return = '';
         $item_id = (int) $item_id;
@@ -7354,7 +7335,7 @@ class learnpath
             case 'dir':
             case 'asset':
             case 'sco':
-                if (isset($_GET['view']) && $_GET['view'] == 'build') {
+            if (isset($_GET['view']) && $_GET['view'] == 'build') {
                     $return .= $this->display_manipulate($item_id, $row['item_type']);
                     $return .= $this->display_item_form(
                         $row['item_type'],
@@ -7768,6 +7749,7 @@ class learnpath
 
         $form->addHidden('type', TOOL_QUIZ);
         $form->addHidden('post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return '<div class="sectioncomment">'.$form->returnForm().'</div>';
@@ -8129,6 +8111,7 @@ class learnpath
         }
         $form->addHidden('type', TOOL_FORUM);
         $form->addHidden('post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return '<div class="sectioncomment">'.$form->returnForm().'</div>';
@@ -8333,6 +8316,7 @@ class learnpath
 
         $form->addHidden('type', TOOL_THREAD);
         $form->addHidden('post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return $form->returnForm();
@@ -8982,6 +8966,7 @@ class learnpath
         }
         $form->addElement('hidden', 'type', TOOL_DOCUMENT);
         $form->addElement('hidden', 'post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return $form->returnForm();
@@ -9273,6 +9258,7 @@ class learnpath
 
         $form->addElement('hidden', 'type', TOOL_READOUT_TEXT);
         $form->addElement('hidden', 'post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return $form->returnForm();
@@ -9621,6 +9607,7 @@ class learnpath
         }
         $form->addHidden('type', TOOL_LINK);
         $form->addHidden('post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults($defaults);
 
         return '<div class="sectioncomment">'.$form->returnForm().'</div>';
@@ -9793,6 +9780,7 @@ class learnpath
 
         $form->addHidden('type', TOOL_STUDENTPUBLICATION);
         $form->addHidden('post_time', time());
+        $form = $this->getAutorLpItem($form);
         $form->setDefaults(['title' => $item_title]);
 
         $return = '<div class="sectioncomment">';
@@ -14183,5 +14171,40 @@ EOD;
         }
 
         return '';
+    }
+
+    /**
+     * Gets the form to evaluate if it exists contains the extra field extra_authorlpitem to establish authors when
+     * editing an item of an LP. Returns the form with the authors' setting. It must be set before the setDefault.
+     *
+     * @param FormValidator $form
+     * @return FormValidator
+     */
+    private function getAutorLpItem($form ){
+        /** @var FormValidator $form */
+        if ($form->hasElement('extra_authorlpitem')) {
+            /** @var HTML_QuickForm_select $author */
+            $author = $form->getElement('extra_authorlpitem');
+            $options = [];
+            $field = new ExtraField('user');
+            $authorLp = $field->get_handler_field_info_by_field_variable('authorlp');
+            $idExtraField = (int) (isset($authorLp['id']) ? $authorLp['id'] : 0);
+            if ($idExtraField != 0) {
+                $extraFieldValueUser = new ExtraFieldValue('user');
+                $arrayExtraFieldValueUser = $extraFieldValueUser->get_item_id_from_field_variable_and_field_value(
+                    $authorLp['variable'],
+                    1,
+                    true,
+                    false,
+                    true
+                );
+                foreach ($arrayExtraFieldValueUser as $item) {
+                    $teacher = api_get_user_info($item['item_id']);
+                    $options[$teacher['id']] = $teacher['complete_name'];
+                }
+            }
+            $author->setOptions($options);
+        }
+        return $form;
     }
 }

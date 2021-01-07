@@ -2107,6 +2107,30 @@ class Tracking
         return false;
     }
 
+    public static function getLastConnectionInAnyCourse($studentId)
+    {
+        $studentId = (int) $studentId;
+
+        if (empty($studentId)) {
+            return false;
+        }
+
+        $table = Database::get_main_table(TABLE_STATISTIC_TRACK_E_COURSE_ACCESS);
+        $sql = "SELECT logout_course_date
+                FROM $table
+                WHERE user_id = $studentId
+                ORDER BY logout_course_date DESC
+                LIMIT 1";
+        $result = Database::query($sql);
+        if (Database::num_rows($result)) {
+            $row = Database::fetch_array($result);
+
+            return $row['logout_course_date'];
+        }
+
+        return false;
+    }
+
     /**
      * Get last course access by course/session.
      */
@@ -7387,7 +7411,7 @@ class Tracking
                     }
                     $sub_res = Database::query($sql);
                     $num_rows = Database::num_rows($sub_res);
-
+                    $new_parent_id = 0;
                     if ($num_rows > 0) {
                         $new_result = Database::fetch_array($sub_res, 'ASSOC');
                         $created_dir = $new_result['url'];
@@ -7398,7 +7422,7 @@ class Tracking
                             $created_dir = create_unexisting_work_directory($base_work_dir, $dir_name);
                             $created_dir = '/'.$created_dir;
                             $now = new DateTime(api_get_utc_datetime(), new DateTimeZone('UTC'));
-                            //Creating directory
+                            // Creating directory
                             $publication = new \Chamilo\CourseBundle\Entity\CStudentPublication();
                             $publication
                                 ->setUrl($created_dir)
@@ -7409,17 +7433,41 @@ class Tracking
                                 )
                                 ->setActive(false)
                                 ->setAccepted(true)
+                                ->setPostGroupId(0)
+                                ->setHasProperties($parent_data['has_properties'])
+                                ->setWeight($parent_data['weight'])
+                                ->setContainsFile($parent_data['contains_file'])
                                 ->setFiletype('folder')
                                 ->setSentDate($now)
                                 ->setQualification($parent_data['qualification'])
                                 ->setParentId(0)
                                 ->setQualificatorId(0)
+                                ->setUserId($parent_data['user_id'])
+                                ->setAllowTextAssignment($parent_data['allow_text_assignment'])
                                 ->setSession($session);
 
+                            $publication->setDocumentId($parent_data['document_id']);
+
+                            Database::getManager()->persist($publication);
+                            Database::getManager()->flush();
                             $id = $publication->getIid();
-                            //Folder created
-                            api_item_property_update($course_info, 'work', $id, 'DirectoryCreated', api_get_user_id());
+                            // Folder created
+                            api_item_property_update(
+                                $course_info,
+                                'work',
+                                $id,
+                                'DirectoryCreated',
+                                api_get_user_id(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                $new_session_id
+                            );
                             $new_parent_id = $id;
+                            if (!isset($result_message[$TBL_STUDENT_PUBLICATION.' - new folder created called: '.$created_dir])) {
+                                $result_message[$TBL_STUDENT_PUBLICATION.' - new folder created called: '.$created_dir] = 0;
+                            }
                             $result_message[$TBL_STUDENT_PUBLICATION.' - new folder created called: '.$created_dir]++;
                         }
                     }
@@ -7432,7 +7480,7 @@ class Tracking
                     }
                     $rest_select = Database::query($sql);
                     if (Database::num_rows($rest_select) > 0) {
-                        if ($update_database) {
+                        if ($update_database && $new_parent_id) {
                             $assignment_data = Database::fetch_array($rest_select, 'ASSOC');
                             $sql_add_publication = "INSERT INTO ".$TBL_STUDENT_PUBLICATION_ASSIGNMENT." SET
                                     	c_id = '$course_id',
@@ -7445,23 +7493,21 @@ class Tracking
                                 echo $sql_add_publication;
                             }
                             Database::query($sql_add_publication);
-                            $id = Database::insert_id();
-
-                            $sql_update = "UPDATE $TBL_STUDENT_PUBLICATION
-                                           SET  has_properties = '".$id."',
-                                                view_properties = '1'
-                                           WHERE id = ".$new_parent_id;
-                            if ($debug) {
-                                echo $sql_update;
+                            $id = (int) Database::insert_id();
+                            if ($id) {
+                                $sql_update = "UPDATE $TBL_STUDENT_PUBLICATION
+                                               SET  has_properties = '".$id."',
+                                                    view_properties = '1'
+                                               WHERE id = ".$new_parent_id;
+                                if ($debug) {
+                                    echo $sql_update;
+                                }
+                                Database::query($sql_update);
+                                if (!isset($result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT])) {
+                                    $result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT] = 0;
+                                }
+                                $result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT]++;
                             }
-                            Database::query($sql_update);
-                            if ($debug) {
-                                var_dump($sql_update);
-                            }
-                            if (!isset($result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT])) {
-                                $result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT] = 0;
-                            }
-                            $result_message[$TBL_STUDENT_PUBLICATION_ASSIGNMENT]++;
                         }
                     }
 
@@ -7471,7 +7517,7 @@ class Tracking
                     if ($update_database) {
                         // Creating a new work
                         $data['sent_date'] = new DateTime($data['sent_date'], new DateTimeZone('UTC'));
-
+                        $data['post_group_id'] = (int) $data['post_group_id'];
                         $publication = new \Chamilo\CourseBundle\Entity\CStudentPublication();
                         $publication
                             ->setUrl($new_url)
@@ -7483,13 +7529,35 @@ class Tracking
                             ->setPostGroupId($data['post_group_id'])
                             ->setSentDate($data['sent_date'])
                             ->setParentId($new_parent_id)
-                            ->setSession($session);
+                            ->setWeight($data['weight'])
+                            ->setHasProperties(0)
+                            ->setWeight($data['weight'])
+                            ->setContainsFile($data['contains_file'])
+                            ->setSession($session)
+                            ->setUserId($data['user_id'])
+                            ->setFiletype('file')
+                            ->setDocumentId(0)
+                        ;
 
                         $em->persist($publication);
                         $em->flush();
 
                         $id = $publication->getIid();
-                        api_item_property_update($course_info, 'work', $id, 'DocumentAdded', $user_id);
+                        api_item_property_update(
+                            $course_info,
+                            'work',
+                            $id,
+                            'DocumentAdded',
+                            $user_id,
+                            null,
+                            null,
+                            null,
+                            null,
+                            $new_session_id
+                        );
+                        if (!isset($result_message[$TBL_STUDENT_PUBLICATION])) {
+                            $result_message[$TBL_STUDENT_PUBLICATION] = 0;
+                        }
                         $result_message[$TBL_STUDENT_PUBLICATION]++;
                         $full_file_name = $course_dir.'/'.$doc_url;
                         $new_file = $course_dir.'/'.$new_url;
@@ -7499,11 +7567,13 @@ class Tracking
                             $result = copy($full_file_name, $new_file);
                             if ($result) {
                                 unlink($full_file_name);
-                                $sql = "DELETE FROM $TBL_STUDENT_PUBLICATION WHERE id= ".$data['id'];
-                                if ($debug) {
-                                    var_dump($sql);
+                                if (isset($data['id'])) {
+                                    $sql = "DELETE FROM $TBL_STUDENT_PUBLICATION WHERE id= ".$data['id'];
+                                    if ($debug) {
+                                        var_dump($sql);
+                                    }
+                                    Database::query($sql);
                                 }
-                                Database::query($sql);
                                 api_item_property_update(
                                     $course_info,
                                     'work',
@@ -7593,7 +7663,6 @@ class Tracking
             echo '<table class="table" width="100%">';
             echo '<tr>';
             echo '<td width="50%" valign="top">';
-
             if ($origin_session_id == 0) {
                 echo '<h5>'.get_lang('OriginCourse').'</h5>';
             } else {

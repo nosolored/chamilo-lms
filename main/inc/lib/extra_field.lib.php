@@ -194,6 +194,7 @@ class ExtraField extends Model
         if (api_get_configuration_value('allow_scheduled_announcements')) {
             $result[] = 'scheduled_announcement';
         }
+        sort($result);
 
         return $result;
     }
@@ -869,7 +870,7 @@ class ExtraField extends Model
                             $extra_data['extra_'.$field['variable']]['extra_'.$field['variable']] = $field_value;
                             break;
                         case self::FIELD_TYPE_TRIPLE_SELECT:
-                            list($level1, $level2, $level3) = explode(';', $field_value);
+                            [$level1, $level2, $level3] = explode(';', $field_value);
 
                             $extra_data["extra_$variable"]["extra_$variable"] = $level1;
                             $extra_data["extra_$variable"]["extra_{$variable}_second"] = $level2;
@@ -1155,7 +1156,6 @@ class ExtraField extends Model
                                 'checkbox',
                                 'extra_'.$field_details['variable'],
                                 null,
-                                //$field_details['display_text'].'<br />',
                                 get_lang('Yes'),
                                 $checkboxAttributes
                             );
@@ -1178,50 +1178,13 @@ class ExtraField extends Model
                         if (empty($defaultValueId)) {
                             $options[''] = get_lang('SelectAnOption');
                         }
-                        // When a variable is 'authors', this will be a
-                        // select element of teachers (see BT#17648)
-                        $variable = $field_details['variable'];
-                        $authors = ($variable == 'authors' || $variable == 'authorlpitem') ? true : false;
-                        if ($authors == false) {
+
+                        if (isset($field_details['options']) && !empty($field_details['options'])) {
                             foreach ($field_details['options'] as $optionDetails) {
                                 $options[$optionDetails['option_value']] = $optionDetails['display_text'];
                             }
-                        } else {
-                            if ($variable == 'authors') {
-                                $conditions = [
-                                    'enabled' => 1,
-                                    'status' => COURSEMANAGER,
-                                ];
-                                $teachers = UserManager::get_user_list($conditions);
-                                foreach ($teachers as $teacher) {
-                                    $options[$teacher['id']] = $teacher['complete_name'];
-                                }
-                            } elseif ($variable == 'authorlpitem') {
-                                /* Authors*/
-                                $options = [];
-                                $field = new ExtraField('user');
-                                $authorLp = $field->get_handler_field_info_by_field_variable('authorlp');
-
-                                $idExtraField = (int) (isset($authorLp['id']) ? $authorLp['id'] : 0);
-                                if ($idExtraField != 0) {
-                                    $extraFieldValueUser = new ExtraFieldValue('user');
-                                    $arrayExtraFieldValueUser = $extraFieldValueUser->get_item_id_from_field_variable_and_field_value(
-                                        $authorLp['variable'],
-                                        1,
-                                        true,
-                                        false,
-                                        true
-                                    );
-
-                                    foreach ($arrayExtraFieldValueUser as $item) {
-                                        $teacher = api_get_user_info($item['item_id']);
-                                        // $teachers[] = $teacher;
-                                        $options[$teacher['id']] = $teacher['complete_name'];
-                                    }
-                                }
-                                /* Authors*/
-                            }
                         }
+
                         $form->addElement(
                             'select',
                             'extra_'.$field_details['variable'],

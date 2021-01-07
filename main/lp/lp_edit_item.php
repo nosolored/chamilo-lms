@@ -125,7 +125,8 @@ $authorLpField = $field->get_handler_field_info_by_field_variable('authorlpitem'
 if ($authorLpField != null) {
     $extraField['authorlp'] = $authorLpField;
 }
-echo $learnPath->build_action_menu(false,
+echo $learnPath->build_action_menu(
+    false,
     true,
     false,
     true,
@@ -177,10 +178,7 @@ if (isset($is_success) && $is_success === true) {
     echo $learnPath->display_item($_GET['id'], $msg);
 } else {
     $item = $learnPath->getItem($_GET['id']);
-    echo $learnPath->display_edit_item(
-        $item->getIid(),
-        $excludeExtraFields
-    );
+    echo $learnPath->display_edit_item($item->getIid(), $excludeExtraFields);
     $finalItem = Session::read('finalItem');
     if ($finalItem) {
         echo '<script>$("#frmModel").remove()</script>';

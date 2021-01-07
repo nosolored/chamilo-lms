@@ -929,15 +929,15 @@ function savedata(item_id) {
  * @param   string      Must be empty string for conformance with SCORM 1.2
  */
 function LMSCommit(val) {
-    logit_scorm('LMSCommit() + val');
+    logit_scorm('LMSCommit() val:' + val, 0);
 
     olms.G_LastError = G_NoError ;
     olms.G_LastErrorMessage = 'No error';
     savedata(olms.lms_item_id);
 
-    reinit_updatable_vars_list();
-    //now changes have been commited, no need to update until next SetValue()
-    //commit = 'false' ;
+    //reinit_updatable_vars_list();
+    logit_scorm('LMSCommit() end ', 0);
+
     return('true');
 }
 
@@ -1458,6 +1458,8 @@ function process_scorm_values() {
  */
 function reinit_updatable_vars_list() {
     logit_scorm('Cleaning updatable_vars_list: reinit_updatable_vars_list');
+    logit_scorm('Original status: ' + olms.lesson_status);
+
     var defaultStatus = 'not attempted';
     if (olms.updatable_vars_list['cmi.core.lesson_status']) {
         if (olms.lesson_status != '') {
