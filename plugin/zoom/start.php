@@ -42,8 +42,48 @@ $htmlHeadXtra[] = '<script>
         var url = "'.$url.'";
         window.location.replace(url+groupId);
     });
+
+    $("#delete-selected").click(function(e) {
+        e.preventDefault();
+        if (confirm("'.$plugin->get_lang("AreYouSureToDeleteSelected").'")) {
+            var list = [];
+            $.each($(".chk-meeting-item:checked"), function() {
+                list.push($(this).val());
+            });
+
+            $.post(
+                "ajax.php",
+                {a:"deleteSelectedMeeting", list:list},
+                function(data){
+                    if (data.status == "false") {
+                        alert(data.message);
+                    } else {
+                        location.reload();
+                    }
+                },
+                "json"
+            );
+        }
+    });
 });
 </script>';
+
+$htmlHeadXtra[] = "<script>
+    function plus_repeated_event() {
+        if (document.getElementById('options2').style.display == 'none') {
+            document.getElementById('options2').style.display = 'block';
+        } else {
+            document.getElementById('options2').style.display = 'none';
+        }
+    }
+    $(function() {
+        var checked = $('input[name=repeat]').attr('checked');
+        if (checked) {
+            $('#options2').show();
+        }
+    });
+</script>";
+
 
 $tool_name = $plugin->get_lang('ZoomVideoConferences');
 $tpl = new Template($tool_name);
