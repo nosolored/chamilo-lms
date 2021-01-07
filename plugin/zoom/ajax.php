@@ -12,7 +12,6 @@ api_protect_course_script(true);
  *
  * @package chamilo.plugin.zoom
  */
-
 if (api_is_anonymous()) {
     api_not_allowed(true);
 }
@@ -56,13 +55,9 @@ switch ($action) {
             );
 
             echo json_encode(["status" => "true"]);
-
         } catch (Exception $exception) {
             $this->handleException($exception);
         }
 
         break;
 }
-
-
-            
