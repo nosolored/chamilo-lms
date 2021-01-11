@@ -41,6 +41,19 @@ switch ($action) {
                 }
 
                 if ($meeting && $meeting->isCourseMeeting()) {
+                    // Delete calendar event
+                    $eventData = Database::select(
+                        '*',
+                        Database::get_course_table(TABLE_AGENDA),
+                        ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
+                        'first'
+                    );
+                    
+                    if (!empty($eventData)) {
+                        $agenda = new Agenda('course');
+                        $agenda->deleteEvent($eventData['id']);
+                    }
+                    
                     // No need to delete a instant meeting.
                     if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT != $meeting->getMeetingInfoGet()->type) {
                         $meeting->getMeetingInfoGet()->delete();

@@ -348,6 +348,34 @@ class ZoomPlugin extends Plugin
                 $meeting->setMeetingInfoGet($meetingInfoGet);
                 Database::getManager()->persist($meeting);
                 Database::getManager()->flush();
+                
+                // Update calendar event
+                $eventData = Database::select(
+                    '*',
+                    Database::get_course_table(TABLE_AGENDA),
+                    ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
+                    'first'
+                );
+                
+                if (!empty($eventData)) {
+                    $meetingId = $meeting->getId();
+                    $agenda = new Agenda('course');
+                    $startTime = $form->getSubmitValue('startTime');
+                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                    $allDay = 'false';
+                    $userToSend = ['everyone'];
+
+                    $eventId = $agenda->editEvent(
+                        $eventData['id'],
+                        $startTime,
+                        $endTime,
+                        $allDay,
+                        $form->getSubmitValue('topic'),
+                        $form->getSubmitValue('agenda'),
+                        $userToSend
+                    );
+                }
+
                 Display::addFlash(
                     Display::return_message($this->get_lang('MeetingUpdated'), 'confirm')
                 );
@@ -406,6 +434,19 @@ class ZoomPlugin extends Plugin
 
         $em = Database::getManager();
         try {
+            // Delete calendar event
+            $eventData = Database::select(
+                '*',
+                Database::get_course_table(TABLE_AGENDA),
+                ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
+                'first'
+            );
+            
+            if (!empty($eventData)) {
+                $agenda = new Agenda('course');
+                $agenda->deleteEvent($eventData['id']);
+            }
+            
             // No need to delete a instant meeting.
             if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT != $meeting->getMeetingInfoGet()->type) {
                 $meeting->getMeetingInfoGet()->delete();
@@ -909,6 +950,14 @@ class ZoomPlugin extends Plugin
                 api_location('start.php?'.$extraUrl);
             }
             
+            if (!empty($form->getSubmitValue('repeat')) && empty($form->getSubmitValue('repeat_end_day'))) {
+                Display::addFlash(
+                    Display::return_message($this->get_lang("DateEndNotValid"), 'error')
+                );
+                
+                api_location('start.php?'.$extraUrl);
+            }
+            
             $type = $form->getSubmitValue('type');
 
             switch ($type) {
@@ -951,10 +1000,32 @@ class ZoomPlugin extends Plugin
                     $host
                 );
 
-                Display::addFlash(
-                    Display::return_message($this->get_lang('NewMeetingCreated'))
-                );
+                if (!empty($newMeeting->getId())) {
+                    $meetingId = $newMeeting->getId();
+                    $agenda = new Agenda('course');
+                    $startTime = $form->getSubmitValue('startTime');
+                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                    $allDay = 'false';
+                    $userToSend = ['everyone'];
 
+                    $eventId = $agenda->addEvent(
+                        $startTime,
+                        $endTime,
+                        $allDay,
+                        $form->getSubmitValue('topic'),
+                        $form->getSubmitValue('agenda'),
+                        $userToSend
+                    );
+
+                    if ($eventId) {
+                        Database::update(
+                            Database::get_course_table(TABLE_AGENDA),
+                            ['zoom_meeting_id' => $meetingId],
+                            ['iid = ? ' => $eventId]
+                        );
+                    }
+                }
+                
                 if ($newMeeting->isCourseMeeting()) {
                     if ('RegisterAllCourseUsers' === $form->getSubmitValue('userRegistration')) {
                         $this->registerAllCourseUsers($newMeeting);
@@ -1005,6 +1076,31 @@ class ZoomPlugin extends Plugin
                                 $host
                             );
                             
+                            if (!empty($newMeetingRep->getId())) {
+                                $meetingId = $newMeetingRep->getId();
+                                $agenda = new Agenda('course');
+                                $endTime = date("Y-m-d H:i:s", strtotime($start.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                                $allDay = 'false';
+                                $userToSend = ['everyone'];
+                                
+                                $eventId = $agenda->addEvent(
+                                    $start,
+                                    $endTime,
+                                    $allDay,
+                                    $form->getSubmitValue('topic'),
+                                    $form->getSubmitValue('agenda'),
+                                    $userToSend
+                                );
+                                
+                                if ($eventId) {
+                                    Database::update(
+                                        Database::get_course_table(TABLE_AGENDA),
+                                        ['zoom_meeting_id' => $meetingId],
+                                        ['iid = ? ' => $eventId]
+                                    );
+                                }
+                            }
+                            
                             if ($newMeetingRep->isCourseMeeting()) {
                                 if ('RegisterAllCourseUsers' === $form->getSubmitValue('userRegistration')) {
                                     $this->registerAllCourseUsers($newMeetingRep);
@@ -1038,6 +1134,10 @@ class ZoomPlugin extends Plugin
                         api_location('start.php?'.$extraUrl);
                     }
                 } else {
+                    Display::addFlash(
+                        Display::return_message($this->get_lang('NewMeetingCreated'))
+                    );
+                    
                     api_location('meeting.php?meetingId='.$newMeeting->getMeetingId().'&'.$extraUrl);
                 }
             } catch (Exception $exception) {
@@ -1602,7 +1702,14 @@ class ZoomPlugin extends Plugin
 
         // Send create to Zoom.
         $meeting->setMeetingInfoGet($meeting->getMeetingInfoGet()->create());
-
+        
+        // Get start Time
+        if (!empty($meeting->getMeetingInfoGet()->start_time)) {
+            $startDateTime = new DateTime($meeting->getMeetingInfoGet()->start_time);
+            $startDateTime->setTimezone(new DateTimeZone(api_get_timezone()));
+            $meeting->setStartTime($startDateTime);
+        }
+        
         Database::getManager()->persist($meeting);
         Database::getManager()->flush();
 

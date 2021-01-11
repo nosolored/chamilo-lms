@@ -116,6 +116,13 @@ class Meeting
      */
     protected $host;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="start_time", type="datetime", nullable=false)
+     */
+    protected $startTime;
+
     /** @var MeetingListItem */
     protected $meetingListItem;
 
@@ -148,6 +155,7 @@ class Meeting
         $this->registrants = new ArrayCollection();
         $this->recordings = new ArrayCollection();
         $this->activities = new ArrayCollection();
+        $this->startTime = new \DateTime();
     }
 
     /**
@@ -202,6 +210,14 @@ class Meeting
         return $this->host;
     }
 
+    /**
+     * @return DateTime
+     */
+    public function getStartTime()
+    {
+        return $this->startTime;
+    }
+    
     /**
      * @return Course
      */
@@ -335,6 +351,16 @@ class Meeting
     public function setHost($host)
     {
         $this->host = $host;
+        
+        return $this;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function setStartTime($starTime)
+    {
+        $this->startTime = $starTime;
         
         return $this;
     }
@@ -634,6 +660,13 @@ class Meeting
             $this->startDateTime = new DateTime($this->meetingInfoGet->start_time);
             $this->startDateTime->setTimezone(new DateTimeZone(api_get_timezone()));
             $this->formattedStartTime = $this->startDateTime->format('Y-m-d H:i');
+        } else {
+            // Mostrar si almacenada en bbdd
+            if (!empty($this->startTime)) {
+                $this->startDateTime = $this->startTime;
+                $this->startDateTime->setTimezone(new DateTimeZone(api_get_timezone()));
+                $this->formattedStartTime = $this->startDateTime->format('Y-m-d H:i');
+            }
         }
 
         if (!empty($this->meetingInfoGet->duration)) {

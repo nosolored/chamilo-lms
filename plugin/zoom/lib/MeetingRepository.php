@@ -192,13 +192,15 @@ class MeetingRepository extends EntityRepository
     public function courseMeetings(Course $course, CGroupInfo $group = null, Session $session = null)
     {
         return $this->matching(
-            Criteria::create()->where(
+            Criteria::create()
+                ->where(
                     Criteria::expr()->andX(
-                 Criteria::expr()->eq('group', $group),
-                    Criteria::expr()->eq('course', $course),
-                    Criteria::expr()->eq('session', $session)
+                        Criteria::expr()->eq('group', $group),
+                        Criteria::expr()->eq('course', $course),
+                        Criteria::expr()->eq('session', $session)
+                    )
                 )
-            )
+                ->orderBy(array('startTime' => Criteria::ASC))
         );
     }
 }

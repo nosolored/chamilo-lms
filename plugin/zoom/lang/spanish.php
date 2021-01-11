@@ -141,3 +141,5 @@ $strings['AreYouSureToDeleteSelected'] = "¿Está seguro de querer eliminar las 
 $strings['DeleteSelected'] = "Eliminar seleccionados";
 $strings['NoMeetingSelected'] = "Ninguna conferencia seleccionada";
 $strings['DateNoValid'] = "La fecha debe ser posterior a la fecha actual";
+$strings['NewMeetingsCreated'] = "Nuevas conferencias creadas";
+$strings['DateEndNotValid'] = "Fecha de finalizar repeticiones no puede estar vacía";
