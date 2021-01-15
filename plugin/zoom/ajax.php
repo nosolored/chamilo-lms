@@ -12,7 +12,6 @@ api_protect_course_script(true);
  *
  * @package chamilo.plugin.zoom
  */
-
 if (api_is_anonymous()) {
     api_not_allowed(true);
 }
@@ -48,12 +47,12 @@ switch ($action) {
                         ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
                         'first'
                     );
-                    
+
                     if (!empty($eventData)) {
                         $agenda = new Agenda('course');
                         $agenda->deleteEvent($eventData['id']);
                     }
-                    
+
                     // No need to delete a instant meeting.
                     if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT != $meeting->getMeetingInfoGet()->type) {
                         $meeting->getMeetingInfoGet()->delete();
@@ -69,13 +68,9 @@ switch ($action) {
             );
 
             echo json_encode(["status" => "true"]);
-
         } catch (Exception $exception) {
             $this->handleException($exception);
         }
 
         break;
 }
-
-
-            
