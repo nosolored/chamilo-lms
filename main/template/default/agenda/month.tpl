@@ -552,7 +552,8 @@ $(function() {
 
 				$("#dialog-form").dialog({
 					buttons: {
-                        '{{ "ExportiCalConfidential"|get_lang }}' : function() {
+                        /*
+					    '{{ "ExportiCalConfidential"|get_lang }}' : function() {
                             url =  "{{ _p.web_main }}calendar/ical_export.php?id=" + calEvent.id+'&course_id='+calEvent.course_id+"&class=confidential";
                             window.location.href = url;
 						},
@@ -564,6 +565,15 @@ $(function() {
                             url =  "{{ _p.web_main }}calendar/ical_export.php?id=" + calEvent.id+'&course_id='+calEvent.course_id+"&class=public";
                             window.location.href = url;
 						},
+						*/
+						'{{ "GotoMeeting"|get_lang }}': function() {
+						    if (calEvent.zoom_meeting_url) {
+                                url =  calEvent.zoom_meeting_url;
+                                window.location.href = url;
+						    } else {
+						        alert('{{ "NoMeetingZoomEvent" | get_lang }}');
+						    }
+                        },
                         {% if type == 'not_available' %}
 						'{{ "Edit" | get_lang }}' : function() {
 							var bValid = true;
@@ -722,6 +732,7 @@ $(function() {
                 $("#simple-dialog-form").dialog("open");
                 $("#simple-dialog-form").dialog({
 					buttons: {
+					    /*
 						'{{"ExportiCalConfidential"|get_lang}}' : function() {
                             url =  "ical_export.php?id=" + calEvent.id+'&course_id='+calEvent.course_id+"&class=confidential";
                             window.location.href = url;
@@ -734,6 +745,15 @@ $(function() {
                             url =  "ical_export.php?id=" + calEvent.id+'&course_id='+calEvent.course_id+"&class=public";
                             window.location.href = url;
 						}
+                        */
+						'{{ "GotoMeeting"|get_lang }}': function() {
+                            if (calEvent.zoom_meeting_url) {
+                                url =  calEvent.zoom_meeting_url;
+                                window.location.href = url;
+                            } else {
+                                alert('{{ "NoMeetingZoomEvent" | get_lang }}');
+                            }
+                        },
 					}
 				});
             }

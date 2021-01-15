@@ -2062,6 +2062,20 @@ class Agenda
                 $event['parent_event_id'] = $row['parent_event_id'];
                 $event['has_children'] = $this->hasChildren($row['id'], $courseId) ? 1 : 0;
                 $event['comment'] = $row['comment'];
+                $event['zoom_meeting_url'] = '';
+                if ((int) $row['zoom_meeting_id'] > 0) {
+                    $meetingId = (int) $row['zoom_meeting_id'];
+                    $zoomInfo = Database::select(
+                        'meeting_id',
+                        'plugin_zoom_meeting',
+                        ['where' => ['id = ?' => [$meetingId]]],
+                        'first'
+                    );
+                    
+                    if (is_array($zoomInfo) && isset($zoomInfo['meeting_id'])) {
+                        $event['zoom_meeting_url'] = api_get_path(WEB_PLUGIN_PATH).'zoom/join_meeting.php?meetingId='.$zoomInfo['meeting_id'];
+                    }
+                }
                 $this->events[] = $event;
             }
         }
