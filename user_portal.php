@@ -83,6 +83,19 @@ if (array_key_exists('action', $_REQUEST)) {
     }
 }
 
+// Redirect to custom page for admin and session admin
+$viewAlternativeForAdmin = api_get_configuration_value('view_alternative_for_admin');
+if (api_is_platform_admin(true) && $viewAlternativeForAdmin) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+$viewAlternativeForStudent = api_get_configuration_value('view_alternative_for_student');
+if ($_user['status'] == STUDENT && $viewAlternativeForStudent) {
+    header('Location: dashboard_student.php');
+    exit;
+}
+
 /* Constants and CONFIGURATION parameters */
 $load_dirs = api_get_setting('show_documents_preview');
 $displayMyCourseViewBySessionLink = api_get_setting('my_courses_view_by_session') === 'true';

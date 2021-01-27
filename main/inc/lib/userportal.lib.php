@@ -1169,7 +1169,7 @@ class IndexManager
      *
      * @return string
      */
-    public function returnCoursesAndSessionsViewBySession($user_id)
+    public function returnCoursesAndSessionsViewBySession($user_id, $ignore_time = false)
     {
         $sessionCount = 0;
         $courseCount = 0;
@@ -1180,7 +1180,11 @@ class IndexManager
             $session_categories = UserManager::get_sessions_by_category($user_id, true);
         } else {
             // Load sessions in category
-            $session_categories = UserManager::get_sessions_by_category($user_id, false);
+            if ($ignore_time) {
+                $session_categories = UserManager::get_sessions_by_category($user_id, false, true, true);
+            } else {
+                $session_categories = UserManager::get_sessions_by_category($user_id, false);
+            }
         }
 
         $html = '';
