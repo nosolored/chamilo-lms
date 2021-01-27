@@ -1,12 +1,7 @@
 <?php
 
 use Chamilo\CoreBundle\Entity\Course;
-use Chamilo\CoreBundle\Entity\Repository\SequenceResourceRepository;
-use Chamilo\CoreBundle\Entity\Repository\SessionRepository;
-use Chamilo\CoreBundle\Entity\SequenceResource;
 use Chamilo\CoreBundle\Entity\Session;
-use Chamilo\CoreBundle\Entity\SessionRelCourseRelUser;
-use Chamilo\CoreBundle\Entity\SessionRelCourse;
 
 $cidReset = true;
 require_once 'main/inc/global.inc.php';
@@ -55,7 +50,6 @@ $htmlHeadXtra[] = '
             font-weight: bold;
         }
     </style>';
-
 
 $htmlHeadXtra[] = '<script>
     $(function() {
@@ -180,7 +174,6 @@ $listActivos = [];
 $listFuturos = [];
 $listPasados = [];
 
-
 foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
     foreach ($sessionCategory['sessions'] as $sessionItem) {
         $groupInfo = [
@@ -202,7 +195,7 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
             : null,
             'courses' => $sessionItem['courses'],
         ];
-        
+
         $sessionId = $groupInfo['id'];
         $accessStartDate = $groupInfo['access_start_date'];
         $accessEndDate = $groupInfo['access_end_date'];
@@ -212,12 +205,12 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
             $listFuturos[$sessionId] = $groupInfo;
             continue;
         }
-        
+
         if (!empty($accessEndDate) && strtotime(api_get_local_time($accessEndDate)) < time()) {
             $listPasados[$sessionId] = $groupInfo;
             continue;
         }
-        
+
         //$coachList = CourseManager::get_coachs_from_course_to_string($row['session_id'], $infoCourse['id']);
         //$groupInfo['coach'] = $coachList;
         $listActivos[$sessionId] = $groupInfo;
@@ -227,7 +220,7 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
 $iconSetting = Display::return_icon(
     'session.png',
     get_lang('Session'),
-    array(),
+    [],
     ICON_SIZE_MEDIUM
 );
 
@@ -249,63 +242,63 @@ foreach ($listActivos as $key => $value) {
     echo '<div class="session panel-body box-session-active">';
     echo '<div class="row">';
     echo '<div class="col-md-12">';
-        echo '<ul class="info-session list-inline" style="margin-bottom:0;">';
-          echo '<li>';
-            $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
-            echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
-          echo '</li>';
-        echo '</ul>';
-        echo '<div class="sessions-items">';
-          echo '<div style="height:40px; overflow: hidden;">';
-            echo '<h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">';
-              echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/index.php?session_id='.$sessionId.'">'.htmlspecialchars($value['name']).'</a>&nbsp;';
-            echo '</h4>';
-          echo '</div>';
-        
-        if (count($value['courses']) === 0) {
-            echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
-        } else {
-            echo '<table class="table" style="margin-bottom:0px">';
-            foreach ($value['courses'] as $course) {
-                $courseUrl = api_get_course_url($course['course_code'], $sessionId);
-                $courseId = $course['real_id'];
-            
-                echo '<tr>';
-                echo '<td>';
-                echo Display::url(
+    echo '<ul class="info-session list-inline" style="margin-bottom:0;">';
+    echo '<li>';
+    $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
+    echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
+    echo '</li>';
+    echo '</ul>';
+    echo '<div class="sessions-items">';
+    echo '<div style="height:40px; overflow: hidden;">';
+    echo '<h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">';
+    echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/index.php?session_id='.$sessionId.'">'.htmlspecialchars($value['name']).'</a>&nbsp;';
+    echo '</h4>';
+    echo '</div>';
+
+    if (count($value['courses']) === 0) {
+        echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
+    } else {
+        echo '<table class="table" style="margin-bottom:0px">';
+        foreach ($value['courses'] as $course) {
+            $courseUrl = api_get_course_url($course['course_code'], $sessionId);
+            $courseId = $course['real_id'];
+
+            echo '<tr>';
+            echo '<td>';
+            echo Display::url(
                     $course['title'],
                     $courseUrl
                 );
-                echo '</td>';
-                echo '<td class="text-right">';
-                
-                $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
-                if ($allowZoom) {
-                    echo Display::url(
+            echo '</td>';
+            echo '<td class="text-right">';
+
+            $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
+            if ($allowZoom) {
+                echo Display::url(
                         Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
                         $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course['course_code']
                     );
-                }
-                
-                $course_info = api_get_course_info_by_id($courseId);
-                
-                $course_info['id_session'] = $sessionId;
-                $course_info['status'] = $course['status'];
-                
-                // For each course, get if there is any notification icon to show
-                // (something that would have changed since the user's last visit).
-                $show_notification = !api_get_configuration_value('hide_course_notification')
+            }
+
+            $course_info = api_get_course_info_by_id($courseId);
+
+            $course_info['id_session'] = $sessionId;
+            $course_info['status'] = $course['status'];
+
+            // For each course, get if there is any notification icon to show
+            // (something that would have changed since the user's last visit).
+            $show_notification = !api_get_configuration_value('hide_course_notification')
                 ? Display::show_notification($course_info)
                 : '';
-                echo $show_notification;
-                
-                echo '</td>';
-                echo '</tr>';
-            } // foreach course
-            echo '</table>';
-        }
-        echo '</div>';
-   
+            echo $show_notification;
+
+            echo '</td>';
+            echo '</tr>';
+        } // foreach course
+        echo '</table>';
+    }
+    echo '</div>';
+
     echo '</div>';
     echo '</div>';
     echo '</div>';
@@ -322,8 +315,8 @@ $sessionId = 0;
     echo '<div class="col-md-12">';
 
     echo '<div class="sessions-items">';
-    
-    if (count($courseAndSessions['courses']) > 0) { 
+
+    if (count($courseAndSessions['courses']) > 0) {
         echo '<table class="table" style="margin-bottom:0px">';
         echo '<tr><th colspan="3">'.get_lang('Courses').'</th></tr>';
         foreach ($courseAndSessions['courses'] as $key => $courseItem) {
@@ -343,7 +336,7 @@ $sessionId = 0;
             );
             echo '</td>';
             echo '<td class="text-right" style="vertical-align: middle;">';
-            
+
             $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
             if ($allowZoom) {
                 echo Display::url(
@@ -351,27 +344,27 @@ $sessionId = 0;
                     $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$courseItem['code']
                 ).' ';
             }
-           
+
             $course_info = api_get_course_info_by_id($courseId);
-            
+
             $userInCourseStatus = CourseManager::getUserInCourseStatus($userId, $course_info['real_id']);
             $course_info['status'] = empty($sessionId) ? $userInCourseStatus : STUDENT;
             $course_info['id_session'] = $sessionId;
-            
+
             // For each course, get if there is any notification icon to show
             // (something that would have changed since the user's last visit).
             $show_notification = !api_get_configuration_value('hide_course_notification')
             ? Display::show_notification($course_info)
             : '';
             echo $show_notification;
-            
+
             echo '</td>';
             echo '</tr>';
         }
         echo '</table>';
     }
     echo '</div>';
-    
+
     echo '</div>';
     echo '</div>';
     echo '</div>';
@@ -405,7 +398,7 @@ foreach ($listFuturos as $key => $value) {
     echo '<a title="'.htmlspecialchars($value['name']).'" href="#">'.htmlspecialchars($value['name']).'</a>&nbsp;';
     echo '</h4>';
     echo '</div>';
-    
+
     if (count($value['courses']) === 0) {
         echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
     } else {
@@ -413,7 +406,7 @@ foreach ($listFuturos as $key => $value) {
         foreach ($value['courses'] as $course) {
             $courseUrl = "#"; // api_get_course_url($course['course_code'], $sessionId);
             $courseId = $course['real_id'];
-            
+
             echo '<tr>';
             echo '<td>';
             echo Display::url(
@@ -423,7 +416,7 @@ foreach ($listFuturos as $key => $value) {
             echo '</td>';
             /*
             echo '<td class="text-right">';
-            
+
             $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
             if ($allowZoom) {
                 echo Display::url(
@@ -431,21 +424,21 @@ foreach ($listFuturos as $key => $value) {
                     '#' //$pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course['course_code']
                 );
             }
-            
+
             $course_info = api_get_course_info_by_id($courseId);
-            
+
             $course_info['id_session'] = $sessionId;
             $course_info['status'] = $course['status'];
-            
+
             echo '</td>';
             */
             echo '</tr>';
         } // foreach course
         echo '</table>';
     }
-    
+
     echo '</div>';
-    
+
     echo '</div>';
     echo '</div>';
     echo '</div>';
@@ -465,7 +458,7 @@ if (count($listPasados) > 0) {
     foreach ($listPasados as $key => $value) {
         $sessionId = $key;
         $sessionInfo = api_get_session_info($sessionId);
-        
+
         if ($sessionInfo['visibility'] == SESSION_INVISIBLE) {
             continue;
         }
@@ -474,7 +467,7 @@ if (count($listPasados) > 0) {
         $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
         echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
         echo '</td>';
-        
+
         $tools = Display::url(
             $iconSetting,
             $codePath.'session/index.php?session_id='.$key
