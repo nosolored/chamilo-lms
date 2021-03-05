@@ -1661,7 +1661,10 @@ class Template
                 $nameTools
             );
         }
-        $this->assign('breadcrumb', $breadcrumb);
+        $disableBreadcrum = api_get_configuration_value('disable_breadcrum');
+        if (!$disableBreadcrum) {
+            $this->assign('breadcrumb', $breadcrumb);
+        }
 
         //Extra content
         $extra_header = null;

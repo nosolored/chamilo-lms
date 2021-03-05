@@ -129,12 +129,12 @@ echo '<div class="panel panel-default" style="margin-bottom:10px">';
 echo '<div class="session panel-body">';
 $icon = Display::return_icon(
     'course.png',
-    'Cursos',
+    get_lang('MyCourses'),
     array("style" => "margin-right:5px; vertical-align: text-bottom;"),
     ICON_SIZE_MEDIUM
 );
 $tools = Display::url(
-    $icon.' <span class="item-name">Cursos</span>',
+    $icon.' <span class="item-name">'.get_lang('MyCourses').'</span>',
     $codePath.'admin/course_list.php'
 );
 echo $tools;
@@ -147,14 +147,14 @@ echo '<div class="menu-item-gestor col-md-3 col-sm-4 col-xs-12">';
 echo '<div class="panel panel-default" style="margin-bottom:10px">';
 echo '<div class="session panel-body">';
 $icon = Display::return_icon(
-    'user.png',
-    'Estudiantes',
+    'session.png',
+    get_lang('Groups'),
     array("style" => "margin-right:5px; vertical-align: text-bottom;"),
     ICON_SIZE_MEDIUM
 );
 $tools = Display::url(
-    $icon.' <span class="item-name">Estudiantes</span>',
-    $codePath.'admin/user_list.php'
+    $icon.' <span class="item-name">'.get_lang('Groups').'</span>',
+    $codePath.'session/session_list.php'
 );
 echo $tools;
 echo '</div>';
@@ -166,15 +166,15 @@ echo '<div class="menu-item-gestor col-md-3 col-sm-4 col-xs-12">';
 echo '<div class="panel panel-default" style="margin-bottom:10px">';
 echo '<div class="session panel-body">';
 $icon = Display::return_icon(
-    'announce.png',
-    'Anuncios',
-    array("style" => "margin-right:5px; vertical-align: text-bottom;"),
-    ICON_SIZE_MEDIUM
-);
+        'announce.png',
+        get_lang('Announcements'),
+        array("style" => "margin-right:5px; vertical-align: text-bottom;"),
+        ICON_SIZE_MEDIUM
+        );
 $tools = Display::url(
-    $icon.' <span class="item-name">Anuncios</span>',
-    $codePath.'admin/system_announcements.php'
-);
+        $icon.' <span class="item-name">'.get_lang('Announcements').'</span>',
+        $codePath.'admin/system_announcements.php'
+        );
 echo $tools;
 echo '</div>';
 echo '</div>';
@@ -185,14 +185,14 @@ echo '<div class="menu-item-gestor col-md-3 col-sm-4 col-xs-12">';
 echo '<div class="panel panel-default" style="margin-bottom:10px">';
 echo '<div class="session panel-body">';
 $icon = Display::return_icon(
-    'zoom_meet.png',
-    'Videoconferencias',
+    'user.png',
+    get_lang('Students'),
     array("style" => "margin-right:5px; vertical-align: text-bottom;"),
     ICON_SIZE_MEDIUM
 );
 $tools = Display::url(
-    $icon.' <span class="item-name">Videoconferencia</span>',
-    $codePath.'admin/configure_plugin.php?name=zoom'
+    $icon.' <span class="item-name">'.get_lang('Students').'</span>',
+    $codePath.'admin/user_list.php?keyword_status=5&keyword_active=1&keyword_inactive=1&item_id=0'
 );
 echo $tools;
 echo '</div>';
@@ -272,7 +272,77 @@ foreach ($databaseSessions as $session) {
     $sessionId = $groupInfo['id'];
     $accessStartDate = $groupInfo['access_start_date'];
     $accessEndDate = $groupInfo['access_end_date'];
+    
+    $courseList = [];
+    // Crear un array con la información a mostrar en las tablas
+    if ($session->getNbrCourses() === 0) {
+        $imgPath = Display::return_icon(
+            'session_default_small.png',
+            null,
+            [],
+            ICON_SIZE_SMALL,
+            false,
+            true
+        );
+        $courseList[0]['imagePath'] = $imgPath;
+        $courseList[0]['existCourse'] = false;
+        $courseList[0]['courseTitle'] = get_lang('HaveNoCourse');
+        
+        $actions = Display::url(
+            Display::return_icon('settings.png', get_lang('Settings')),
+            $codePath.'session/resume_session.php?id_session='.$sessionId
+        );
+        $courseList[0]['actions'] = $actions;
+        
+    } else {
+        $courses = $sessionRepository->getCoursesOrderedByPosition($session);
+        
+        foreach ($courses as $course) {
+            $courseId = $course->getId();
+            $courseList[$courseId]['imagePath'] = CourseManager::getPicturePath($course);
+            $courseList[$courseId]['existCourse'] = true;
+            $courseList[$courseId]['courseTitle'] = $course->getTitle();
+            $courseList[$courseId]['students'] = SessionManager::getCountUsersInCourseSession($course, $session);
 
+            $namesOfCoaches = [];
+            $coachSubscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
+            
+            if ($coachSubscriptions) {
+                /** @var SessionRelCourseRelUser $subscription */
+                foreach ($coachSubscriptions as $subscription) {
+                    $namesOfCoaches[] = $subscription->getUser()->getCompleteNameWithUserName();
+                }
+            }
+            $courseList[$courseId]['coach'] = ($namesOfCoaches ? implode('<br>', $namesOfCoaches) : 'Sin tutores');
+            $actions = '';
+            $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
+            if ($allowZoom) {
+                $actions .= Display::url(
+                    Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
+                    $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
+                );
+            }
+            // announcement icon
+            $actions .= Display::url(
+                Display::return_icon('valves.gif', get_lang('announcement')),
+                $codePath."announcements/announcements.php?cidReq={$course->getCode()}&id_session=$sessionId"
+            );
+            // calendar icon
+            $actions .= Display::url(
+                Display::return_icon('agenda.gif', get_lang('calendar_event')),
+                $codePath."calendar/agenda.php?cidReq={$course->getCode()}&id_session=$sessionId"
+            );
+            // User icon
+            $actions .= Display::url(
+                Display::return_icon('members.gif', get_lang('user')),
+                $codePath."user/user.php?cidReq={$course->getCode()}&id_session=$sessionId"
+            );
+            $courseList[$courseId]['actions'] = $actions;
+        }
+    }
+    $groupInfo['courses'] = $courseList;
+
+    // Determinar en que pestaña irá (Activos, futuros o pasados)
     if (!empty($accessStartDate) && strtotime($accessStartDate) > time()) {
         // futuro curso
         $listFuturos[$sessionId] = $groupInfo;
@@ -296,9 +366,13 @@ $iconSetting = Display::return_icon(
     ICON_SIZE_MEDIUM
 );
 
-echo '<li><a href="#tabs-1">Cursos activos</a></li>';
-echo '<li><a href="#tabs-2">Cursos futuros</a></li>';
-echo '<li><a href="#tabs-3">Cursos finalizados</a></li>';
+echo '<li><a href="#tabs-1">'.get_lang('ActiveGroups').'</a></li>';
+if (!empty($listFuturos)) {
+    echo '<li><a href="#tabs-2">'.get_lang('FutureGroups').'</a></li>';
+}
+if (!empty($listPasados)) {
+    echo '<li><a href="#tabs-3">'.get_lang('GroupsCompleted').'</a></li>';
+}
 echo '</ul>';
 
 echo '<div id="tabs-1">';
@@ -306,97 +380,80 @@ if (empty($listActivos)) {
     echo Display::return_message("No hay curso activos", 'warning', true);
 }
 echo '<div class="row">';
-foreach ($listActivos as $key => $value) {
-    $sessionId = $key;
-    $sessionInfo = api_get_session_info($sessionId);
-    echo '<div class="col-md-12 col-lg-6">';
-    echo '<div class="panel panel-default">';
-    echo '<div class="session panel-body ">';
-    echo '<div class="row">';
-    echo '<div class="col-md-12 box-session-active">';
-        echo '<ul class="info-session list-inline" style="margin-bottom:0;">';
-          echo '<li>';
-            $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
-            echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
-          echo '</li>';
-        echo '</ul>';
-        echo '<div class="sessions-items">';
-          echo '<div style="height:40px; overflow: hidden;">';
-            echo '<h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">';
-              echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">'.htmlspecialchars($value['name']).'</a>&nbsp;';
-            echo '</h4>';
-          echo '</div>';
 
-        /** @var Session $session */
-        $session = $sessionRepository->find($sessionId);
+echo '<div class="col-md-12">';
+
+if (count($listActivos) > 0) {
+    echo '<table class="table data_table">';
+
+    foreach ($listActivos as $key => $value) {
+        $sessionId = $key;
+        $sessionInfo = api_get_session_info($sessionId);
         
-        if ($session->getNbrCourses() === 0) {
-            echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
-        } else {
-            echo '<table class="table" style="margin-bottom:0px">';
-            $courses = $sessionRepository->getCoursesOrderedByPosition($session);
+        foreach ($value['courses'] as $courseItem) {
+            echo '<tr>';
+            // Course image
+            echo '<td>';
+            echo '<img src="'.$courseItem['imagePath'].'" />';
+            echo '</td>';
             
-            /** @var Course $course */
-            foreach ($courses as $course) {
-                $courseUrl = api_get_course_url($course->getCode(), $sessionId);
+            // Session name and course title
+            echo '<td>';
+            echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">';
+            echo '<span style="font-weight: bold; font-size: 16px;">'.htmlspecialchars($value['name']).'</span>';
+            echo '</a>';
+            echo '<br><span style="font-style: italic; font-size: 14px;">'.htmlspecialchars($courseItem['courseTitle']).'</span>';
+            if (!empty($value['session_category_id'])) {
+                echo '<span class="btn btn-primary btn-xs pull-right">';
+                echo $orderedCategories[$value['session_category_id']];
+                echo '</span>';
+            }
+            echo '</td>';
             
-                echo '<tr>';
-                echo '<td>';
-                echo Display::url(
-                    $course->getTitle(), //.' ('.$course->getVisualCode().')',
-                    $courseUrl
-                );
-                echo '</td>';
-                echo '<td class="text-right">';
-                
-                $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
-                if ($allowZoom) {
-                    echo Display::url(
-                        Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
-                        $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
-                    );
+            // Dates
+            echo '<td style="font-size:14px; ">';
+            $newDates = SessionManager::convert_dates_to_local($sessionInfo, false);
+            echo date("d/m/Y", strtotime($newDates['access_start_date'])).'<br>';
+            if (!empty($newDates['access_end_date'])) {
+                echo date("d/m/Y", strtotime($newDates['access_end_date']));
+            }
+            echo '</td>';
+            
+            if ($courseItem['existCourse']) {
+                // Student
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                if ($courseItem['students'] > 0) {
+                    echo '<span style="font-size:18px;">'.$courseItem['students'].'</span><br>matrículas activas';
+                } else {
+                    echo 'Sin alumnos matrículados';
                 }
-                // announcement icon
-                echo Display::url(
-                    Display::return_icon('valves.gif', get_lang('announcement')),
-                    $codePath."announcements/announcements.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                );
-                // calendar icon
-                echo Display::url(
-                    Display::return_icon('agenda.gif', get_lang('calendar_event')),
-                    $codePath."calendar/agenda.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                );
-                // User icon
-                echo Display::url(
-                    Display::return_icon('members.gif', get_lang('user')),
-                    $codePath."user/user.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                );
-                
                 echo '</td>';
-                echo '</tr>';
-            } // foreach course
-            echo '</table>';
+                
+                // Coach
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                echo $courseItem['coach'];
+                echo '</td>';
+            } else {
+                echo '<td colspan="2">';
+                echo '<div class="alert alert-warning" style="margin-bottom:0px">'.get_lang('NoCoursesForThisSession').'</div>';
+                echo '</td>';
+            }
+            
+            // Acciones
+            echo '<td class="text-right" style="vertical-align:middle">';
+            echo $courseItem['actions'];
+            echo '</td>';
+            
+            echo '</tr>';
         }
-        echo '</div>';
-        
-        
-        if (!empty($value['session_category_id'])) {
-            echo '<div class="cat-session-activos">';
-            echo '<span class="btn btn-primary btn-xs">';
-            echo $orderedCategories[$value['session_category_id']];
-            echo '</span>';
-            echo '</div>';
-        }
-        echo '</div>';
-        echo '</div>';
+    }
+    echo '</table>';
     
-    echo '</div>';
-    echo '</div>';
-    echo '</div>';
 }
-
+echo '</div>';
+/*
 if (api_is_platform_admin()) {
-    /** @var CourseRepository $courseRepository */
+  
     $courseRepository = $em->getRepository('ChamiloCoreBundle:Course');
     $databaseCourses = $courseRepository->findAll();
     $sessionId = 0;
@@ -411,7 +468,7 @@ if (api_is_platform_admin()) {
     
     echo '<table class="table" style="margin-bottom:0px">';
     echo '<tr><th colspan="3">'.get_lang('Courses').'</th></tr>';
-    /** @var Course $course */
+    
     foreach ($databaseCourses as $course) {
         $courseUrl = api_get_course_url($course->getCode(), $sessionId);
         
@@ -476,116 +533,241 @@ if (api_is_platform_admin()) {
     echo '</div>';
     echo '</div>'; // courses section
 }
-
+*/
 echo '</div>';
 echo '</div>';
-echo '<div id="tabs-2">';
-if (empty($listFuturos)) {
-    echo Display::return_message("No hay curso futuros", 'warning', true);
-}
-echo '<div class="row">';
-foreach ($listFuturos as $key => $value) {
-    $sessionId = $key;
-    $sessionInfo = api_get_session_info($sessionId);
-    echo '<div class="col-md-12 col-lg-6">';
-    echo '<div class="panel panel-default">';
-    echo '<div class="session panel-body ">';
+if (!empty($listFuturos)) {
+    echo '<div id="tabs-2">';
     echo '<div class="row">';
-    echo '<div class="col-md-12 box-session-future">';
-    echo '<ul class="info-session list-inline" style="margin-bottom:0;">';
-    echo '<li>';
-    $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
-    echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
-    echo '</li>';
-    echo '</ul>';
-    echo '<div class="sessions-items">';
-    echo '<div style="height:40px; overflow: hidden;">';
-    echo '<h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">';
-    echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">'.htmlspecialchars($value['name']).'</a>&nbsp;';
-    echo '</h4>';
-    echo '</div>';
-    
-    /** @var Session $session */
-    $session = $sessionRepository->find($sessionId);
-    
-    if ($session->getNbrCourses() === 0) {
-        echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
-    } else {
-        echo '<table class="table" style="margin-bottom:0px">';
-        $courses = $sessionRepository->getCoursesOrderedByPosition($session);
-        
-        /** @var Course $course */
-        foreach ($courses as $course) {
-            $courseUrl = api_get_course_url($course->getCode(), $sessionId);
-            
-            echo '<tr>';
-            echo '<td>';
-            echo Display::url(
-                    $course->getTitle(),
-                    $courseUrl
-                    );
-            echo '</td>';
-            echo '<td class="text-right">';
-            
-            $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
-            if ($allowZoom) {
-                echo Display::url(
-                        Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
-                        $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
-                        );
-            }
-            // announcement icon
-            echo Display::url(
-                    Display::return_icon('valves.gif', get_lang('announcement')),
-                    $codePath."announcements/announcements.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                    );
-            // calendar icon
-            echo Display::url(
-                    Display::return_icon('agenda.gif', get_lang('calendar_event')),
-                    $codePath."calendar/agenda.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                    );
-            // User icon
-            echo Display::url(
-                    Display::return_icon('members.gif', get_lang('user')),
-                    $codePath."user/user.php?cidReq={$course->getCode()}&id_session=$sessionId"
-                    );
-            
-            echo '</td>';
-            echo '</tr>';
-        } // foreach course
-        echo '</table>';
-    }
-    echo '</div>';
-    
-   
-    
-    if (!empty($value['session_category_id'])) {
-        echo '<div class="cat-session-futuros">';
-        echo '<span class="btn btn-primary btn-xs">';
-        echo $orderedCategories[$value['session_category_id']];
-        echo '</span>';
-        echo '</div>';
-    }
-    echo '</div>';
-    echo '</div>';
-    
-    echo '</div>';
-    echo '</div>';
-    echo '</div>';
-}
-echo '</div>';
-echo '</div>';
-echo '<div id="tabs-3">';
-if (empty($listPasados)) {
-    echo Display::return_message("No hay curso finalizados", 'warning', true);
-}
-echo '<div class="row">';
-if (count($listPasados) > 0) {
+    echo '<div class="col-md-12">';
+
     echo '<table class="data_table table">';
-    echo '<tr><th>Curso</th><th>Opciones</th></tr>';
+    foreach ($listFuturos as $key => $value) {
+        $sessionId = $key;
+        $sessionInfo = api_get_session_info($sessionId);
+        
+        foreach ($value['courses'] as $courseItem) {
+            echo '<tr>';
+            // Course image
+            echo '<td>';
+            echo '<img src="'.$courseItem['imagePath'].'" />';
+            echo '</td>';
+            
+            // Session name and course title
+            echo '<td>';
+            echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">';
+            echo '<span style="font-weight: bold; font-size: 16px;">'.htmlspecialchars($value['name']).'</span>';
+            echo '</a>';
+            echo '<br><span style="font-style: italic; font-size: 14px;">'.htmlspecialchars($courseItem['courseTitle']).'</span>';
+            if (!empty($value['session_category_id'])) {
+                echo '<span class="btn btn-primary btn-xs pull-right">';
+                echo $orderedCategories[$value['session_category_id']];
+                echo '</span>';
+            }
+            echo '</td>';
+            
+            // Dates
+            echo '<td style="font-size:14px; ">';
+            $newDates = SessionManager::convert_dates_to_local($sessionInfo, false);
+            echo date("d/m/Y", strtotime($newDates['access_start_date'])).'<br>';
+            if (!empty($newDates['access_end_date'])) {
+                echo date("d/m/Y", strtotime($newDates['access_end_date']));
+            }
+            echo '</td>';
+            
+            if ($courseItem['existCourse']) {
+                // Student
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                if ($courseItem['students'] > 0) {
+                    echo '<span style="font-size:18px;">'.$courseItem['students'].'</span><br>matrículas activas';
+                } else {
+                    echo 'Sin alumnos matrículados';
+                }
+                echo '</td>';
+                
+                // Coach
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                echo $courseItem['coach'];
+                echo '</td>';
+            } else {
+                echo '<td colspan="2">';
+                echo '<div class="alert alert-warning" style="margin-bottom:0px">'.get_lang('NoCoursesForThisSession').'</div>';
+                echo '</td>';
+            }
+            
+            // Acciones
+            echo '<td class="text-right" style="vertical-align:middle">';
+            echo $courseItem['actions'];
+            echo '</td>';
+            
+            echo '</tr>';
+        }
+    
+        /*
+        $sessionId = $key;
+        $sessionInfo = api_get_session_info($sessionId);
+        echo '<div class="col-md-12 col-lg-6">';
+        echo '<div class="panel panel-default">';
+        echo '<div class="session panel-body ">';
+        echo '<div class="row">';
+        echo '<div class="col-md-12 box-session-future">';
+        echo '<ul class="info-session list-inline" style="margin-bottom:0;">';
+        echo '<li>';
+        $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
+        echo '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
+        echo '</li>';
+        echo '</ul>';
+        echo '<div class="sessions-items">';
+        echo '<div style="height:40px; overflow: hidden;">';
+        echo '<h4 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">';
+        echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">'.htmlspecialchars($value['name']).'</a>&nbsp;';
+        echo '</h4>';
+        echo '</div>';
+        
+        
+        $session = $sessionRepository->find($sessionId);
+        
+        if ($session->getNbrCourses() === 0) {
+            echo '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
+        } else {
+            echo '<table class="table" style="margin-bottom:0px">';
+            $courses = $sessionRepository->getCoursesOrderedByPosition($session);
+            
+           
+            foreach ($courses as $course) {
+                $courseUrl = api_get_course_url($course->getCode(), $sessionId);
+                
+                echo '<tr>';
+                echo '<td>';
+                echo Display::url(
+                        $course->getTitle(),
+                        $courseUrl
+                        );
+                echo '</td>';
+                echo '<td class="text-right">';
+                
+                $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
+                if ($allowZoom) {
+                    echo Display::url(
+                            Display::return_icon('zoom_meet.png', 'Videoconferencia Zoom'),
+                            $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$course->getCode()
+                            );
+                }
+                // announcement icon
+                echo Display::url(
+                        Display::return_icon('valves.gif', get_lang('announcement')),
+                        $codePath."announcements/announcements.php?cidReq={$course->getCode()}&id_session=$sessionId"
+                        );
+                // calendar icon
+                echo Display::url(
+                        Display::return_icon('agenda.gif', get_lang('calendar_event')),
+                        $codePath."calendar/agenda.php?cidReq={$course->getCode()}&id_session=$sessionId"
+                        );
+                // User icon
+                echo Display::url(
+                        Display::return_icon('members.gif', get_lang('user')),
+                        $codePath."user/user.php?cidReq={$course->getCode()}&id_session=$sessionId"
+                        );
+                
+                echo '</td>';
+                echo '</tr>';
+            } // foreach course
+            echo '</table>';
+        }
+        echo '</div>';
+        
+       
+        
+        if (!empty($value['session_category_id'])) {
+            echo '<div class="cat-session-futuros">';
+            echo '<span class="btn btn-primary btn-xs">';
+            echo $orderedCategories[$value['session_category_id']];
+            echo '</span>';
+            echo '</div>';
+        }
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        */
+    }
+    echo '</table>';
+   
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+}
+
+if (!empty($listPasados)) {
+    echo '<div id="tabs-3">';
+    echo '<div class="row">';
+    echo '<div class="col-md-12">';
+    
+    echo '<table class="data_table table">';
     foreach ($listPasados as $key => $value) {
         $sessionId = $key;
         $sessionInfo = api_get_session_info($sessionId);
+        
+        
+        foreach ($value['courses'] as $courseItem) {
+            echo '<tr>';
+            // Course image
+            echo '<td>';
+            echo '<img src="'.$courseItem['imagePath'].'" />';
+            echo '</td>';
+            
+            // Session name and course title
+            echo '<td>';
+            echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">';
+            echo '<span style="font-weight: bold; font-size: 16px;">'.htmlspecialchars($value['name']).'</span>';
+            echo '</a>';
+            echo '<br><span style="font-style: italic; font-size: 14px;">'.htmlspecialchars($courseItem['courseTitle']).'</span>';
+            if (!empty($value['session_category_id'])) {
+                echo '<span class="btn btn-primary btn-xs pull-right">';
+                echo $orderedCategories[$value['session_category_id']];
+                echo '</span>';
+            }
+            echo '</td>';
+            
+            // Dates
+            echo '<td style="font-size:14px; ">';
+            $newDates = SessionManager::convert_dates_to_local($sessionInfo, false);
+            echo date("d/m/Y", strtotime($newDates['access_start_date'])).'<br>';
+            if (!empty($newDates['access_end_date'])) {
+                echo date("d/m/Y", strtotime($newDates['access_end_date']));
+            }
+            echo '</td>';
+            
+            if ($courseItem['existCourse']) {
+                // Student
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                if ($courseItem['students'] > 0) {
+                    echo '<span style="font-size:18px;">'.$courseItem['students'].'</span><br>matrículas activas';
+                } else {
+                    echo 'Sin alumnos matrículados';
+                }
+                echo '</td>';
+                
+                // Coach
+                echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+                echo $courseItem['coach'];
+                echo '</td>';
+            } else {
+                echo '<td colspan="2">';
+                echo '<div class="alert alert-warning" style="margin-bottom:0px">'.get_lang('NoCoursesForThisSession').'</div>';
+                echo '</td>';
+            }
+            
+            // Acciones
+            echo '<td class="text-right" style="vertical-align:middle">';
+            echo $courseItem['actions'];
+            echo '</td>';
+            
+            echo '</tr>';
+        }
+        /*
         echo '<tr>';
         echo '<td><h4><a href="'.$codePath.'session/resume_session.php?id_session='.$sessionId.'">'.htmlspecialchars($value['name']).'</a></h4>';
         $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
@@ -600,12 +782,14 @@ if (count($listPasados) > 0) {
         echo $tools;
         echo '</td>';
         echo '</tr>';
+        */
     }
     echo '</table>';
-}
-echo '</div>';
-echo '</div>';
 
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+}
 echo '</div>';
 echo '</div>';
 Display::display_footer();

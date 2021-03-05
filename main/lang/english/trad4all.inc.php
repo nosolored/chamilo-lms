@@ -8720,4 +8720,8 @@ $ShowScoreEveryAttemptShowAnswersLastAttemptNoFeedback = "Show the result to the
 $AddGradebookComment = "Comment";
 $LatestLoginInAnyCourse = "Latest login in a course";
 $The = "The";
+$StartMenu = "Start";
+$ActiveGroups = "Active groups";
+$FutureGroups = "Future groups";
+$GroupsCompleted = "Groups completed";
 ?>

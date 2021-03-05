@@ -8750,4 +8750,8 @@ $LatestLoginInAnyCourse = "Último acceso en un curso";
 $The = "El";
 $GotoMeeting = "Ir a conferencia programada";
 $NoMeetingZoomEvent = "El evento programado no está asociado a una conferencia de Zoom";
+$StartMenu = "Inicio";
+$ActiveGroups = "Grupos activos";
+$FutureGroups = "Grupos futuros";
+$GroupsCompleted = "Grupos finalizados";
 ?>

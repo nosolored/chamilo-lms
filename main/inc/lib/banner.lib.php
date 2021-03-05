@@ -49,6 +49,10 @@ function get_tabs($courseId = null)
         $navigation['mycourses']['url'] = api_get_path(WEB_PATH).'user_portal.php';
     }
     $navigation['mycourses']['title'] = get_lang('MyCourses');
+    $alternativeStartMenu = api_get_configuration_value('alternative_start_menu');
+    if ($alternativeStartMenu) {
+        $navigation['mycourses']['title'] = get_lang('StartMenu');
+    }
     $navigation['mycourses']['key'] = 'my-course';
     $navigation['mycourses']['icon'] = 'my-course.png';
 
