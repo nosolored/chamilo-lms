@@ -630,6 +630,19 @@ class Meeting
     }
 
     /**
+     * Check checkPassStartDateTime
+     *
+     * @return bool
+     */
+    public function checkPassStartDateTime()
+    {
+        $today = new DateTime("midnight");
+        $today->setTimezone(new DateTimeZone(api_get_timezone()));
+        
+        return $this->startDateTime > $today;
+    }
+    
+    /**
      * @throws Exception on unexpected start_time or duration
      */
     private function initializeDisplayableProperties()

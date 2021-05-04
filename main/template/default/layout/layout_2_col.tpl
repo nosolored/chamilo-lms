@@ -77,6 +77,15 @@
                 {% include 'layout/login_form.tpl'|get_template %}
 
                 {% if not sidebar_hide %}
+                    {% if social_avatar_block %}
+                        {{ social_avatar_block }}
+                    {% endif %}
+
+                    {% if social_menu_block %}
+                        <div class="social-network-menu">
+                        {{ social_menu_block }}
+                        </div>
+                    {% endif %}
 
                     {% if _u.logged  == 1 %}
                         {{ user_image_block }}

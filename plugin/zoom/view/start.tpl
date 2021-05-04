@@ -19,7 +19,9 @@
     </style>
     <table class="table">
         <tr>
-            <th>&nbsp;</th>
+            {% if is_manager %}
+                <th>&nbsp;</th>
+            {% endif %}
             <th>{{ 'Topic'|get_plugin_lang('ZoomPlugin') }}</th>
             <th>{{ 'Agenda'|get_plugin_lang('ZoomPlugin') }}</th>
             <th>{{ 'StartTime'|get_lang }}</th>
@@ -28,9 +30,15 @@
         </tr>
         {% for meeting in meetings %}
         <tr>
-            <td>
-                <input type="checkbox" class="chk-meeting-item" name="slt-meeting" value="{{ meeting.meetingId }}" />
-            </td>
+            {% if is_manager %}
+                <td>
+                    <input type="checkbox"
+                        class="chk-meeting-item"
+                        name="slt-meeting"
+                        value="{{ meeting.meetingId }}"
+                    />
+                </td>
+            {% endif %}
             <td>
                 {{ meeting.meetingInfoGet.topic }}
             </td>
@@ -60,9 +68,13 @@
         </tr>
         {% endfor %}
     </table>
+    {% if is_manager %}
     <div>
         <a href="delete-meeting.php" class="btn btn-danger" id="delete-selected">
             {{ 'DeleteSelected'| get_plugin_lang('ZoomPlugin') }}
         </a>
     </div>
+    {% endif %}
+{% else %}    
+    <div class="alert alert-warning">Sin salas creadas</div>
 {% endif %}

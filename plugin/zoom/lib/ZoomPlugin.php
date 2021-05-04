@@ -349,6 +349,11 @@ class ZoomPlugin extends Plugin
                 Database::getManager()->persist($meeting);
                 Database::getManager()->flush();
                 
+                // Update star_time in plugin_zoom_meeting
+                $startTime = $meetingInfoGet->start_time;
+                $sql = "UPDATE plugin_zoom_meeting SET start_time='".$startTime."'WHERE id=".$meeting->getId();
+                Database::query($sql);
+                
                 // Update calendar event
                 $eventData = Database::select(
                     '*',

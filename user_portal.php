@@ -43,6 +43,7 @@ $logInfo = [
 Event::registerLog($logInfo);
 
 $userId = api_get_user_id();
+$pluginPath = api_get_path(WEB_PLUGIN_PATH);
 
 if (array_key_exists('action', $_REQUEST)) {
     switch ($_REQUEST['action']) {
@@ -91,8 +92,14 @@ if (api_is_platform_admin(true) && $viewAlternativeForAdmin) {
 }
 
 $viewAlternativeForStudent = api_get_configuration_value('view_alternative_for_student');
-if ($_user['status'] == STUDENT && $viewAlternativeForStudent) {
+if (api_is_student() && $viewAlternativeForStudent) {
     header('Location: dashboard_student.php');
+    exit;
+}
+
+$viewAlternativeForTeacher = api_get_configuration_value('view_alternative_for_teacher');
+if (api_is_teacher() && $viewAlternativeForTeacher) {
+    header('Location: dashboard_teacher.php');
     exit;
 }
 
@@ -205,6 +212,8 @@ if (!$myCourseListAsCategory) {
         IndexManager::setDefaultMyCourseView(IndexManager::VIEW_BY_DEFAULT, $userId);
     }
 
+    
+    
     // if teacher, session coach or admin, display the button to change te course view
     if ($displayMyCourseViewBySessionLink &&
         (
@@ -303,6 +312,89 @@ if (empty($courseAndSessions['html']) && !isset($_GET['history'])) {
     );
 }
 
+// Lista de videoconferencias de zoom
+$zoomHtml = '<div class="alert alert-warning">Sin salas de videoconferencia próximas</div>';
+$zoomMeetingList = $zoomMeetingDate = [];
+$now = strtotime(date("Y-m-d"));
+
+foreach ($courseAndSessions['sessions'] as $catSession) {
+    foreach ($catSession['sessions'] as $sessionItem) {
+        $sessionItemId = $sessionItem['session_id'];
+        foreach ($sessionItem['courses'] as $courseItem) {
+            $courseItemCode = $courseItem['course_code'];
+            $courseItemVisibilty = $courseItem['visibility'];
+            if ($courseItemVisibilty == COURSE_VISIBILITY_HIDDEN) {
+                continue;
+            }
+            
+            $courseInfo = api_get_course_info($courseItemCode);
+            $courseId = $courseInfo['real_id'];
+            
+            $sql = "SELECT * FROM plugin_zoom_meeting WHERE course_id=$courseId AND session_id=$sessionItemId";
+            $res = Database::query($sql);
+            while ($row = Database::fetch_assoc($res)) {
+                if ($now > strtotime($row['start_time'])) {
+                    continue;
+                }
+                $zoomMeetingDate[] = strtotime($row['start_time']);
+                $zoomMeetingList[] = $row['meeting_id'];
+            }
+        }
+    }
+}
+
+array_multisort($zoomMeetingDate, $zoomMeetingList);
+
+if (!empty($zoomMeetingList)) {
+    $pluginZoom = ZoomPlugin::create();
+    $zoomHtml = '<div class="panel panel-default">';
+    $zoomHtml .= '<div class="panel-heading"><h4>Próximas videoconferencias</h4></div>';
+    $zoomHtml .= '<div class="panel-body">';
+    $zoomHtml .= '<table class="table">';
+    $zoomHtml .= '<tr>';
+    $zoomHtml .= '<th>'.$pluginZoom->get_lang('Course').'</th>';
+    $zoomHtml .= '<th>'.$pluginZoom->get_lang('Topic').'</th>';
+    $zoomHtml .= '<th>'.$pluginZoom->get_lang('StartTime').'</th>';
+    //$zoomHtml .= '<th>'.$pluginZoom->get_lang('Duration').'</th>';
+    $zoomHtml .= '<th>'.$pluginZoom->get_lang('Actions').'</th>';
+    $zoomHtml .= '</tr>';
+    
+    $em = Database::getManager();
+    $i = 0;
+    $limRow = api_get_configuration_value('limit_row_meeting') ? api_get_configuration_value('limit_row_meeting') : 10;
+    foreach ($zoomMeetingList as $meetingItemId) {
+        if ($i >= $limRow) {
+            break;
+        }
+        $meeting = $pluginZoom->getMeetingRepository()->findOneBy(['meetingId' => $meetingItemId]);
+        $meetingInfoGet = $meeting->getMeetingInfoGet();
+        $infoCourse = api_get_course_info_by_id($meeting->getCourse());
+        $zoomHtml .= '<tr>';
+        $zoomHtml .= '<td>'.$infoCourse['title'].'</td>';
+        $min = $meetingInfoGet->duration > 0 ? ' ('.$meetingInfoGet->duration.' min)' : '';
+        $zoomHtml .= '<td>'.$meetingInfoGet->topic.$min.'</td>';
+        $zoomHtml .= '<td>'.$meeting->startDateTime->format('Y-m-d H:i').'</td>';
+        //$zoomHtml .= '<td>'.$meetingInfoGet->duration.'</td>';
+        
+        $zoomHtml .= '<td>';
+        if (!$meeting->checkStartDateTime()) {
+            $zoomHtml .= 'No disponible';
+        } else {
+            $zoomHtml .= '<a class="btn btn-primary btn-xs" href="'.$pluginPath.'zoom/join_meeting.php?meetingId='.$meetingItemId.'&cidReq='.$infoCourse['code'].'&id_session='.$meeting->getSession()->getId().'">';
+            $zoomHtml .= $pluginZoom->get_lang('Join');
+            $zoomHtml .= '</a>';
+        }
+        $zoomHtml .= '</td>';
+        
+        $zoomHtml .= '</tr>';
+    }
+    $zoomHtml .= '</table>';
+    $zoomHtml .= '</div>';
+    $zoomHtml .= '</div>';
+}
+
+$courseAndSessions['html'] .= $zoomHtml;
+
 $controller->tpl->assign('content', $courseAndSessions['html']);
 
 // Display the Site Use Cookie Warning Validation
@@ -335,8 +427,14 @@ if (!empty($some_activex) || !empty($some_plugins)) {
     }
 }
 
-$controller->tpl->assign('profile_block', $controller->return_profile_block());
-$controller->tpl->assign('user_image_block', $controller->return_user_image_block());
+SocialManager::setSocialUserBlock($controller->tpl, $userId, 'home');
+
+// Block Menu
+$menu = SocialManager::show_social_menu('home');
+$controller->tpl->assign('social_menu_block',$menu);
+
+//$controller->tpl->assign('profile_block', $controller->return_profile_block());
+//$controller->tpl->assign('user_image_block', $controller->return_user_image_block());
 $controller->tpl->assign('course_block', $controller->return_course_block());
 $controller->tpl->assign('navigation_course_links', $controller->return_navigation_links());
 $controller->tpl->assign('search_block', $controller->return_search_block());

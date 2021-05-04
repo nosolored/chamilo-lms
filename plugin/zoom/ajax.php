@@ -71,7 +71,13 @@ switch ($action) {
             echo json_encode(["status" => "true"]);
 
         } catch (Exception $exception) {
-            $this->handleException($exception);
+            error_log(print_r($exception,1));
+            Display::addFlash(
+                Display::return_message("Error al borrar sala", 'error')
+            );
+            
+            echo json_encode(["status" => "false", "message" => "Errro al borrar sala de zoom"]);
+            //$this->handleException($exception);
         }
 
         break;
