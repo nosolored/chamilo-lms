@@ -119,8 +119,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\PortfolioCategory $category
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -183,8 +181,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\PortfolioCategory $category
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -208,8 +204,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\PortfolioCategory $category
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -304,8 +298,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\Portfolio $item
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
@@ -380,8 +372,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\Portfolio $item
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -407,8 +397,6 @@ class PortfolioController
     }
 
     /**
-     * @param \Chamilo\CoreBundle\Entity\Portfolio $item
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -499,11 +487,6 @@ class PortfolioController
         $this->renderView($content, get_lang('Portfolio'), $actions);
     }
 
-    /**
-     * @param \Chamilo\CoreBundle\Entity\PortfolioCategory $category
-     *
-     * @return bool
-     */
     private function categoryBelongToOwner(PortfolioCategory $category): bool
     {
         if ($category->getUser()->getId() != $this->owner->getId()) {
@@ -513,11 +496,6 @@ class PortfolioController
         return true;
     }
 
-    /**
-     * @param \Chamilo\CoreBundle\Entity\Portfolio $item
-     *
-     * @return bool
-     */
     private function itemBelongToOwner(Portfolio $item): bool
     {
         if ($this->session && $item->getSession()->getId() != $this->session->getId()) {
@@ -535,11 +513,6 @@ class PortfolioController
         return true;
     }
 
-    /**
-     * @param string $content
-     * @param string $toolName
-     * @param array  $actions
-     */
     private function renderView(string $content, string $toolName, array $actions = [])
     {
         global $this_section;

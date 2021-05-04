@@ -1,13 +1,5 @@
 <?php
 
-use Chamilo\CoreBundle\Entity\Course;
-use Chamilo\CoreBundle\Entity\Repository\SequenceResourceRepository;
-use Chamilo\CoreBundle\Entity\Repository\SessionRepository;
-use Chamilo\CoreBundle\Entity\SequenceResource;
-use Chamilo\CoreBundle\Entity\Session;
-use Chamilo\CoreBundle\Entity\SessionRelCourseRelUser;
-use Chamilo\CoreBundle\Entity\SessionRelCourse;
-
 $cidReset = true;
 require_once 'main/inc/global.inc.php';
 
@@ -50,7 +42,7 @@ if (count($videoconferenceList) > 0) {
     echo '<th>'.$pluginZoom->get_lang('StartTime').'</th>';
     echo '<th>'.$pluginZoom->get_lang('Access').'</th>';
     echo '</tr>';
-    foreach ($videoconferenceList as $item ) {
+    foreach ($videoconferenceList as $item) {
         $meetingItemId = $item['meeting_id'];
         $meeting = $pluginZoom->getMeetingRepository()->findOneBy(['meetingId' => $meetingItemId]);
         $meetingInfoGet = $meeting->getMeetingInfoGet();
@@ -72,7 +64,7 @@ if (count($videoconferenceList) > 0) {
             echo '<span class="btn btn-warning btn-xs">No disponible</span>';
         } else {
             if (!$meeting->checkPassStartDateTime()) {
-                echo '<span class="btn btn-success btn-xs">Realizada</span>';   
+                echo '<span class="btn btn-success btn-xs">Realizada</span>';
             } else {
                 echo '<a class="btn btn-primary btn-xs" href="'.$pluginPath.'zoom/join_meeting.php?meetingId='.$meetingItemId.'&cidReq='.$infoCourse['code'].'&id_session='.$meeting->getSession()->getId().'">';
                 echo $pluginZoom->get_lang('Join');
