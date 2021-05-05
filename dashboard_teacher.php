@@ -512,7 +512,7 @@ if (!empty($listPasados)) {
     echo '</div>';
     echo '</div>';
 }
-
+/*
 // Lista de videoconferencias de zoom
 $zoomHtml = '<div class="alert alert-warning">Sin salas de videoconferencia próximas</div>';
 $zoomMeetingList = $zoomMeetingDate = [];
@@ -594,7 +594,7 @@ if (!empty($zoomMeetingList)) {
     $zoomHtml .= '</div>';
 }
 echo $zoomHtml;
-
+*/
 echo '</div>';
 echo '</div>';
 Display::display_footer();

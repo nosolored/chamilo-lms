@@ -23,6 +23,7 @@ $pluginPath = api_get_path(WEB_PLUGIN_PATH);
 $pluginZoom = ZoomPlugin::create();
 $toolName = $pluginZoom->get_lang('ZoomVideoConferences');
 $userId = api_get_user_id();
+$now = date("Y-m-d");
 
 $session_table = Database::get_main_table(TABLE_MAIN_SESSION);
 $session_rel_course_rel_user_table = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
@@ -32,7 +33,7 @@ $sql = "SELECT session_rc_ru.*, s.name, z.start_time, z.meeting_id
         INNER JOIN $session_rel_course_rel_user_table session_rc_ru
         ON session_rc_ru.session_id = s.id AND session_rc_ru.user_id = '".$userId."'
         INNER JOIN plugin_zoom_meeting z ON (session_rc_ru.session_id = z.session_id AND session_rc_ru.c_id = z.course_id)
-        WHERE session_rc_ru.status = 2
+        WHERE session_rc_ru.status = 2 AND z.start_time > '".$now."'
         ORDER BY start_time ASC";
 $result = Database::query($sql);
 $videoconferenceList = Database::store_result($result);
@@ -71,13 +72,13 @@ if (count($videoconferenceList) > 0) {
         if (!$meeting->checkStartDateTime()) {
             echo '<span class="btn btn-warning btn-xs">No disponible</span>';
         } else {
-            if (!$meeting->checkPassStartDateTime()) {
-                echo '<span class="btn btn-success btn-xs">Realizada</span>';   
-            } else {
+            // if (!$meeting->checkPassStartDateTime()) {
+            //    echo '<span class="btn btn-success btn-xs">Realizada</span>';   
+            // } else {
                 echo '<a class="btn btn-primary btn-xs" href="'.$pluginPath.'zoom/join_meeting.php?meetingId='.$meetingItemId.'&cidReq='.$infoCourse['code'].'&id_session='.$meeting->getSession()->getId().'">';
                 echo $pluginZoom->get_lang('Join');
                 echo '</a>';
-            }
+            // }
         }
         echo '</td>';
         echo '</tr>';
