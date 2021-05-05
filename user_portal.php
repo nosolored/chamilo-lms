@@ -212,8 +212,6 @@ if (!$myCourseListAsCategory) {
         IndexManager::setDefaultMyCourseView(IndexManager::VIEW_BY_DEFAULT, $userId);
     }
 
-    
-    
     // if teacher, session coach or admin, display the button to change te course view
     if ($displayMyCourseViewBySessionLink &&
         (
@@ -326,10 +324,10 @@ foreach ($courseAndSessions['sessions'] as $catSession) {
             if ($courseItemVisibilty == COURSE_VISIBILITY_HIDDEN) {
                 continue;
             }
-            
+
             $courseInfo = api_get_course_info($courseItemCode);
             $courseId = $courseInfo['real_id'];
-            
+
             $sql = "SELECT * FROM plugin_zoom_meeting WHERE course_id=$courseId AND session_id=$sessionItemId";
             $res = Database::query($sql);
             while ($row = Database::fetch_assoc($res)) {
@@ -358,7 +356,7 @@ if (!empty($zoomMeetingList)) {
     //$zoomHtml .= '<th>'.$pluginZoom->get_lang('Duration').'</th>';
     $zoomHtml .= '<th>'.$pluginZoom->get_lang('Actions').'</th>';
     $zoomHtml .= '</tr>';
-    
+
     $em = Database::getManager();
     $i = 0;
     $limRow = api_get_configuration_value('limit_row_meeting') ? api_get_configuration_value('limit_row_meeting') : 10;
@@ -375,7 +373,7 @@ if (!empty($zoomMeetingList)) {
         $zoomHtml .= '<td>'.$meetingInfoGet->topic.$min.'</td>';
         $zoomHtml .= '<td>'.$meeting->startDateTime->format('Y-m-d H:i').'</td>';
         //$zoomHtml .= '<td>'.$meetingInfoGet->duration.'</td>';
-        
+
         $zoomHtml .= '<td>';
         if (!$meeting->checkStartDateTime()) {
             $zoomHtml .= 'No disponible';
@@ -385,7 +383,7 @@ if (!empty($zoomMeetingList)) {
             $zoomHtml .= '</a>';
         }
         $zoomHtml .= '</td>';
-        
+
         $zoomHtml .= '</tr>';
     }
     $zoomHtml .= '</table>';
@@ -431,7 +429,7 @@ SocialManager::setSocialUserBlock($controller->tpl, $userId, 'home');
 
 // Block Menu
 $menu = SocialManager::show_social_menu('home');
-$controller->tpl->assign('social_menu_block',$menu);
+$controller->tpl->assign('social_menu_block', $menu);
 
 //$controller->tpl->assign('profile_block', $controller->return_profile_block());
 //$controller->tpl->assign('user_image_block', $controller->return_user_image_block());
