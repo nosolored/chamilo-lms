@@ -51,6 +51,7 @@ class Careers extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -74,7 +75,7 @@ class Careers extends Basic
         return [
             ['Save', 'NewPage', 'Templates', '-', 'PasteText'],
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor', 'Source'],
@@ -92,7 +93,7 @@ class Careers extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'VimeoEmbed', 'Audio', 'Table'],
+            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'VimeoEmbed', 'Audio', 'Table', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor', 'Source'],

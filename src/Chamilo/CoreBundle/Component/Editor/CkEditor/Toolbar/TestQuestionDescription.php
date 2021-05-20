@@ -83,6 +83,7 @@ class TestQuestionDescription extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -118,7 +119,7 @@ class TestQuestionDescription extends Basic
         return [
             ['Maximize', '-', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio', 'Furigana'],
             ['Table', 'SpecialChar'],
             [
                 'NumberedList',
@@ -163,6 +164,7 @@ class TestQuestionDescription extends Basic
                 'Table',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],

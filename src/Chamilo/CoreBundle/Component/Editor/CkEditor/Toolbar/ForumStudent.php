@@ -53,6 +53,7 @@ class ForumStudent extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -76,7 +77,7 @@ class ForumStudent extends Basic
         return [
             ['Save', 'Maximize', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio', 'Furigana'],
             ['Table', 'SpecialChar'],
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'TextColor', 'BGColor'],
             '/',
@@ -97,7 +98,7 @@ class ForumStudent extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Oembed', 'Flash', 'Youtube', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+            ['Link', 'Image', 'Video', 'Oembed', 'Flash', 'Youtube', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor'],

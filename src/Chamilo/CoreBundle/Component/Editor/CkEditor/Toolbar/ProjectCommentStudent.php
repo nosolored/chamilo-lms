@@ -51,6 +51,7 @@ class ProjectCommentStudent extends Basic
                 'Smiley',
                 'SpecialChar',
                 'Asciimath',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -74,7 +75,7 @@ class ProjectCommentStudent extends Basic
         return [
             ['Maximize', '-', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio', 'Furigana'],
             ['Table', 'leaflet'],
             ['Bold', 'Italic', 'Underline'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'TextColor', 'BGColor'],
@@ -92,7 +93,7 @@ class ProjectCommentStudent extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyBlock'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'TextColor'],

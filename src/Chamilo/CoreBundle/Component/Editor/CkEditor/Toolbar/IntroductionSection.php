@@ -68,6 +68,7 @@ class IntroductionSection extends Basic
                 'Audio',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             ['Table', 'SpecialChar'],
             [
@@ -113,6 +114,7 @@ class IntroductionSection extends Basic
                 'Table',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyBlock'],
@@ -160,6 +162,7 @@ class IntroductionSection extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],

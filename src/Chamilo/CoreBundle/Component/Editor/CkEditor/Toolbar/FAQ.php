@@ -52,6 +52,7 @@ class FAQ extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -87,7 +88,7 @@ class FAQ extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor'],

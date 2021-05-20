@@ -36,7 +36,7 @@ class Forum extends Basic
         return [
             ['Save', 'Maximize', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio','Furigana'],
             ['Table', 'SpecialChar'],
             [
                 'NumberedList',
@@ -83,6 +83,7 @@ class Forum extends Basic
                 'Table',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],

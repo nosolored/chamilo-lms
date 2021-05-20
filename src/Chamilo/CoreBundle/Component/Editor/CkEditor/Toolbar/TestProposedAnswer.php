@@ -60,6 +60,7 @@ class TestProposedAnswer extends Basic
                 'PasteFromWord',
                 'inserthtml',
                 api_get_setting('enabled_mathjax') === 'true' ? 'Mathjax' : '',
+                'Furigana',
             ],
             ['Asciimath', 'Asciisvg'],
             ['Maximize', 'Source'],

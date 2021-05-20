@@ -53,6 +53,7 @@ class Survey extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -107,7 +108,7 @@ class Survey extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             [

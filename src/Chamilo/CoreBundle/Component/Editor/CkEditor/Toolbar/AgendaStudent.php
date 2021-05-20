@@ -55,6 +55,7 @@ class AgendaStudent extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -97,7 +98,7 @@ class AgendaStudent extends Basic
         return [
             ['Save', 'Maximize', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor', 'inserthtml'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio', 'Furigana'],
             ['Table', 'SpecialChar'],
             '/',
             ['Format', 'Font', 'FontSize'],
@@ -130,7 +131,7 @@ class AgendaStudent extends Basic
         return [
             ['Save', 'NewPage', 'Templates', '-', 'PasteFromWord', 'inserthtml'],
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor'],

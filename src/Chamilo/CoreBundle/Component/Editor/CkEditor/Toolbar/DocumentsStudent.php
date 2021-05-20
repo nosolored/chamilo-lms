@@ -56,6 +56,7 @@ class DocumentsStudent extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -108,6 +109,7 @@ class DocumentsStudent extends Basic
                 'VimeoEmbed',
                 'Audio',
                 'Asciimath',
+                'Furigana',
             ],
             ['Table', 'SpecialChar'],
             [
@@ -148,6 +150,7 @@ class DocumentsStudent extends Basic
                 'Table',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],

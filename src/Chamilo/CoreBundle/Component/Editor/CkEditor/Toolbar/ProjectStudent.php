@@ -51,6 +51,7 @@ class ProjectStudent extends Basic
                 'Smiley',
                 'SpecialChar',
                 'Asciimath',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -74,7 +75,7 @@ class ProjectStudent extends Basic
         return [
             ['Maximize', '-', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'Audio', 'Furigana'],
             ['Table', 'leaflet'],
             ['Font', 'FontSize'],
             ['Bold', 'Italic', 'Underline'],
@@ -93,7 +94,7 @@ class ProjectStudent extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'TextColor'],

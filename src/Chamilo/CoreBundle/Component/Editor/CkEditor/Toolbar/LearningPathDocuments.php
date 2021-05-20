@@ -55,6 +55,7 @@ class LearningPathDocuments extends Basic
                 'SpecialChar',
                 'Asciimath',
                 'Asciisvg',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -90,6 +91,7 @@ class LearningPathDocuments extends Basic
                 'Asciisvg',
                 'Table',
                 'SpecialChar',
+                'Furigana',
             ],
             [
                 'Outdent',
@@ -119,7 +121,7 @@ class LearningPathDocuments extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Youtube', 'VimeoEmbed', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+                ['Link', 'Image', 'Video', 'Youtube', 'VimeoEmbed', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Toolbarswitch'],

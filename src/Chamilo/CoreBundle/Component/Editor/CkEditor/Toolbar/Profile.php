@@ -51,6 +51,7 @@ class Profile extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -74,7 +75,7 @@ class Profile extends Basic
         return [
             ['Maximize', '-', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio', 'Furigana'],
             ['Table', 'Smiley'],
             '/',
             ['Font', 'FontSize'],
@@ -94,7 +95,7 @@ class Profile extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor'],

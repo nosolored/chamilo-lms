@@ -63,6 +63,7 @@ class TestMatching extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             ['Asciimath', 'Asciisvg'],
             '/',
@@ -102,6 +103,7 @@ class TestMatching extends Basic
                 'Subscript',
                 'Superscript',
                 'ShowBlocks',
+                'Furigana',
             ],
         ];
     }
@@ -127,6 +129,7 @@ class TestMatching extends Basic
                 'Audio',
                 'Table',
                 'Asciimath',
+                'Furigana',
             ],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],

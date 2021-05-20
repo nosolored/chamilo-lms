@@ -68,6 +68,7 @@ class TestFreeAnswer extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             ['Asciimath', 'Asciisvg'],
             '/',
@@ -101,6 +102,7 @@ class TestFreeAnswer extends Basic
                 'Subscript',
                 'Superscript',
                 'ShowBlocks',
+                'Furigana',
             ],
         ];
     }
@@ -115,7 +117,7 @@ class TestFreeAnswer extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Asciimath', 'Asciisvg', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'Underline', 'TextColor', 'BGColor'],

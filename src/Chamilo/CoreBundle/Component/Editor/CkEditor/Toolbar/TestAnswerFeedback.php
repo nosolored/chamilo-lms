@@ -79,6 +79,7 @@ class TestAnswerFeedback extends Basic
                 'leaflet',
                 'Smiley',
                 'SpecialChar',
+                'Furigana',
             ],
             '/',
             ['Table', '-', 'CreateDiv'],
@@ -114,7 +115,7 @@ class TestAnswerFeedback extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table'],
+            ['Link', 'Image', 'Video', 'Flash', 'Audio', 'Table', 'Furigana'],
             ['BulletedList', 'NumberedList', 'HorizontalRule'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Asciimath', 'Asciisvg'],
