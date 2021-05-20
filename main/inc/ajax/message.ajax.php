@@ -123,29 +123,83 @@ switch ($action) {
             echo '';
             break;
         }
-
-        $repo = UserManager::getRepository();
-        $users = $repo->findUsersToSendMessage(
-            api_get_user_id(),
-            $_REQUEST['q'],
-            $_REQUEST['page_limit']
-        );
-
+        
         $showEmail = api_get_setting('show_email_addresses') === 'true';
         $return = ['items' => []];
 
-        /** @var User $user */
-        foreach ($users as $user) {
-            $userName = UserManager::formatUserFullName($user, true);
+        $studentOnlyViewFriendAndCourses = api_get_configuration_value('enable_student_only_view_friend_and_courses');
+        if ($studentOnlyViewFriendAndCourses && $_user['status'] == STUDENT) {
+            $accessUrlId = api_get_multiple_access_url() ? api_get_current_access_url_id() : 1;
+            $userList = [];
 
-            if ($showEmail) {
-                $userName .= " ({$user->getEmail()})";
+            $sql = "SELECT DISTINCT U.user_id
+                    FROM access_url_rel_user R, user_rel_user UF
+                    INNER JOIN user AS U ON UF.friend_user_id = U.user_id
+                    WHERE
+                        U.active = 1 AND
+                        U.status != 6 AND
+                        UF.relation_type NOT IN(".USER_RELATION_TYPE_DELETED.", ".USER_RELATION_TYPE_RRHH.") AND
+                        UF.user_id = ".api_get_user_id()." AND
+                        UF.friend_user_id != ".api_get_user_id()." AND
+                        U.user_id = R.user_id AND
+                        R.access_url_id = $accessUrlId";
+            $res = Database::query($sql);
+            while ($row = Database::fetch_assoc($res)) {
+                $userList[] = $row['user_id'];
             }
 
-            $return['items'][] = [
-                'text' => $userName,
-                'id' => $user->getId(),
-            ];
+            $sql = "SELECT DISTINCT SCU.user_id FROM session_rel_user SU
+                    INNER JOIN session_rel_course_rel_user SCU ON SU.session_id=SCU.session_id
+                    WHERE SU.user_id=".api_get_user_id()." AND SCU.user_id != ".api_get_user_id()." AND SCU.visibility = 1";
+            $res = Database::query($sql);
+            while ($row = Database::fetch_assoc($res)) {
+                $userList[] = $row['user_id'];
+            }
+
+            $userList = array_unique($userList);
+
+            foreach ($userList as $user) {
+                $userInfo = api_get_user_info($user);
+                if (stripos($userInfo['firstname'], $_REQUEST['q']) === false &&
+                    stripos($userInfo['lastname'], $_REQUEST['q']) === false &&
+                    stripos($userInfo['username'], $_REQUEST['q']) === false &&
+                    stripos($userInfo['email'], $_REQUEST['q']) === false
+                ) {
+                    continue;
+                }
+
+                $userName = $userInfo['complete_name'];
+
+                if ($showEmail) {
+                    $userName .= " (".$userInfo['email'].")";
+                }
+
+                $return['items'][] = [
+                    'text' => $userName,
+                    'id' => $user,
+                ];
+            }
+        } else {
+            $repo = UserManager::getRepository();
+            $users = $repo->findUsersToSendMessage(
+                api_get_user_id(),
+                $_REQUEST['q'],
+                $_REQUEST['page_limit']
+            );
+    
+            /** @var User $user */
+            foreach ($users as $user) {
+                $userName = UserManager::formatUserFullName($user, true);
+    
+                if ($showEmail) {
+                    $userName .= " ({$user->getEmail()})";
+                }
+    
+                $return['items'][] = [
+                    'text' => $userName,
+                    'id' => $user->getId(),
+                ];
+            }
         }
         header('Content-type:application/json');
         echo json_encode($return);

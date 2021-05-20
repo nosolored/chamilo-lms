@@ -80,7 +80,15 @@ if (!empty($threadList)) {
     $threadIdList = array_column($threadList, 'id');
 }
 
-$posts = SocialManager::getMyWallMessages($user_id, 0, 10, $threadIdList);
+if (api_get_configuration_value('enable_public_wall')) {
+    $maxPost = api_get_configuration_value('max_post_public_wall')
+        ? (int) api_get_configuration_value('max_post_public_wall')
+        : 10;
+    $posts = SocialManager::getAllWallMessages(0, $maxPost);
+} else {
+    $posts = SocialManager::getMyWallMessages($user_id, 0, 10, $threadIdList);
+}
+
 $countPost = $posts['count'];
 $posts = $posts['posts'];
 SocialManager::getScrollJs($countPost, $htmlHeadXtra);

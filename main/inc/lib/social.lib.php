@@ -1791,6 +1791,7 @@ class SocialManager extends UserManager
         $sqlLimit = " LIMIT $start, $length ";
         $messages = [];
         foreach ($sql as $index => $oneQuery) {
+            error_log($oneQuery);
             if ($index === 5) {
                 // Exception only for the forum query above (field name change)
                 $oneQuery .= ' ORDER BY post_date DESC '.$sqlLimit;
@@ -2616,6 +2617,99 @@ class SocialManager extends UserManager
             $html .= self::wrapPost($message, $post.$comments);
         }
 
+        return [
+            'posts' => $html,
+            'count' => $countPost,
+        ];
+    }
+    
+    /**
+     * @param int   $start
+     * @param int   $length
+     *
+     * @return array
+     */
+    public static function getAllWallMessages($start = 0, $length = 10)
+    {
+        $tblMessage = Database::get_main_table(TABLE_MESSAGE);
+        $select = " SELECT
+                    id,
+                    user_sender_id,
+                    user_receiver_id,
+                    send_date,
+                    content,
+                    parent_id,
+                    msg_status,
+                    group_id,
+                    '' as forum_id,
+                    '' as thread_id,
+                    '' as c_id
+                  ";
+        
+        $sqlBase = "$select FROM $tblMessage m WHERE ";
+        $sql = $sqlBase."msg_status <> ".MESSAGE_STATUS_WALL_DELETE.' AND ';
+        
+        // Get my own posts
+        $userReceiverCondition = ' (
+            msg_status IN ('.MESSAGE_STATUS_WALL_POST.', '.MESSAGE_STATUS_WALL.') AND
+            parent_id = 0
+        )';
+        
+        $sql .= $userReceiverCondition;
+        
+        
+        
+        $sql .= ' ORDER BY send_date DESC ';
+        $sql .= " LIMIT $start, $length ";
+        $messages = [];
+        
+        $res = Database::query($sql);
+        if (Database::num_rows($res) > 0) {
+            $groups = [];
+            $userGroup = new UserGroup();
+            $urlGroup = api_get_path(WEB_CODE_PATH).'social/group_view.php?id=';
+            while ($row = Database::fetch_array($res, 'ASSOC')) {
+                $row['group_info'] = [];
+                if (!empty($row['group_id'])) {
+                    if (!in_array($row['group_id'], $groups)) {
+                        $group = $userGroup->get($row['group_id']);
+                        $group['url'] = $urlGroup.$group['id'];
+                        $groups[$row['group_id']] = $group;
+                        $row['group_info'] = $group;
+                    } else {
+                        $row['group_info'] = $groups[$row['group_id']];
+                    }
+                }
+                
+                // Forums
+                $row['post_title'] = '';
+                $row['forum_title'] = '';
+                $row['thread_url'] = '';
+
+                
+                $messages[$row['id']] = $row;
+            }
+        }
+
+        // Reordering messages by ID (reverse order) is enough to have the
+        // latest first, as there is currently no option to edit messages
+        // afterwards
+        krsort($messages);
+        
+        $countPost = count($messages);
+        $messages = self::formatWallMessages($messages);
+        
+        $html = '';
+        foreach ($messages as $message) {
+            $post = $message['html'];
+            $comments = '';
+            if (in_array($message['msg_status'], [MESSAGE_STATUS_WALL_POST, MESSAGE_STATUS_PROMOTED])) {
+                $comments = self::getWallPostComments($userId, $message);
+            }
+            
+            $html .= self::wrapPost($message, $post.$comments);
+        }
+        
         return [
             'posts' => $html,
             'count' => $countPost,
