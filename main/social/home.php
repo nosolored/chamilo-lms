@@ -94,7 +94,11 @@ $posts = $posts['posts'];
 SocialManager::getScrollJs($countPost, $htmlHeadXtra);
 
 // Block Menu
-$menu = SocialManager::show_social_menu('home');
+$viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+
+$menu = $viewQuickAccessMenu 
+    ? SocialManager::show_quick_access_menu('home') 
+    : SocialManager::show_social_menu('home');
 
 $social_search_block = Display::panel(
     UserManager::get_search_form(''),
@@ -130,6 +134,16 @@ $formSearch->addText(
     ]
 );
 
+$controller = new IndexManager('Social');
+
+
+// Promotions Plugins
+require_once api_get_path(SYS_PLUGIN_PATH).'promotions/src/PromotionsPlugin.php';
+$pluginPromotions = PromotionsPlugin::create();
+if ($pluginPromotions->isEnabled() && $pluginPromotions->get('tool_enable') == "true") {
+    $promotions = PromotionsPlugin::getPromotions();
+}
+
 // Added a Jquery Function to return the Preview of OpenGraph URL Content
 $htmlHeadXtra[] = SocialManager::getScriptToGetOpenGraph();
 
@@ -137,7 +151,9 @@ $tpl = new Template(get_lang('SocialNetwork'));
 SocialManager::setSocialUserBlock($tpl, $user_id, 'home');
 $tpl->assign('add_post_form', $wallSocialAddPost);
 $tpl->assign('posts', $posts);
+$tpl->assign('promotions', $promotions);
 $tpl->assign('social_menu_block', $menu);
+$tpl->assign('help_block', $controller->return_help());
 $tpl->assign('social_auto_extend_link', $socialAutoExtendLink);
 $tpl->assign('search_friends_form', $formSearch->returnForm());
 $tpl->assign('social_friend_block', $friend_html);

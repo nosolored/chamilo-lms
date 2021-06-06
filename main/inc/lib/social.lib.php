@@ -1331,6 +1331,108 @@ class SocialManager extends UserManager
 
         return $html;
     }
+    
+    /**
+     * Shows the quick access menu
+     *
+     * @param string $show                       highlight link possible values:
+     *                                           quick_access,
+     *                                           home,
+     *                                           messages,
+     *                                           messages_inbox,
+     *                                           messages_compose ,
+     *                                           messages_outbox,
+     *                                           invitations,
+     *                                           shared_profile,
+     *                                           friends,
+     *                                           groups search
+     * @param int    $group_id                   group id
+     * @param int    $user_id                    user id
+     * @param bool   $show_full_profile          show profile or not (show or hide the user image/information)
+     * @param bool   $show_delete_account_button
+     */
+    public static function show_quick_access_menu($show = '') {
+        $items = [];
+        $html = '';
+
+        // New messages.
+        $number_of_new_messages = MessageManager::getCountNewMessages();
+        $cant_msg = Display::badge($number_of_new_messages);
+
+        $items[] = [
+            'class' => 'home-icon',
+            'icon' => Display::return_icon('sn-home.png', get_lang('SocialNetwork'), null, ICON_SIZE_SMALL),
+            'link' => api_get_path(WEB_CODE_PATH).'social/home.php',
+            'title' => get_lang('SocialNetwork'),
+        ];
+
+        $items[] = [
+            'class' => 'inbox-message-social',
+            'icon' => Display::return_icon('inbox.png', get_lang('Inbox')),
+            'link' => api_get_path(WEB_CODE_PATH).'messages/inbox.php',
+            'title' => get_lang('Inbox').$cant_msg,
+        ];
+
+        $items[] = [
+            'class' => 'new-message-social',
+            'icon' => Display::return_icon('new-message.png', get_lang('Compose')),
+            'link' => api_get_path(WEB_CODE_PATH).'messages/new_message.php',
+            'title' => get_lang('Compose'),
+        ];
+        
+        $items[] = [
+            'class' => 'browse-groups-icon',
+            'icon' => Display::return_icon('sn-groups.png', get_lang('SocialGroups'), null, ICON_SIZE_SMALL),
+            'link' => api_get_path(WEB_CODE_PATH).'social/groups.php',
+            'title' => get_lang('SocialGroups'),
+        ];
+        
+        $items[] = [
+            'class' => 'list-course',
+            'icon' => Display::return_icon('catalog-course.png', get_lang('CourseManagement'), null, ICON_SIZE_SMALL),
+            'link' => api_get_path(WEB_CODE_PATH).'auth/courses.php',
+            'title' => get_lang('CourseManagement'),
+        ];
+        
+        $items[] = [
+            'class' => 'list-group-item',
+            'icon' => Display::return_icon('skill-badges.png', get_lang('MyCompetences'), null, ICON_SIZE_SMALL),
+            'link' => api_get_path(WEB_CODE_PATH).'social/my_skills_report.php',
+            'title' => get_lang('MyCompetences'),
+        ];
+        
+        foreach ($items as $item) {
+            $links .= '<li class="'.$item['class'].'">';
+            $links .= '<a href="'.$item['link'].'">'.$item['icon'].' '.$item['title'].'</a>';
+            $links .= '</li>';
+        }
+
+        
+        $html .= '<div class="panel-group" id="quick_access" role="tablist" aria-multiselectable="true">';
+        $html .= '<div class="panel panel-default" id="quick_access_block">';
+        $html .= '<div class="panel-heading" role="tab">';
+        $html .= '<a role="button" data-toggle="collapse" data-parent="#quick_access" href="#quick_accessCollapse"
+                aria-expanded="true" aria-controls="quick_accessCollapse">';
+        $html .= get_lang('QuickAccess');
+        $html .= '</a>';
+        $html .= '</div>';
+        $html .= '<div aria-expanded="true" id="quick_accessCollapse" class="panel-collapse collapse in" role="tabpanel">';
+        $html .= '<div class="panel-body">';
+        $html .= '<ul class="list-group">';
+        foreach ($items as $item) {
+            $html .= '<li class="list-group-item '.$item['class'].'">';
+            $html .= '<span class="item-icon">'.$item['icon'].'</span>';
+            $html .= '<a href="'.$item['link'].'">'.$item['title'].'</a>';
+            $html .= '</li>';
+        }
+        $html .= '</ul>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        return $html;
+    }
 
     /**
      * Displays a sortable table with the list of online users.
@@ -2254,9 +2356,11 @@ class SocialManager extends UserManager
         //Added the link to export the vCard to the Template
 
         //If not friend $show_full_profile is False and the user can't see Email Address and Vcard Download Link
+        /* ## NSR
         if ($show_full_profile) {
             $template->assign('vcard_user_link', $vCardUserLink);
         }
+        */
 
         if (api_get_setting('gamification_mode') === '1') {
             $gamificationPoints = GamificationUtils::getTotalUserPoints(

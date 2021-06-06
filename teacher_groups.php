@@ -1,5 +1,8 @@
 <?php
 
+header('Location: dashboard_teacher.php');
+exit;
+
 use Chamilo\CoreBundle\Entity\Course;
 use Chamilo\CoreBundle\Entity\Repository\SequenceResourceRepository;
 use Chamilo\CoreBundle\Entity\Repository\SessionRepository;

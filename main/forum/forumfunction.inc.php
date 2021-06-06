@@ -590,7 +590,7 @@ function show_edit_forumcategory_form($inputvalues = [])
  *
  * @version february 2006, dokeos 1.8
  */
-function store_forumcategory($values, $courseInfo = [], $showMessage = true)
+function store_forumcategory($values, $courseInfo = [], $showMessage = true, $sessionId = 0)
 {
     $courseInfo = empty($courseInfo) ? api_get_course_info() : $courseInfo;
     $course_id = $courseInfo['real_id'];
@@ -603,7 +603,7 @@ function store_forumcategory($values, $courseInfo = [], $showMessage = true)
     $result = Database::query($sql);
     $row = Database::fetch_array($result);
     $new_max = $row['sort_max'] + 1;
-    $session_id = api_get_session_id();
+    $session_id = empty($sessionId) ? api_get_session_id() : $sessionId;
     $clean_cat_title = $values['forum_category_title'];
     $last_id = null;
 
@@ -713,11 +713,11 @@ function store_forumcategory($values, $courseInfo = [], $showMessage = true)
  *
  * @version february 2006, dokeos 1.8
  */
-function store_forum($values, $courseInfo = [], $returnId = false)
+function store_forum($values, $courseInfo = [], $returnId = false, $sessionId = 0)
 {
     $courseInfo = empty($courseInfo) ? api_get_course_info() : $courseInfo;
     $courseId = $courseInfo['real_id'];
-    $session_id = api_get_session_id();
+    $session_id = empty($sessionId) ? api_get_session_id() : $sessionId;
     $group_id = api_get_group_id();
     if (isset($values['group_id']) && !empty($values['group_id'])) {
         $group_id = $values['group_id'];
@@ -952,14 +952,19 @@ function store_forum($values, $courseInfo = [], $returnId = false)
                 $forumId,
                 'ForumAdded',
                 api_get_user_id(),
-                $groupInfo
+                $groupInfo,
+                null,
+                null,
+                null,
+                $session_id
             );
 
             api_set_default_visibility(
                 $forumId,
                 TOOL_FORUM,
                 $group_id,
-                $courseInfo
+                $courseInfo,
+                $session_id
             );
 
             $logInfo = [

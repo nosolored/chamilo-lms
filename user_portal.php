@@ -330,7 +330,9 @@ foreach ($courseAndSessions['sessions'] as $catSession) {
             $courseInfo = api_get_course_info($courseItemCode);
             $courseId = $courseInfo['real_id'];
             
-            $sql = "SELECT * FROM plugin_zoom_meeting WHERE course_id=$courseId AND session_id=$sessionItemId";
+            $sql = "SELECT * FROM plugin_zoom_meeting
+                    WHERE course_id=$courseId AND session_id=$sessionItemId
+                    ORDER BY start_time ASC";
             $res = Database::query($sql);
             while ($row = Database::fetch_assoc($res)) {
                 if ($now > strtotime($row['start_time'])) {
@@ -363,7 +365,7 @@ if (!empty($zoomMeetingList)) {
     $i = 0;
     $limRow = api_get_configuration_value('limit_row_meeting') ? api_get_configuration_value('limit_row_meeting') : 10;
     foreach ($zoomMeetingList as $meetingItemId) {
-        if ($i >= $limRow) {
+        if ($i > $limRow) {
             break;
         }
         $meeting = $pluginZoom->getMeetingRepository()->findOneBy(['meetingId' => $meetingItemId]);
@@ -373,7 +375,7 @@ if (!empty($zoomMeetingList)) {
         $zoomHtml .= '<td>'.$infoCourse['title'].'</td>';
         $min = $meetingInfoGet->duration > 0 ? ' ('.$meetingInfoGet->duration.' min)' : '';
         $zoomHtml .= '<td>'.$meetingInfoGet->topic.$min.'</td>';
-        $zoomHtml .= '<td>'.$meeting->startDateTime->format('Y-m-d H:i').'</td>';
+        $zoomHtml .= '<td>'.$meeting->startDateTime->format('d-m-Y H:i').'</td>';
         //$zoomHtml .= '<td>'.$meetingInfoGet->duration.'</td>';
         
         $zoomHtml .= '<td>';
@@ -387,6 +389,7 @@ if (!empty($zoomMeetingList)) {
         $zoomHtml .= '</td>';
         
         $zoomHtml .= '</tr>';
+        $i++;
     }
     $zoomHtml .= '</table>';
     $zoomHtml .= '</div>';
@@ -430,18 +433,24 @@ if (!empty($some_activex) || !empty($some_plugins)) {
 SocialManager::setSocialUserBlock($controller->tpl, $userId, 'home');
 
 // Block Menu
-$menu = SocialManager::show_social_menu('home');
-$controller->tpl->assign('social_menu_block',$menu);
+$viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+$menu = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu('home')
+    : SocialManager::show_social_menu('home');
+$controller->tpl->assign('social_menu_block', $menu);
 
 //$controller->tpl->assign('profile_block', $controller->return_profile_block());
 //$controller->tpl->assign('user_image_block', $controller->return_user_image_block());
-$controller->tpl->assign('course_block', $controller->return_course_block());
-$controller->tpl->assign('navigation_course_links', $controller->return_navigation_links());
-$controller->tpl->assign('search_block', $controller->return_search_block());
-$controller->tpl->assign('notice_block', $controller->return_notice());
-$controller->tpl->assign('classes_block', $controller->returnClassesBlock());
-$controller->tpl->assign('skills_block', $controller->returnSkillLinks());
-$controller->tpl->assign('student_publication_block', $controller->studentPublicationBlock());
+if (!$viewQuickAccessMenu) {
+    $controller->tpl->assign('course_block', $controller->return_course_block());
+    $controller->tpl->assign('navigation_course_links', $controller->return_navigation_links());
+    $controller->tpl->assign('search_block', $controller->return_search_block());
+    $controller->tpl->assign('notice_block', $controller->return_notice());
+    $controller->tpl->assign('classes_block', $controller->returnClassesBlock());
+    $controller->tpl->assign('skills_block', $controller->returnSkillLinks());
+    $controller->tpl->assign('student_publication_block', $controller->studentPublicationBlock());
+}
+$controller->tpl->assign('help_block', $controller->return_help());
 
 $historyClass = '';
 if (!empty($_GET['history'])) {

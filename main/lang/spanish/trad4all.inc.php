@@ -3104,7 +3104,7 @@ $MyCourses = "Mis cursos";
 $ModifyProfile = "Mi perfil";
 $MyStats = "Ver mis estadísticas";
 $Logout = "Salir";
-$MyAgenda = "Mi agenda";
+$MyAgenda = "Agenda";
 $CourseHomepage = "Página principal del curso";
 $SwitchToTeacherView = "Cambiar a vista profesor";
 $SwitchToStudentView = "Cambiar a \"Vista de estudiante\"";
@@ -8754,4 +8754,5 @@ $StartMenu = "Inicio";
 $ActiveGroups = "Grupos activos";
 $FutureGroups = "Grupos futuros";
 $GroupsCompleted = "Grupos finalizados";
+$QuickAccess = "Acceso rápido";
 ?>

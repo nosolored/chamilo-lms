@@ -43,7 +43,10 @@ $interbreadcrumb[] = ['url' => 'groups.php', 'name' => get_lang('Groups')];
 $interbreadcrumb[] = ['url' => '#', 'name' => $nameTools];
 
 $social_avatar_block = SocialManager::show_social_avatar_block('group_add');
-$social_menu_block = SocialManager::show_social_menu('group_add');
+$viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+$social_menu_block = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu('group_add')
+    : SocialManager::show_social_menu('group_add');
 $social_right_content = $form->returnForm();
 
 $tpl = new Template(null);

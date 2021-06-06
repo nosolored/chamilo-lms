@@ -378,7 +378,10 @@ if (isset($_GET['view']) && $_GET['view'] == 'mygroups') {
     $show_menu = $_GET['view'];
 }
 
-$social_menu_block = SocialManager::show_social_menu($show_menu);
+$viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+$social_menu_block = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu($show_menu)
+    : SocialManager::show_social_menu($show_menu);
 $templateName = 'social/groups.tpl';
 
 $tpl->setHelp('Groups');

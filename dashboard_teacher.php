@@ -247,15 +247,17 @@ if (count($listActivos) > 0) {
             
             // Session name and course title
             echo '<td>';
-            echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/index.php?session_id='.$sessionId.'">';
+            echo '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
             echo '<span style="font-weight: bold; font-size: 16px;">'.htmlspecialchars($value['name']).'</span>';
             echo '</a>';
             echo '<br><span style="font-style: italic; font-size: 14px;">'.htmlspecialchars($course->getTitle()).'</span>';
+            /*
             if (!empty($value['session_category_id'])) {
                 echo '<span class="btn btn-primary btn-xs pull-right">';
                 echo $orderedCategories[$value['session_category_id']];
                 echo '</span>';
             }
+            */
             echo '</td>';
             
             // Dates
@@ -268,27 +270,37 @@ if (count($listActivos) > 0) {
             echo '</td>';
             
             // Coach
+            /*
             $namesOfCoaches = [];
             $coachSubscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
             
             if ($coachSubscriptions) {
-                /** @var SessionRelCourseRelUser $subscription */
                 foreach ($coachSubscriptions as $subscription) {
                     $namesOfCoaches[] = $subscription->getUser()->getCompleteNameWithUserName();
                 }
             }
+            
             $coachHtml = ($namesOfCoaches ? implode('<br>', $namesOfCoaches) : 'Sin tutores');
 
             echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
             echo $coachHtml;
             echo '</td>';
-          
+            */
+            $students = SessionManager::getCountUsersInCourseSession($course, $session);
+            // Student
+            echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
+            if ($students > 0) {
+                echo '<span style="font-size:18px;">'.$students.'</span><br>matrículas activas';
+            } else {
+                echo 'Sin alumnos matrículados';
+            }
+            echo '</td>';
             
             // Acciones
             echo '<td class="text-right" style="vertical-align:middle">';
             $actions = Display::url(
                 Display::return_icon('2rightarrow.png', get_lang('Details')),
-                $coursePath.$course->getCode()."/index.php?id_session=$sessionId"
+                $codePath.'lp/lp_controller.php?cidReq='.$course->getCode().'&id_session='.$sessionId
             );
             echo $actions;
             echo '</td>';

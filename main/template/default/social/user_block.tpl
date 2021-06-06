@@ -76,17 +76,17 @@
                     {# Ofaj #}
                     <ul class="list-user-data">
                         <li class="item item-name">
-                            <h5>{{ user.complete_name }} </h5>
+                            <h5>{{ user.firstname }} {{ user.lastname }} </h5>
                         </li>
 
                         {% if show_full_profile %}
                             {% if user.email %}
-                            <li class="item">
+                            <dl class="list-info">
                                 <a href="{{ _p.web }}main/messages/new_message.php">
-                                    {{ "sn-message.png"|img(22, "Email" | get_lang) }}
+                                    {# {{ "sn-message.png"|img(22, "Email" | get_lang) }} #}
                                     <div class="email-overflow">{{ user.email }}</div>
                                 </a>
-                            </li>
+                            </dl>
                             {% endif %}
 
                             {% if vcard_user_link %}
@@ -144,6 +144,8 @@
                                 {% endif %}
                             {% endif %}
                         {% endif %}
+
+                    {% if extra_info %}
                     <dl class="list-info">
                         {% for item in extra_info %}
                             {% if item.variable != 'langue_cible' %}
@@ -152,6 +154,7 @@
                             {% endif %}
                         {% endfor %}
                     </dl>
+                    {% endif %}
 
                     {% if not profile_edition_link is empty %}
                         <li class="item">

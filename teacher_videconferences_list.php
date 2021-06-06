@@ -51,7 +51,13 @@ if (count($videoconferenceList) > 0) {
     echo '<th>'.$pluginZoom->get_lang('StartTime').'</th>';
     echo '<th>'.$pluginZoom->get_lang('Access').'</th>';
     echo '</tr>';
+    $limRow = api_get_configuration_value('limit_row_meeting') ? api_get_configuration_value('limit_row_meeting') : 10;
+    $i = 0;
     foreach ($videoconferenceList as $item ) {
+        if ($i > $limRow) {
+            break;
+        }
+        
         $meetingItemId = $item['meeting_id'];
         $meeting = $pluginZoom->getMeetingRepository()->findOneBy(['meetingId' => $meetingItemId]);
         $meetingInfoGet = $meeting->getMeetingInfoGet();
@@ -67,7 +73,7 @@ if (count($videoconferenceList) > 0) {
 
         $min = $meetingInfoGet->duration > 0 ? ' ('.$meetingInfoGet->duration.' min)' : '';
         echo '<td style="vertical-align:middle">'.$meetingInfoGet->topic.$min.'</td>';
-        echo '<td style="vertical-align:middle">'.$meeting->startDateTime->format('Y-m-d H:i').'</td>';
+        echo '<td style="vertical-align:middle">'.$meeting->startDateTime->format('d-m-Y H:i').'</td>';
         echo '<td style="vertical-align:middle">';
         if (!$meeting->checkStartDateTime()) {
             echo '<span class="btn btn-warning btn-xs">No disponible</span>';
@@ -82,6 +88,7 @@ if (count($videoconferenceList) > 0) {
         }
         echo '</td>';
         echo '</tr>';
+        $i++;
     }
     echo '</table>';
 }

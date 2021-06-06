@@ -56,7 +56,10 @@ if ($allowSocial === false && $allowMessage) {
 $social_menu_block = '';
 if ($allowSocial) {
     // Block Social Menu
-    $social_menu_block = SocialManager::show_social_menu('messages');
+    $viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+    $social_menu_block = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu('messages')
+    : SocialManager::show_social_menu('messages');
 }
 
 // Right content

@@ -2839,6 +2839,28 @@ class SessionManager
                         SET nbr_users = $nbr_users
                         WHERE session_id = $sessionId AND c_id = $courseId";
                 Database::query($sql);
+                
+                // Create forum
+                require_once api_get_path(SYS_CODE_PATH).'forum/forumfunction.inc.php';
+                
+                $categoryParams = [];
+                $categoryParams['forum_category_title'] = 'General';
+                $catId = store_forumcategory($categoryParams, $courseInfo, false, $sessionId);
+                
+                $forumParams = [
+                    'c_id' => $courseId,
+                    'forum_title' => 'Foro General',
+                    'forum_image' => '',
+                    'forum_comment' => '',
+                    'forum_category' => $catId,
+                ];
+                $forumParams['allow_new_threads_group']['allow_new_threads'] = 1;
+                $forumParams['students_can_edit_group']['students_can_edit'] = 1;
+                $forumParams['allow_anonymous_group']['allow_anonymous'] = 0;
+                $forumParams['default_view_type_group']['default_view_type'] = 'flat';
+                $forumParams['public_private_group_forum_group']['public_private_group_forum'] = 'public';
+                $forumParams['moderated']['moderated'] = 1;
+                $forumId = store_forum($forumParams, $courseInfo, true, $sessionId);
             }
 
             if ($copyCourseTeachersAsCoach) {

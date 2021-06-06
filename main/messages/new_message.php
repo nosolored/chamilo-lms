@@ -401,7 +401,10 @@ if ($group_id != 0) {
 $social_left_content = '';
 if ($allowSocial) {
     // Block Social Menu
-    $social_menu_block = SocialManager::show_social_menu('messages');
+    $viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+    $social_menu_block = $viewQuickAccessMenu
+        ? SocialManager::show_quick_access_menu('messages')
+        : SocialManager::show_social_menu('messages');
     $social_right_content .= '<div class="row">';
     $social_right_content .= '<div class="col-md-12">';
     $social_right_content .= '<div class="actions">';

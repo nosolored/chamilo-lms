@@ -1,4 +1,5 @@
 {% extends 'layout/layout_1_col.tpl'|get_template %}
+{% import 'default/macro/macro.tpl' as display %}
 
 {% block content %}
     <style>
@@ -11,9 +12,14 @@
         <div class="col-md-3">
             {{ social_avatar_block }}
 
-            <div class="social-network-menu">
+            <div class="social-network-menu sidebar">
             {{ social_menu_block }}
             </div>
+            
+            <!-- BLOCK HELP -->
+            {% if help_block %}
+                {{ display.collapse('help', 'MenuGeneral'|get_lang, help_block, true) }}
+            {% endif %}
         </div>
         <div class="col-md-6">
             <div id="wallMessages">
@@ -27,6 +33,7 @@
                         <div class="url_preview"></div>
                     </div>
                 </div>
+                {{ promotions }}
                 {{ posts }}
                 {{ social_auto_extend_link }}
             </div>
