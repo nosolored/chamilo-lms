@@ -154,6 +154,7 @@ if (api_get_configuration_value('show_hot_sessions') === true) {
     $hotSessions = SessionManager::getHotSessions();
     $controller->tpl->assign('hot_sessions', $hotSessions);
 }
+
 $controller->tpl->assign('hot_courses', $hotCourses);
 $controller->tpl->assign('announcements_block', $announcements_block);
 

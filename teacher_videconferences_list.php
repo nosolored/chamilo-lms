@@ -38,8 +38,93 @@ $sql = "SELECT session_rc_ru.*, s.name, z.start_time, z.meeting_id
 $result = Database::query($sql);
 $videoconferenceList = Database::store_result($result);
 
+$htmlHeadXtra[] = '
+    <style>
+        .menu-item-gestor {
+        
+        }
+        .menu-item-gestor a {
+            color: #660000;
+        }
+        .panel-body {
+            padding: 10px;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-left: 5px;
+            vertical-align: super;
+        }
+    </style>';
+
 Display::display_header($toolName);
-echo Display::page_header($toolName);
+echo '<div class="row">';
+echo '<div class="col-xs-12 breadcrumb" style="padding: 10px 20px 0px 20px; border-radius: 10px;">';
+
+// Icon 1
+echo '<div class="menu-item-gestor col-md-4 col-sm-4 col-xs-12">';
+echo '<div class="panel panel-default" style="margin-bottom:10px">';
+echo '<div class="session panel-body">';
+$icon = Display::return_icon(
+    'session.png',
+    get_lang('Groups'),
+    array("style" => "margin-right:5px; vertical-align: text-bottom;"),
+    ICON_SIZE_MEDIUM
+);
+$tools = Display::url(
+    $icon.' <span class="item-name">'.get_lang('Groups').'</span>',
+    'teacher_groups.php'
+);
+echo $tools;
+echo '</div>';
+echo '</div>';
+echo '</div>';
+
+// Icon 2
+echo '<div class="menu-item-gestor col-md-4 col-sm-4 col-xs-12">';
+echo '<div class="panel panel-default" style="margin-bottom:10px">';
+echo '<div class="session panel-body">';
+$icon = Display::return_icon(
+    'user.png',
+    get_lang('Students'),
+    array("style" => "margin-right:5px; vertical-align: text-bottom;"),
+    ICON_SIZE_MEDIUM
+);
+$tools = Display::url(
+    $icon.' <span class="item-name">'.get_lang('Students').'</span>',
+    'teacher_student_list.php'
+);
+echo $tools;
+echo '</div>';
+echo '</div>';
+echo '</div>';
+
+// Icon 3
+echo '<div class="menu-item-gestor col-md-4 col-sm-4 col-xs-12">';
+echo '<div class="panel panel-default" style="margin-bottom:10px">';
+echo '<div class="session panel-body">';
+$icon = Display::return_icon(
+    'zoom_meet.png',
+    ZoomPlugin::create()->get_lang('ZoomVideoConferences'),
+    array("style" => "margin-right:5px; vertical-align: text-bottom;"),
+    ICON_SIZE_MEDIUM
+);
+$tools = Display::url(
+    $icon.' <span class="item-name">'.ZoomPlugin::create()->get_lang('ZoomVideoConferences').'</span>',
+    'teacher_videconferences_list.php'
+);
+echo $tools;
+echo '</div>';
+echo '</div>';
+echo '</div>';
+
+echo '<div class="clearfix"></div>';
+echo '</div>';
+
+echo '</div>';
+
+echo '<h2>'.$toolName.'</h2>';
 echo '<div class="row">';
 echo '<div class="col-md-12">';
 
@@ -91,6 +176,8 @@ if (count($videoconferenceList) > 0) {
         $i++;
     }
     echo '</table>';
+} else {
+    echo '<div class="alert alert-warning">Sin videoconferencias activas</div>';
 }
 
 Display::display_footer();

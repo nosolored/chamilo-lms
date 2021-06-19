@@ -71,6 +71,11 @@ if (!empty($group_id)) {
 
 Event::event_access_tool(TOOL_ANNOUNCEMENT);
 
+$htmlHeadXtra[] = '<style>
+    .ui-jqgrid .ui-jqgrid-view {
+        font-size: 14px !important;
+    }
+    </style>';
 $announcement_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 $action = isset($_GET['action']) ? Security::remove_XSS($_GET['action']) : 'list';
 $announcement_number = AnnouncementManager::getNumberAnnouncements();
@@ -238,6 +243,8 @@ switch ($action) {
         $extra_params['autowidth'] = 'true';
         // height auto
         $extra_params['height'] = 'auto';
+        $all_value = 10000000;
+        $extra_params['rowList'] = [$all_value];
         $editOptions = '';
 
         if ($isTutor || api_is_allowed_to_edit()) {
@@ -297,7 +304,7 @@ switch ($action) {
             }
             $content = $html;
         } else {
-            $content .= Display::grid_html('announcements');
+            $content .= Display::grid_html('announcements', true);
         }
         break;
     case 'delete':

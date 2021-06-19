@@ -1231,13 +1231,16 @@ class Display
      * As you can see both function use the same "my_grid_name" this is very important otherwise nothing will work
      *
      * @param   string  the div id, this value must be the same with the first parameter of Display::grid_js()
+     * @param   bool    show/hide pager div (default: false)
      *
      * @return string html
      */
-    public static function grid_html($div_id)
+    public static function grid_html($div_id, $hidePager = false)
     {
         $table = self::tag('table', '', ['id' => $div_id]);
-        $table .= self::tag('div', '', ['id' => $div_id.'_pager']);
+        if (!$hidePager) {
+            $table .= self::tag('div', '', ['id' => $div_id.'_pager']);
+        }
 
         return $table;
     }

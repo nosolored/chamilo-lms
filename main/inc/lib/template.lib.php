@@ -355,6 +355,15 @@ class Template
         $tpl = $this->get_template('layout/layout_2_col.tpl');
         $this->display($tpl);
     }
+    
+    /**
+     * Shortcut to display a 2 col reverse layout (userportal.php).
+     */
+    public function display_two_col_reverse_template()
+    {
+        $tpl = $this->get_template('layout/layout_2_col_reverse.tpl');
+        $this->display($tpl);
+    }
 
     /**
      * Displays an empty template.

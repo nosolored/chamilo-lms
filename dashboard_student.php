@@ -21,6 +21,7 @@ $toolName = get_lang('Dashboard');
 $userId = api_get_user_id();
 $controller = new IndexManager(get_lang('MyCourses'));
 $courseAndSessions = $controller->returnCoursesAndSessionsViewBySession($userId, true);
+$ajax_url = api_get_path(WEB_AJAX_PATH).'course.ajax.php?a=add_course_vote';
 /*
 echo "<pre>";
 echo var_dump($courseAndSessions);
@@ -171,9 +172,9 @@ if (empty($listActivos)) {
     $content .= Display::return_message("No hay curso activos", 'warning', true);
 }
 $content .= '<div class="row">';
-$content .= '<div class="col-md-12">';
+$content .= '<div id="list-hot-courses" class="grid-courses">'; //$content .= '<div class="col-md-12">';
 if (count($listActivos) > 0) {
-    $content .= '<table class="table data_table">';
+    //$content .= '<table class="table data_table">';
     
     foreach ($listActivos as $key => $value) {
         $sessionId = $key;
@@ -182,7 +183,64 @@ if (count($listActivos) > 0) {
         
         foreach ($value['courses'] as $courseItem) {
             $course = api_get_course_entity($courseItem['real_id']);
-            $imagePath = CourseManager::getPicturePath($course);
+            $course_info = api_get_course_info($course->getCode());
+            $imagePath = $course_info['course_image_large']; //CourseManager::getPicturePath($course, true);
+            
+            $content .= '<div class="col-xs-12 col-sm-6 col-md-4">';
+            $content .= '<div class="items items-hotcourse">';
+            $content .= '<div class="image">';
+            $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
+            $content .= '<img src="'.$imagePath.'" class="img-responsive" alt="'.htmlspecialchars($value['name']).'">';
+            $content .= '</a>';
+            
+            if (!empty($value['session_category_id'])) {
+                $content .= '<span class="category">'.$orderedCategories[$value['session_category_id']].'</span>';
+                $content .= '<div class="cribbon"></div>';
+            }
+            
+            $content .= '<div class="user-actions">'.CourseManager::returnDescriptionButton($course_info).'</div>';
+            $content .= '</div>';
+            $content .= '<div class="description">';
+            $content .= '<div class="block-title">';
+            $content .= '<h5 class="title">';
+                $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
+                $content .= htmlspecialchars($course->getTitle());
+                $content .= '</a>';
+            $content .= '</h5>';
+            $content .= '<h5><em>'.htmlspecialchars($value['name']).'</em></h5>';
+            $content .= '</div>';
+            
+            if (api_get_configuration_value('hide_course_rating') === false) {
+                $point_info = CourseManager::get_course_ranking($course_info['real_id'], 0);
+                $rating_html = Display::return_rating_system(
+                    'star_'.$course_info['real_id'],
+                    $ajax_url.'&course_id='.$course_info['real_id'],
+                    $point_info
+                );
+                $content .= '<div class="ranking">';
+                $content .= $rating_html;
+                $content .= '</div>';
+            }
+            /*
+            
+            $content .= '<div class="toolbar row">';
+            $content .= '<div class="col-sm-4">';
+            if (item.price) {
+                $content .= '{{ item.price }}';
+            }
+            $content .= '</div>';
+            $content .= '<div class="col-sm-8">';
+            $content .= '<div class="btn-group" role="group">';
+            $content .= '{{ item.register_button }}';
+            $content .= '{{ item.unsubscribe_button }}';
+            $content .= '</div>';
+            $content .= '</div>';
+            $content .= '</div>';
+            */
+            $content .= '</div>';
+            $content .= '</div>';
+            $content .= '</div>';
+            /*
             $content .= '<tr>';
             // Course image
             $content .= '<td>';
@@ -216,7 +274,7 @@ if (count($listActivos) > 0) {
             $coachSubscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
             
             if ($coachSubscriptions) {
-                /** @var SessionRelCourseRelUser $subscription */
+               
                 foreach ($coachSubscriptions as $subscription) {
                     $namesOfCoaches[] = $subscription->getUser()->getCompleteNameWithUserName();
                 }
@@ -238,9 +296,10 @@ if (count($listActivos) > 0) {
             $content .= '</td>';
             
             $content .= '</tr>';
+            */
         }
     }
-    $content .= '</table>';
+    //$content .= '</table>';
     
 }
 $content .= '</div>';
@@ -409,11 +468,16 @@ if (!empty($listPasados)) {
 //Display::display_footer();
 
 // Block Menu
-$menu = SocialManager::show_social_menu('home');
+// Block Menu
+$viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
+$menu = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu('home')
+    : SocialManager::show_social_menu('home');
 
 $tpl = new Template($toolName);
 SocialManager::setSocialUserBlock($tpl, $userId, 'home');
 $tpl->assign('social_menu_block', $menu);
+$tpl->assign('help_block', $controller->return_help());
 $tpl->assign('content', $content);
 /*
 $tpl->assign('add_post_form', $wallSocialAddPost);

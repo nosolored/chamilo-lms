@@ -32,7 +32,7 @@ $htmlHeadXtra[] = '
 
         }
         .menu-item-gestor a {
-            color: #337ab7;
+            color: #660000;
         }
         .panel-body {
             padding: 10px;
