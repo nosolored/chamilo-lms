@@ -49,6 +49,7 @@ plugin/vchamilo/templates/*
 
 # Stuff updated through composer - Remove just before release
 /vendor
+web/
 web/assets/*
 node_modules
 yarn.lock
