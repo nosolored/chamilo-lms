@@ -31,6 +31,17 @@ if (isset($_GET['action'], $_GET['id'])) {
         header('Location: '.api_get_self());
         exit;
     }
+    
+    if ($_GET['action'] == 'delete_country_payment') {
+        $plugin->deleteCountryRelPayment($_GET['id']);
+        
+        Display::addFlash(
+            Display::return_message(get_lang('ItemRemoved'), 'success')
+        );
+        
+        header('Location: '.api_get_self());
+        exit;
+    }
 }
 
 $globalSettingForm = new FormValidator('currency');
@@ -395,6 +406,60 @@ $culqiForm->addCheckBox('integration', null, $plugin->get_lang('Sandbox'));
 $culqiForm->addButtonSave(get_lang('Save'));
 $culqiForm->setDefaults($plugin->getCulqiParams());
 
+$countryRelPaymentForm = new FormValidator('country_rel_payment');
+
+if ($countryRelPaymentForm->validate()) {
+    $countryRelPaymentFormValues = $countryRelPaymentForm->getSubmitValues();
+
+    $plugin->saveCountryRelPayment($countryRelPaymentFormValues);
+
+    Display::addFlash(
+        Display::return_message(get_lang('Saved'), 'success')
+    );
+
+    header('Location:'.api_get_self());
+    exit;
+}
+
+//Select countries
+$countryList = $plugin->getCurrencies();
+$countrySelect = $countryRelPaymentForm->addSelect(
+    'country',
+    $plugin->get_lang('Country'),
+    [get_lang('Select')]
+);
+
+foreach ($countryList as $country) {
+    $countrySelect->addOption($country['country_name'], $country['country_name']);
+}
+
+//Select paymentTypes
+$paymentSelect = $countryRelPaymentForm->addSelect(
+    'payment_type',
+    $plugin->get_lang('PaymentType'),
+    [get_lang('Select')]
+);
+
+if ($paypalEnable === 'true') {
+    $paymentSelect->addOption('PayPal', BuyCoursesPlugin::PAYMENT_TYPE_PAYPAL);
+}
+
+if ($transferEnable === 'true') {
+    $paymentSelect->addOption($plugin->get_lang('BankTransfer'), BuyCoursesPlugin::PAYMENT_TYPE_TRANSFER);
+}
+
+if ($tpvRedsysEnable === 'true') {
+    $paymentSelect->addOption($plugin->get_lang('TpvPayment'), BuyCoursesPlugin::PAYMENT_TYPE_TPV_REDSYS);
+}
+
+if ($culqiEnable === 'true') {
+    $paymentSelect->addOption('Culqi', BuyCoursesPlugin::PAYMENT_TYPE_CULQI);
+}
+
+$countryRelPaymentForm->addButtonCreate(get_lang('Add'));
+
+$countryPaymentTypes = $plugin->getCountryPayments();
+
 // breadcrumbs
 $interbreadcrumb[] = [
     'url' => api_get_path(WEB_PLUGIN_PATH).'buycourses/index.php',
@@ -419,6 +484,8 @@ $tpl->assign('transfer_enable', $transferEnable);
 $tpl->assign('culqi_enable', $culqiEnable);
 $tpl->assign('tpv_redsys_enable', $tpvRedsysEnable);
 $tpl->assign('tpv_redsys_form', $htmlTpvRedsys);
+$tpl->assign('country_rel_payment_form', $countryRelPaymentForm->returnForm());
+$tpl->assign('country_payment_types', $countryPaymentTypes);
 
 $content = $tpl->fetch('buycourses/view/paymentsetup.tpl');
 

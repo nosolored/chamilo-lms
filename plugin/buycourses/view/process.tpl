@@ -41,6 +41,18 @@
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
                                     {{ course.item.total_price_formatted }}
                                 </div>
+                                {% if course.item.has_coupon %}
+                                    <div class="price-details-tax">
+                                        {{ 'DiscountAmount'|get_plugin_lang('BuyCoursesPlugin') }}:
+                                        {{ course.item.discount_amount_formatted }}
+                                    </div>
+                                {% endif %}
+                                <div class="coupon-question">
+                                    {{ 'DoYouHaveACoupon'|get_plugin_lang('BuyCoursesPlugin') }}
+                                </div>
+                                <div class="coupon">
+                                    {{ form_coupon }}
+                                </div>
                             </div>
                             <div class="col-md-9">
                                 <div class="buy-item">
@@ -89,6 +101,18 @@
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
                                     {{ session.item.total_price_formatted }}
                                 </div>
+                                {% if session.item.has_coupon %}
+                                    <div class="price-details-tax">
+                                        {{ 'DiscountAmount'|get_plugin_lang('BuyCoursesPlugin') }}:
+                                        {{ session.item.discount_amount_formatted }}
+                                    </div>
+                                {% endif %}
+                                <div class="coupon-question">
+                                    {{ 'DoYouHaveACoupon'|get_plugin_lang('BuyCoursesPlugin') }}
+                                </div>
+                                <div class="coupon">
+                                    {{ form_coupon }}
+                                </div>
                             </div>
                             <div class="col-md-9">
                                 <div class="buy-item">
@@ -127,7 +151,11 @@
                 </div>
                 <div class="buy-summary">
                     <h3>{{ 'PaymentMethods'|get_plugin_lang('BuyCoursesPlugin') }}</h3>
-                    {{ form }}
+                    {% if message_payment %}
+                        {{ message_payment }}
+                    {% else %}
+                        {{ form }}
+                    {% endif %}
                 </div>
             </div>
         </div>

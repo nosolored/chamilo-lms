@@ -136,3 +136,56 @@
         </div>
     </div>
 {% endif %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{{ 'CountryRelPaymentConfig'|get_plugin_lang('BuyCoursesPlugin') }}</h3>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                {{ country_rel_payment_form }}
+            </div>
+            <div class="col-md-12">
+                <p class="alert alert-info">{{ 'CountryRelPaymentMessage'|get_plugin_lang('BuyCoursesPlugin') }}</p>
+                <div class="table-responsive">
+                
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>{{ 'Country'|get_plugin_lang('BuyCoursesPlugin') }}</th>
+                            <th>{{ 'PaymentType'|get_plugin_lang('BuyCoursesPlugin') }}</th>
+                            <th>{{ 'Actions'|get_lang }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in country_payment_types %}
+                            <tr>
+                                <td>{{ item.country }}</td>
+                                {% if item.payment_type  == "1" %}
+                                    <td>PayPal</td>
+                                {% elseif item.payment_type  == "2" %}
+                                    <td>{{ 'BankTransfer'|get_plugin_lang('BuyCoursesPlugin') }}</td>
+                                {% elseif item.payment_type  == "3" %}
+                                    <td>Culqi</td>
+                                {% elseif item.payment_type  == "4" %}
+                                    <td>{{ 'TpvPayment'|get_plugin_lang('BuyCoursesPlugin') }}</td>
+                                {% else %}
+                                    <td>-</td>
+                                {% endif %}
+                                <td>
+                                    <a href="{{ _p.web_self ~ '?' ~ {'action':'delete_country_payment', 'id': item.id}|url_encode() }}"
+                                       class="btn btn-danger btn-sm">
+                                        <em class="fa fa-remove"></em> {{ 'Delete'|get_lang }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
