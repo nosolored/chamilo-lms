@@ -31,14 +31,14 @@ if (isset($_GET['action'], $_GET['id'])) {
         header('Location: '.api_get_self());
         exit;
     }
-    
+
     if ($_GET['action'] == 'delete_country_payment') {
         $plugin->deleteCountryRelPayment($_GET['id']);
-        
+
         Display::addFlash(
             Display::return_message(get_lang('ItemRemoved'), 'success')
         );
-        
+
         header('Location: '.api_get_self());
         exit;
     }

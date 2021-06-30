@@ -96,8 +96,8 @@ SocialManager::getScrollJs($countPost, $htmlHeadXtra);
 // Block Menu
 $viewQuickAccessMenu = api_get_configuration_value('view_quick_access_menu');
 
-$menu = $viewQuickAccessMenu 
-    ? SocialManager::show_quick_access_menu('home') 
+$menu = $viewQuickAccessMenu
+    ? SocialManager::show_quick_access_menu('home')
     : SocialManager::show_social_menu('home');
 
 $social_search_block = Display::panel(
@@ -135,7 +135,6 @@ $formSearch->addText(
 );
 
 $controller = new IndexManager('Social');
-
 
 // Promotions Plugins
 require_once api_get_path(SYS_PLUGIN_PATH).'promotions/src/PromotionsPlugin.php';

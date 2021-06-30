@@ -736,8 +736,7 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
             ['country = ? AND payment_type = ?' => [$params['country'], (int) $params['paymente_type']]]
         );
-        
-        
+
         return Database::insert(
             Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
             [
@@ -762,8 +761,7 @@ class BuyCoursesPlugin extends Plugin
             ['id = ?' => (int) $id]
         );
     }
-    
-    
+
     /**
      * Get registered item data.
      *
