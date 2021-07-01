@@ -507,7 +507,7 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUNTRY_REL_PAYMENT)) {
         Types::INTEGER,
         ['autoincrement' => true, 'unsigned' => true]
     );
-    $countryPaymentTable->addColumn('country', Types::STRING);
+    $countryPaymentTable->addColumn('currency_id', Types::INTEGER);
     $countryPaymentTable->addColumn('payment_type', Types::INTEGER);
     $countryPaymentTable->addColumn('date_reg', Types::DATETIME_MUTABLE);
     $countryPaymentTable->setPrimaryKey(['id']);

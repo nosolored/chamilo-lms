@@ -421,7 +421,90 @@ if ($countryRelPaymentForm->validate()) {
     exit;
 }
 
-//Select countries
+//WIP 2021/07/01 JCP
+
+$countries = [];
+$countryList = $plugin->getCurrencies();
+foreach ($countryList as $country) {
+    $countries[$country['id']] = $country['country_name'].' ('.$country['iso_code'].')';
+}
+
+$paypalCountriesPayment = [];
+if ($paypalEnable === 'true') {
+    $paypalCountriesPayment = $plugin->getCountryPayments(BuyCoursesPlugin::PAYMENT_TYPE_PAYPAL);
+
+    if (!empty($paypalCountriesPayment)) {
+        $paypalCountriesPayment = array_column($paypalCountriesPayment, 'currency_id');
+    }
+
+    $countryRelPaymentForm->addElement(
+        'advmultiselect',
+        'paypalselect',
+        'PayPal',
+        $countries
+    );
+}
+
+$transferCountriesPayment = [];
+if ($transferEnable === 'true') {
+    $transferCountriesPayment = $plugin->getCountryPayments(BuyCoursesPlugin::PAYMENT_TYPE_TRANSFER);
+
+    if (!empty($transferCountriesPayment)) {
+        $transferCountriesPayment = array_column($transferCountriesPayment, 'currency_id');
+    }
+
+    $countryRelPaymentForm->addElement(
+        'advmultiselect',
+        'transferCountries',
+        $plugin->get_lang('BankTransfer'),
+        $countries
+    );
+}
+
+$tpvCountriesPayment = [];
+if ($tpvRedsysEnable === 'true') {
+    $tpvCountriesPayment = $plugin->getCountryPayments(BuyCoursesPlugin::PAYMENT_TYPE_TPV_REDSYS);
+
+    if (!empty($tpvCountriesPayment)) {
+        $tpvCountriesPayment = array_column($tpvCountriesPayment, 'currency_id');
+    }
+
+    $countryRelPaymentForm->addElement(
+        'advmultiselect',
+        'tpvCountries',
+        $plugin->get_lang('TpvPayment'),
+        $countries
+    );
+}
+
+$culquiCountriesPayment = [];
+if ($culqiEnable === 'true') {
+    $culquiCountriesPayment = $plugin->getCountryPayments(BuyCoursesPlugin::PAYMENT_TYPE_CULQI);
+
+    if (!empty($culquiCountriesPayment)) {
+        $culquiCountriesPayment = array_column($culquiCountriesPayment, 'currency_id');
+    }
+
+    $countryRelPaymentForm->addElement(
+        'advmultiselect',
+        'culquiCountries',
+        'Culqi',
+        $countries
+    );
+}
+
+$countryRelPaymentFormDefaults = [
+    'paypalselect' => $paypalCountriesPayment,
+    'transferCountries' => $transferCountriesPayment,
+    'tpvCountries' => $tpvCountriesPayment,
+    'culquiCountries' => $culquiCountriesPayment,
+];
+
+$countryRelPaymentForm->setDefaults($countryRelPaymentFormDefaults);
+
+//END WIP 2021/07/01 JCP
+
+/*//Select countries
 $countryList = $plugin->getCurrencies();
 $countrySelect = $countryRelPaymentForm->addSelect(
     'country',
@@ -458,7 +541,7 @@ if ($culqiEnable === 'true') {
 
 $countryRelPaymentForm->addButtonCreate(get_lang('Add'));
 
-$countryPaymentTypes = $plugin->getCountryPayments();
+$countryPaymentTypes = $plugin->getCountryPayments();*/
 
 // breadcrumbs
 $interbreadcrumb[] = [
@@ -485,7 +568,7 @@ $tpl->assign('culqi_enable', $culqiEnable);
 $tpl->assign('tpv_redsys_enable', $tpvRedsysEnable);
 $tpl->assign('tpv_redsys_form', $htmlTpvRedsys);
 $tpl->assign('country_rel_payment_form', $countryRelPaymentForm->returnForm());
-$tpl->assign('country_payment_types', $countryPaymentTypes);
+//$tpl->assign('country_payment_types', $countryPaymentTypes);
 
 $content = $tpl->fetch('buycourses/view/paymentsetup.tpl');
 

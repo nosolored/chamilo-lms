@@ -156,6 +156,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SERVICE,
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
+            self::TABLE_COUNTRY_REL_PAYMENT,
         ];
         $em = Database::getManager();
         $cn = $em->getConnection();
@@ -194,6 +195,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SERVICE,
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
+            self::TABLE_COUNTRY_REL_PAYMENT,
         ];
 
         foreach ($tablesToBeDeleted as $tableToBeDeleted) {
@@ -410,6 +412,16 @@ class BuyCoursesPlugin extends Plugin
             id int unsigned NOT NULL AUTO_INCREMENT,
             coupon_id int unsigned NOT NULL,
             service_sale_id int unsigned NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_COUNTRY_REL_PAYMENT;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            currency_id int unsigned NOT NULL,
+            payment_type int unsigned NOT NULL,
+            date_reg datetime NOT NULL,
             PRIMARY KEY (id)
         )";
         Database::query($sql);
@@ -698,14 +710,33 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get a list of countries and payment types.
      *
+     * @param int $paymentType The payment type ID
+     *
      * @return array
      */
-    public function getCountryPayments()
+    public function getCountryPayments($paymentType = null)
     {
+        $countryPaymentTable = Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+
+        $from = "
+            $countryPaymentTable cp
+            INNER JOIN $currencyTable c
+                on c.id = cp.currency_id
+        ";
+
+        $where = [];
+        if ($paymentType != null) {
+            $where = ['payment_type = ?' => (int) $paymentType];
+        }
+
         return Database::select(
-            '*',
-            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT)
+            ['cp.id', 'cp.currency_id', 'c.country_name', 'c.iso_code', 'cp.payment_type', 'cp.date_reg'],
+            $from,
+            ['WHERE' => $where ]
         );
+
+        //getCurrenciesPayment
     }
 
     /**
