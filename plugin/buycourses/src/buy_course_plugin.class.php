@@ -727,7 +727,7 @@ class BuyCoursesPlugin extends Plugin
 
         $where = [];
         if ($paymentType != null) {
-            $where = ['payment_type = ?' => (int) $paymentType];
+            $where = ['cp.payment_type = ?' => (int) $paymentType];
         }
 
         return Database::select(
@@ -735,8 +735,33 @@ class BuyCoursesPlugin extends Plugin
             $from,
             ['WHERE' => $where ]
         );
+    }
 
-        //getCurrenciesPayment
+    /**
+     * Remove a transfer account.
+     *
+     * @param string $country The country name
+     *
+     * @return array
+     */
+    public function getPaymentsByCountry($country)
+    {
+        $countryPaymentTable = Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+
+        $from = "
+            $countryPaymentTable cp
+            INNER JOIN $currencyTable c
+                on c.id = cp.currency_id
+        ";
+
+        $country = Database::escape_string($country);
+
+        return Database::select(
+            ['cp.*'],
+            $from,
+            ['c.country_name = ?' => (string) $country]
+        );
     }
 
     /**
@@ -794,22 +819,6 @@ class BuyCoursesPlugin extends Plugin
             }
         }
     }
-
-    /**
-     * Remove a relation country and payment type.
-     *
-     * @param int $id The transfer account ID
-     *
-     * @return int Rows affected. Otherwise return false
-     */
-    public function deleteCountryRelPayment($id)
-    {
-        return Database::delete(
-            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
-            ['id = ?' => (int) $id]
-        );
-    }
-    
     
     /**
      * Get registered item data.

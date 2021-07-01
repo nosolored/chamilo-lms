@@ -115,13 +115,7 @@ if (empty($extraData['extra_country'])) {
         'warning'
     );
 } else {
-    $listCountryPayment = Database::select(
-        '*',
-        Database::get_main_table(BuyCoursesPlugin::TABLE_COUNTRY_REL_PAYMENT),
-        [
-            'where' => ['country = ?' => Database::escape_string($extraData['extra_country'])],
-        ]
-    );
+    $listCountryPayment = $plugin->getPaymentsByCountry($extraData['extra_country']);
 
     $paymentTypesRelCountries = [];
     foreach ($listCountryPayment as $itemCountryPayment) {
