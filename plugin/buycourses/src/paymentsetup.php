@@ -411,7 +411,12 @@ $countryRelPaymentForm = new FormValidator('country_rel_payment');
 if ($countryRelPaymentForm->validate()) {
     $countryRelPaymentFormValues = $countryRelPaymentForm->getSubmitValues();
 
-    $plugin->saveCountryRelPayment($countryRelPaymentFormValues);
+    $paypalSelectedCountries = isset($countryRelPaymentFormValues['paypalcountries']) ? $countryRelPaymentFormValues['paypalcountries'] : [];
+    $transferSelectedCountries = isset($countryRelPaymentFormValues['transfercountries']) ? $countryRelPaymentFormValues['transfercountries'] : [];
+    $tpvSelectedCountries = isset($countryRelPaymentFormValues['tpvcountries']) ? $countryRelPaymentFormValues['tpvcountries'] : [];
+    $culquiSelectedCountries = isset($countryRelPaymentFormValues['culqicountries']) ? $countryRelPaymentFormValues['culqicountries'] : [];
+
+    $plugin->saveCountryRelPayment($paypalSelectedCountries, $transferSelectedCountries, $tpvSelectedCountries, $culquiSelectedCountries);
 
     Display::addFlash(
         Display::return_message(get_lang('Saved'), 'success')
@@ -420,8 +425,6 @@ if ($countryRelPaymentForm->validate()) {
     header('Location:'.api_get_self());
     exit;
 }
-
-//WIP 2021/07/01 JCP
 
 $countries = [];
 $countryList = $plugin->getCurrencies();
@@ -439,7 +442,7 @@ if ($paypalEnable === 'true') {
 
     $countryRelPaymentForm->addElement(
         'advmultiselect',
-        'paypalselect',
+        'paypalcountries',
         'PayPal',
         $countries
     );
@@ -455,7 +458,7 @@ if ($transferEnable === 'true') {
 
     $countryRelPaymentForm->addElement(
         'advmultiselect',
-        'transferCountries',
+        'transfercountries',
         $plugin->get_lang('BankTransfer'),
         $countries
     );
@@ -471,7 +474,7 @@ if ($tpvRedsysEnable === 'true') {
 
     $countryRelPaymentForm->addElement(
         'advmultiselect',
-        'tpvCountries',
+        'tpvcountries',
         $plugin->get_lang('TpvPayment'),
         $countries
     );
@@ -487,61 +490,22 @@ if ($culqiEnable === 'true') {
 
     $countryRelPaymentForm->addElement(
         'advmultiselect',
-        'culquiCountries',
+        'culqicountries',
         'Culqi',
         $countries
     );
 }
 
+$countryRelPaymentForm->addButtonCreate(get_lang('Add'));
+
 $countryRelPaymentFormDefaults = [
-    'paypalselect' => $paypalCountriesPayment,
-    'transferCountries' => $transferCountriesPayment,
-    'tpvCountries' => $tpvCountriesPayment,
-    'culquiCountries' => $culquiCountriesPayment,
+    'paypalcountries' => $paypalCountriesPayment,
+    'transfercountries' => $transferCountriesPayment,
+    'tpvcountries' => $tpvCountriesPayment,
+    'culqicountries' => $culquiCountriesPayment,
 ];
 
 $countryRelPaymentForm->setDefaults($countryRelPaymentFormDefaults);
-
-//END WIP 2021/07/01 JCP
-
-/*//Select countries
-$countryList = $plugin->getCurrencies();
-$countrySelect = $countryRelPaymentForm->addSelect(
-    'country',
-    $plugin->get_lang('Country'),
-    [get_lang('Select')]
-);
-
-foreach ($countryList as $country) {
-    $countrySelect->addOption($country['country_name'], $country['country_name']);
-}
-
-//Select paymentTypes
-$paymentSelect = $countryRelPaymentForm->addSelect(
-    'payment_type',
-    $plugin->get_lang('PaymentType'),
-    [get_lang('Select')]
-);
-
-if ($paypalEnable === 'true') {
-    $paymentSelect->addOption('PayPal', BuyCoursesPlugin::PAYMENT_TYPE_PAYPAL);
-}
-
-if ($transferEnable === 'true') {
-    $paymentSelect->addOption($plugin->get_lang('BankTransfer'), BuyCoursesPlugin::PAYMENT_TYPE_TRANSFER);
-}
-
-if ($tpvRedsysEnable === 'true') {
-    $paymentSelect->addOption($plugin->get_lang('TpvPayment'), BuyCoursesPlugin::PAYMENT_TYPE_TPV_REDSYS);
-}
-
-if ($culqiEnable === 'true') {
-    $paymentSelect->addOption('Culqi', BuyCoursesPlugin::PAYMENT_TYPE_CULQI);
-}
-
-$countryRelPaymentForm->addButtonCreate(get_lang('Add'));
-
-$countryPaymentTypes = $plugin->getCountryPayments();*/
 
 // breadcrumbs
 $interbreadcrumb[] = [
@@ -568,7 +532,6 @@ $tpl->assign('culqi_enable', $culqiEnable);
 $tpl->assign('tpv_redsys_enable', $tpvRedsysEnable);
 $tpl->assign('tpv_redsys_form', $htmlTpvRedsys);
 $tpl->assign('country_rel_payment_form', $countryRelPaymentForm->returnForm());
-//$tpl->assign('country_payment_types', $countryPaymentTypes);
 
 $content = $tpl->fetch('buycourses/view/paymentsetup.tpl');
 

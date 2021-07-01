@@ -757,26 +757,42 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Save a relation between country and payment type.
      *
-     * @param array $params The relation info
+     * @param array $paypalSelectedCountries Currencies countries IDs for Paypal payments
+     * @param array $paypalSelectedCountries Currencies countries IDs for Paypal payments
+     * @param array $paypalSelectedCountries Currencies countries IDs for Paypal payments
+     * @param array $paypalSelectedCountries Currencies countries IDs for Paypal payments
      *
      * @return int Rows affected. Otherwise return false
      */
-    public function saveCountryRelPayment($params)
+    public function saveCountryRelPayment($paypalSelectedCountries, $transferSelectedCountries, $tpvSelectedCountries, $culquiSelectedCountries)
     {
-        $affectedRows = Database::delete(
-            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
-            ['country = ? AND payment_type = ?' => [$params['country'], (int) $params['paymente_type']]]
-        );
+        if (!empty($paypalSelectedCountries)) {
+            $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_PAYPAL);
+            foreach ($paypalSelectedCountries as $countryCurrency) {
+                $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_PAYPAL);
+            }
+        }
         
-        
-        return Database::insert(
-            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
-            [
-                'country' => $params['country'],
-                'payment_type' => $params['payment_type'],
-                'date_reg' => date("Y-m-d H:i"),
-            ]
-        );
+        if (!empty($transferSelectedCountries)) {
+            $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_TRANSFER);
+            foreach ($transferSelectedCountries as $countryCurrency) {
+                $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_TRANSFER);
+            }
+        }
+
+        if (!empty($tpvSelectedCountries)) {
+            $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_TPV_REDSYS);
+            foreach ($tpvSelectedCountries as $countryCurrency) {
+                $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_TPV_REDSYS);
+            }
+        }
+
+        if (!empty($culquiSelectedCountries)) {
+            $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_CULQI);
+            foreach ($culquiSelectedCountries as $countryCurrency) {
+                $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_CULQI);
+            }
+        }
     }
 
     /**
@@ -4357,6 +4373,43 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_COUPON_SERVICE),
             [
                 'coupon_id = ?' => (int) $couponId,
+            ]
+        );
+    }
+
+    /**
+     * Save a relation between country and payment type.
+     *
+     * @param int $country     The currency country ID type
+     * @param int $paymentType The payment type
+     *
+     * @return int Rows affected. Otherwise return false
+     */
+    private function saveCountryPayment($country, $paymentType)
+    {
+        return Database::insert(
+            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
+            [
+                'currency_id' => $country,
+                'payment_type' => $paymentType,
+                'date_reg' => date("Y-m-d H:i"),
+            ]
+        );
+    }
+
+    /**
+     * Remove all country payments for a product type.
+     *
+     * @param int $paymentType The payment type
+     *
+     * @return int Rows affected. Otherwise return false
+     */
+    private function deleteCountryPaymentsByPaymentType($paymentType)
+    {
+        return Database::delete(
+            Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
+            [
+                'payment_type = ?' => (int) $paymentType,
             ]
         );
     }
