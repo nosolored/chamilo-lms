@@ -733,7 +733,7 @@ class BuyCoursesPlugin extends Plugin
         return Database::select(
             ['cp.id', 'cp.currency_id', 'c.country_name', 'c.iso_code', 'cp.payment_type', 'cp.date_reg'],
             $from,
-            ['WHERE' => $where ]
+            ['WHERE' => $where]
         );
 
         //getCurrenciesPayment
@@ -767,8 +767,7 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
             ['country = ? AND payment_type = ?' => [$params['country'], (int) $params['paymente_type']]]
         );
-        
-        
+
         return Database::insert(
             Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
             [
@@ -793,8 +792,7 @@ class BuyCoursesPlugin extends Plugin
             ['id = ?' => (int) $id]
         );
     }
-    
-    
+
     /**
      * Get registered item data.
      *
