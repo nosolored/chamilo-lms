@@ -307,10 +307,10 @@ if (api_is_student()) {
     $zoomHtml = '<div class="alert alert-warning">Sin salas de videoconferencia próximas</div>';
     $zoomMeetingList = $zoomMeetingDate = [];
     $now = strtotime(date("Y-m-d"));
-    
+
     $controller = new IndexManager(get_lang('MyCourses'));
     $courseAndSessions = $controller->returnCoursesAndSessionsViewBySession(api_get_user_id(), true);
-    
+
     foreach ($courseAndSessions['sessions'] as $catSession) {
         foreach ($catSession['sessions'] as $sessionItem) {
             $sessionItemId = $sessionItem['session_id'];
@@ -320,10 +320,10 @@ if (api_is_student()) {
                 if ($courseItemVisibilty == COURSE_VISIBILITY_HIDDEN) {
                     continue;
                 }
-                
+
                 $courseInfo = api_get_course_info($courseItemCode);
                 $courseId = $courseInfo['real_id'];
-                
+
                 $sql = "SELECT * FROM plugin_zoom_meeting
                     WHERE course_id=$courseId AND session_id=$sessionItemId
                     ORDER BY start_time ASC";
@@ -338,9 +338,9 @@ if (api_is_student()) {
             }
         }
     }
-    
+
     array_multisort($zoomMeetingDate, $zoomMeetingList);
-    
+
     if (!empty($zoomMeetingList)) {
         $pluginZoom = ZoomPlugin::create();
         $zoomHtml = '<div class="panel panel-default">';
@@ -354,7 +354,7 @@ if (api_is_student()) {
         //$zoomHtml .= '<th>'.$pluginZoom->get_lang('Duration').'</th>';
         $zoomHtml .= '<th>'.$pluginZoom->get_lang('Actions').'</th>';
         $zoomHtml .= '</tr>';
-        
+
         $em = Database::getManager();
         $i = 0;
         $limRow = api_get_configuration_value('limit_row_meeting') ? api_get_configuration_value('limit_row_meeting') : 10;
@@ -373,7 +373,7 @@ if (api_is_student()) {
             */
             $zoomHtml .= '<td>'.$meeting->startDateTime->format('d-m-Y H:i').'</td>';
             //$zoomHtml .= '<td>'.$meetingInfoGet->duration.'</td>';
-            
+
             $zoomHtml .= '<td>';
             if (!$meeting->checkStartDateTime()) {
                 $zoomHtml .= 'No disponible';
@@ -383,7 +383,7 @@ if (api_is_student()) {
                 $zoomHtml .= '</a>';
             }
             $zoomHtml .= '</td>';
-            
+
             $zoomHtml .= '</tr>';
             $i++;
         }
@@ -396,4 +396,3 @@ if (api_is_student()) {
 } else {
     $tpl->display_one_col_template();
 }
-

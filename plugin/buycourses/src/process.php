@@ -125,7 +125,7 @@ if (empty($extraData['extra_country'])) {
 
     $paymentTypesRelCountries = [];
     foreach ($listCountryPayment as $itemCountryPayment) {
-        $paymentTypesRelCountries[] = $itemCountryPayment['payment_type']; 
+        $paymentTypesRelCountries[] = $itemCountryPayment['payment_type'];
     }
 
     foreach ($paymentTypesOptions as $key => $itemPayment) {
