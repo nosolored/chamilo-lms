@@ -153,7 +153,7 @@
             </div>
         </div>
     {% endif %}
-    {% if services_are_included %}
+    {% if services_are_included and services %}
         <a href="{{ _p.web_plugin ~ 'buycourses/src/services_add.php' }}" class="btn btn-primary">
             <em class="fa fa-cart-plus fa-fw"></em> {{ 'NewService'| get_plugin_lang('BuyCoursesPlugin') }}
         </a>
