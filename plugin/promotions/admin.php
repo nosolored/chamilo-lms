@@ -26,7 +26,7 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
             ['delete_at' => date("Y-m-d"), 'is_delete' => 1],
             ['id = ? ' => (int) $_GET['delete_id']]
         );
-    
+
         Display::addFlash(Display::return_message($plugin->get_lang('PromotionDeleted')));
         header('Location: admin.php');
         exit;
@@ -35,27 +35,27 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
     $nameTools = $plugin->get_lang("Promotions");
     Display::display_header($nameTools);
     echo Display::page_header($nameTools);
-    
+
     $form = new FormValidator('promotions');
-    
+
     $form->addTextarea('content', $plugin->get_lang('Content'), ['cols-size' => [2, 8, 2], 'rows' => 5]);
     $form->addRule('content', get_lang('ThisFieldIsRequired'), 'required');
 
     $form->addDateTimePicker(
         'end_at',
         $plugin->get_lang('EndAt'),
-        array('id' => 'end_at', 'cols-size' => [2, 8, 2])
+        ['id' => 'end_at', 'cols-size' => [2, 8, 2]]
     );
     $form->addRule('end_at', get_lang('ThisFieldIsRequired'), 'required');
-    
+
     $group = [
-        $form->addButtonSave(get_lang('Save'), 'submit', true)
+        $form->addButtonSave(get_lang('Save'), 'submit', true),
     ];
     $form->addGroup($group);
-    
+
     if ($form->validate()) {
         $formValues = $form->getSubmitValues();
-        
+
         $check = Security::check_token('post');
         if ($check) {
             $params = [
@@ -68,7 +68,6 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
             Database::insert(PromotionsPlugin::TABLE_PROMOTIONS, $params);
             $promotionsId = Database::insert_id();
 
-            
             Display::addFlash(Display::return_message($plugin->get_lang('CreatedPromotions')));
             header('Location: admin.php');
             exit;
@@ -78,16 +77,16 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
             exit;
         }
     }
-    
+
     if (isset($_POST['submit'])) {
         Security::clear_token();
     }
     $token = Security::get_token();
     $form->addElement('hidden', 'sec_token');
-    $form->setConstants(array('sec_token' => $token));
+    $form->setConstants(['sec_token' => $token]);
 
     $form->display();
-    
+
     $contentHtml = Display::page_subheader2(
         $plugin->get_lang('PromotionsList')
     );
@@ -101,38 +100,38 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
             ],
         ]
     );
-    
+
     if (count($promotionsData) > 0) {
         $header = [
             ['ID', true],
             [$plugin->get_lang('Content'), true],
             [$plugin->get_lang('CreateAt'), true],
             [$plugin->get_lang('EndAt'), true],
-            [get_lang('Actions'), false]
+            [get_lang('Actions'), false],
         ];
-        
+
         $deleteIcon = Display::return_icon(
             'icons/22/delete.png',
             $plugin->get_lang('DeletePromotions'),
-            array(),
+            [],
             ICON_SIZE_SMALL
         );
-        
-        $data = array();
+
+        $data = [];
         foreach ($promotionsData as $item) {
             $options = Display::url(
                 $deleteIcon,
                 'admin.php?delete_id='.$item['id'],
                 ['class' => 'delete_promotion']
             );
-            
-            $row = array(
+
+            $row = [
                 $item['id'],
                 $item['content'],
                 date("d/m/Y H:i:s", strtotime($item['create_at'])),
                 date("d/m/Y H:i:s", strtotime($item['ends_at'])),
-                $options
-            );
+                $options,
+            ];
             $data[] = $row;
         }
 
@@ -140,11 +139,10 @@ if ($isEnabled == "true" && $isPlatformAdmin) {
             $header,
             $data
         );
-        
     } else {
         $contentHtml .= '<div class="alert alert-warning">'.$plugin->get_lang('NoPromotions').'</div>';
     }
-    
+
     echo $contentHtml;
 
     Display::display_footer();
