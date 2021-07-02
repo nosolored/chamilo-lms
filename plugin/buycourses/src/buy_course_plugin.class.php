@@ -733,7 +733,7 @@ class BuyCoursesPlugin extends Plugin
         return Database::select(
             ['cp.id', 'cp.currency_id', 'c.country_name', 'c.iso_code', 'cp.payment_type', 'cp.date_reg'],
             $from,
-            ['WHERE' => $where ]
+            ['WHERE' => $where]
         );
     }
 
@@ -797,7 +797,7 @@ class BuyCoursesPlugin extends Plugin
                 $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_PAYPAL);
             }
         }
-        
+
         if (!empty($transferSelectedCountries)) {
             $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_TRANSFER);
             foreach ($transferSelectedCountries as $countryCurrency) {
@@ -819,7 +819,7 @@ class BuyCoursesPlugin extends Plugin
             }
         }
     }
-    
+
     /**
      * Get registered item data.
      *
