@@ -69,13 +69,51 @@ if (!$culqiEnabled) {
     unset($paymentTypesOptions[BuyCoursesPlugin::PAYMENT_TYPE_CULQI]);
 }
 
-$form->addHtml(
-    Display::return_message(
-        $plugin->get_lang('PleaseSelectThePaymentMethodBeforeConfirmYourOrder'),
-        'info'
-    )
-);
-$form->addRadio('payment_type', null, $paymentTypesOptions);
+$messagePayment = '';
+$extraField = new ExtraField('user');
+$extraData = $extraField->get_handler_extra_data(api_get_user_id());
+if (empty($extraData['extra_country'])) {
+    $messagePayment = Display::return_message(
+        $plugin->get_lang('CountryEmpty'),
+        'warning'
+    );
+} else {
+    $listCountryPayment = $plugin->getPaymentsByCountry($extraData['extra_country']);
+
+    $paymentTypesRelCountries = [];
+    foreach ($listCountryPayment as $itemCountryPayment) {
+        $paymentTypesRelCountries[] = $itemCountryPayment['payment_type'];
+    }
+
+    foreach ($paymentTypesOptions as $key => $itemPayment) {
+        if (in_array($key, $paymentTypesRelCountries) === false) {
+            unset($paymentTypesOptions[$key]);
+        }
+    }
+}
+
+$count = count($paymentTypesOptions);
+if ($count === 0) {
+    $form->addHtml($plugin->get_lang('NoPaymentOptionAvailable'));
+    $form->addHtml('<br />');
+    $form->addHtml('<br />');
+} elseif ($count === 1) {
+    // get the only array item
+    foreach ($paymentTypesOptions as $type => $value) {
+        $form->addHtml(sprintf($plugin->get_lang('XIsOnlyPaymentMethodAvailable'), $value));
+        $form->addHtml('<br />');
+        $form->addHtml('<br />');
+        $form->addHidden('payment_type', $type);
+    }
+} else {
+    $form->addHtml(
+        Display::return_message(
+            $plugin->get_lang('PleaseSelectThePaymentMethodBeforeConfirmYourOrder'),
+            'info'
+        )
+    );
+    $form->addRadio('payment_type', null, $paymentTypesOptions);
+}
 
 $infoRequired = false;
 if ($typeUser || $typeCourse || $typeSession || $typeFinalLp) {
