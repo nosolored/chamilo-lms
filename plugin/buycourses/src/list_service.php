@@ -55,6 +55,7 @@ $tpl->assign('sessions_are_included', $includeSession);
 $tpl->assign('services_are_included', $includeServices);
 $tpl->assign('tax_enable', $taxEnable);
 $tpl->assign('services', $services);
+$tpl->assign('show_services_add_button', true);
 $tpl->assign('service_pagination', $pagination);
 
 if ($taxEnable) {
