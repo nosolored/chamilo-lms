@@ -738,7 +738,7 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
-     * Remove a transfer account.
+     * Get pyaments types for a country.
      *
      * @param string $country The country name
      *
@@ -760,7 +760,9 @@ class BuyCoursesPlugin extends Plugin
         return Database::select(
             ['cp.*'],
             $from,
-            ['c.country_name = ?' => (string) $country]
+            [
+                'where' => ['c.country_name = ?' => (string) $country]
+            ]
         );
     }
 
