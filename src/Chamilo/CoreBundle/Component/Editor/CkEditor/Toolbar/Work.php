@@ -79,7 +79,7 @@ class Work extends Basic
         return [
             ['Maxmize', '-', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio','Furigana'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio', 'Furigana'],
             ['Table', 'Smiley'],
             '/',
             ['Font', 'FontSize'],
@@ -99,7 +99,7 @@ class Work extends Basic
         return [
             $this->getNewPageBlock(),
             ['Undo', 'Redo'],
-            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'VimeoEmbed', 'Audio', 'Table', 'Asciimath','Furigana'],
+            ['Link', 'Image', 'Video', 'Flash', 'Youtube', 'VimeoEmbed', 'Audio', 'Table', 'Asciimath', 'Furigana'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
             ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'TextColor', 'BGColor'],
             ['Toolbarswitch'],

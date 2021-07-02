@@ -36,7 +36,7 @@ class Forum extends Basic
         return [
             ['Save', 'Maximize', 'PasteFromWord', '-', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio','Furigana'],
+            ['Image', 'Video', 'Flash', 'Oembed', 'Youtube', 'VimeoEmbed', 'Audio', 'Furigana'],
             ['Table', 'SpecialChar'],
             [
                 'NumberedList',
