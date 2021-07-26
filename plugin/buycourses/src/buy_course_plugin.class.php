@@ -3607,6 +3607,162 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
+     * Register a subscription sale.
+     *
+     * @param int $subscriptionId   The subscription ID
+     * @param int $saleId           The sale ID
+     * @param int $subscriptionEnd  The subscription end date
+     *
+     * @return int
+     */
+    public function registerSubscriptionSale($subscriptionId, $saleId, $subscriptionEnd)
+    {
+        $sale = $this->getSale($saleId);
+
+        if (empty($sale)) {
+            return false;
+        }
+
+        $values = [
+            'subscription_id' => (int) $subscriptionId,
+            'sale_id' => (int) $saleId,
+            'subscription_end' => $subscriptionEnd,
+        ];
+
+        return Database::insert(self::TABLE_SUBSCRIPTION_SALE, $values);
+    }
+
+    /**
+     * Add a new subscription.
+     *
+     * @param array $subscription
+     *
+     * @return bool
+     */
+    public function addNewSubscription($subscription)
+    {
+        $subscriptionId = $this->registerSubscription($subscription);
+        if ($subscriptionId) {
+            if (isset($subscription['courses'])) {
+                foreach ($subscription['courses'] as $course) {
+                    $this->registerSubscriptionItem($subscriptionId, self::PRODUCT_TYPE_COURSE, $course);
+                }
+            }
+
+            if (isset($subscription['sessions'])) {
+                foreach ($subscription['sessions'] as $session) {
+                    $this->registerSubscriptionItem($subscriptionId, self::PRODUCT_TYPE_SESSION, $session);
+                }
+            }
+
+            if (isset($subscription['frecuencies'])) {
+                foreach ($subscription['frecuencies'] as $subscriptionFrecuency) {
+                    $this->registerSubscriptionFrecuency($subscriptionId, $subscriptionFrecuency);
+                }
+            }
+
+            return true;
+        } else {
+            Display::addFlash(
+                Display::return_message(
+                    $this->get_lang('SubscriptionErrorInsert'),
+                    'error',
+                    false
+                )
+            );
+
+            return false;
+        }
+    }
+
+    /**
+     * Update a subscription.
+     *
+     * @param array $subscription
+     *
+     * @return bool
+     */
+    public function updateSubscriptionData($subscription)
+    {
+        $this->updateSubscription($subscription);
+        $this->deleteSubscriptionItemsBySubscription(self::PRODUCT_TYPE_COURSE, $subscription['id']);
+        $this->deleteSubscriptionItemsBySubscription(self::PRODUCT_TYPE_SESSION, $subscription['id']);
+        $this->deleteSubscriptionFrecuencyBySubscription($subscription['id']);
+
+        if (isset($subscription['courses'])) {
+            foreach ($subscription['courses'] as $course) {
+                $this->registerSubscriptionItem($subscription['id'], self::PRODUCT_TYPE_COURSE, $course);
+            }
+        }
+
+        if (isset($subscription['sessions'])) {
+            foreach ($subscription['sessions'] as $session) {
+                $this->registerSubscriptionItem($subscription['id'], self::PRODUCT_TYPE_SESSION, $session);
+            }
+        }
+
+        if (isset($subscription['frecuencies'])) {
+            foreach ($subscription['frecuencies'] as $subscriptionFrecuency) {
+                $this->registerSubscriptionFrecuency($subscription['id'], $subscriptionFrecuency);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get subscription info.
+     *
+     * @param int $subscriptionId The subscription ID
+     *
+     * @return array The subscription data
+     */
+    public function getSubscriptionInfo($subscriptionId)
+    {
+        $subscription = $this->getDataSubscription($subscriptionId);
+
+        $subscriptionRelubscription = $this->getItemsSubscription($subscriptionId, self::PRODUCT_TYPE_COURSE);
+        $subscriptionRelSessions = $this->getItemsSubscription($subscriptionId, self::PRODUCT_TYPE_SESSION);
+        $subscriptionRelFrecuencies = $this->getFrecuenciesSubscription($subscriptionId);
+
+        $subscription['courses'] = $subscriptionRelubscription;
+        $subscription['sessions'] = $subscriptionRelSessions;
+        $subscription['frecuencies'] = $subscriptionRelFrecuencies;
+
+        return $subscription;
+    }
+
+    /**
+     * Get a list of subscriptions.
+     *
+     * @param int $status The subscription activation status
+     *
+     * @return array Subscriptions data
+     */
+    public function getSubscriptionsListByStatus($status)
+    {
+        $subscriptions = $this->getDataSubscriptions($status);
+
+        return $subscriptions;
+    }
+
+    /**
+     * Get data of the subscription.
+     *
+     * @param string $subscriptionId    The subscription ID
+     * @param int    $productId         The product ID
+     * @param int    $productType       The product type
+     *
+     * @return array The subscription data
+     */
+    public function getSubscription($subscriptionId, $productType = null, $productId = null)
+    {
+        $subscription = $this->getDataSubscription($subscriptionId, $productType, $productId);
+
+        return $subscription;
+    }
+
+    /**
      * @return string
      */
     public function getSubscriptionSuccessMessage(array $saleInfo)
@@ -4474,6 +4630,302 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_COUNTRY_REL_PAYMENT),
             [
                 'payment_type = ?' => (int) $paymentType,
+            ]
+        );
+    }
+
+    /**
+     * Get the items (courses or sessions) of a subscription.
+     *
+     * @param string $subscriptionId    The subscription ID
+     * @param int    $productType The product type
+     *
+     * @return array The item data
+     */
+    private function getItemsSubscription($subscriptionId, $productType)
+    {
+        $subscriptionItemTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_ITEM);
+        if ($productType == self::PRODUCT_TYPE_COURSE) {
+            $itemTable = Database::get_main_table(TABLE_MAIN_COURSE);
+            $select = ['ci.product_id as id', 'it.title'];
+        } elseif ($productType == self::PRODUCT_TYPE_SESSION) {
+            $itemTable = Database::get_main_table(TABLE_MAIN_SESSION);
+            $select = ['ci.product_id as id', 'it.name'];
+        }
+
+        $subscriptionFrom = "
+            $subscriptionItemTable si
+            INNER JOIN $itemTable it
+                on it.id = si.product_id and si.product_type = $productType
+        ";
+
+        return Database::select(
+            $select,
+            $subscriptionFrom,
+            [
+                'where' => [
+                    'si.subscription_id = ? ' => (int) $subscriptionId,
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Get the frecuencies of a subscription.
+     *
+     * @param string $subscriptionId    The subscription ID
+     *
+     * @return array The frecuency data
+     */
+    private function getFrecuenciesSubscription($subscriptionId)
+    {
+        $subscriptionFrecuencyTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_FRECUENCY);
+
+        return Database::select(
+            ['*'],
+            $subscriptionFrecuencyTable,
+            [
+                'where' => [
+                    'subscription_id = ? ' => (int) $subscriptionId,
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Get an array of subscriptions filtered by their status.
+     *
+     * @param int $status The subscription activation status
+     *
+     * @return array Subscriptions data
+     */
+    private function getDataSubscriptions($status = null)
+    {
+        $subscriptionTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+
+        if ($status != null) {
+            return Database::select(
+                ['*'],
+                $subscriptionTable,
+                [
+                    'where' => [
+                        ' active = ? ' => (int) $status,
+                    ],
+                    'order' => 'id DESC',
+                ]
+            );
+        } else {
+            return Database::select(
+                ['*'],
+                $subscriptionTable,
+                [
+                    'order' => 'id DESC',
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get data of a subscription for a product (course or service) by the subscription ID.
+     *
+     * @param int $subscriptionId    The subscription ID
+     * @param int $productType The product type
+     * @param int $productId   The product ID
+     *
+     * @return array The subscription data
+     */
+    private function getDataSubscription($subscriptionId, $productType = null, $productId = null)
+    {
+        $subscriptionTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+
+        if ($productType == null || $productId == null) {
+            return Database::select(
+                ['*'],
+                $subscriptionTable,
+                [
+                    'where' => [
+                        'id = ? ' => (int) $subscriptionId,
+                    ],
+                ],
+                'first'
+            );
+        } else {
+            $subscriptionItemTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_ITEM);
+
+            $subscriptionnFrom = "
+                $subscriptionTable s
+                INNER JOIN $subscriptionItemTable si
+                    on si.subscription_id = s.id
+            ";
+
+            return Database::select(
+                ['c.*'],
+                $subscriptionnFrom,
+                [
+                    'where' => [
+                        's.id = ? AND ' => (int) $subscriptionId,
+                        'si.product_type = ? AND ' => (int) $productType,
+                        'si.product_id = ?' => (int) $productId,
+                    ],
+                ],
+                'first'
+            );
+        }
+    }
+
+    /**
+     * Update a subscription.
+     *
+     * @param array $subscription
+     *
+     * @return int
+     */
+    private function updateSubscription($subscription)
+    {
+        $subscriptionExist = $this->getSubscription($subscription['id']);
+        if (!$subscriptionExist) {
+            Display::addFlash(
+                Display::return_message(
+                    $this->get_lang('SubscriptionNoExists'),
+                    'error',
+                    false
+                )
+            );
+
+            return false;
+        }
+
+        $values = [
+            'name' => $subscription['name'],
+            'description' => $subscription['description'],
+            'active' => $subscription['active'],
+        ];
+
+        return Database::update(
+            self::TABLE_SUBSCRIPTION,
+            $values,
+            ['id = ?' => $subscription['id']]
+        );
+    }
+
+    /**
+     * Register a subscription.
+     *
+     * @param array $subscription
+     *
+     * @return int
+     */
+    private function registerSubscription($subscription)
+    {
+        $values = [
+            'currency_id' => (int) $subscription['currency_id'],
+            'name' => (string) $subscription['discount_type'],
+            'description' => (string) $subscription['discount_amount'],
+            'active' => $subscription['active'],
+        ];
+
+        return Database::insert(self::TABLE_SUBSCRIPTION, $values);
+    }
+
+    /**
+     * Register a subscription item.
+     *
+     * @param int $subscriptionId   The subscription ID
+     * @param int $productType      The product type
+     * @param int $productId        The product ID
+     *
+     * @return int
+     */
+    private function registerSubscriptionItem($subscriptionId, $productType, $productId)
+    {
+        $subscription = $this->getDataSubscription($subscriptionId);
+        if (empty($subscription)) {
+            Display::addFlash(
+                Display::return_message(
+                    $this->get_lang('SubscriptionNoExists'),
+                    'error',
+                    false
+                )
+            );
+
+            return false;
+        }
+
+        $values = [
+            'subscription_id' => (int) $subscriptionId,
+            'product_type' => (int) $productType,
+            'product_id' => (int) $productId,
+        ];
+
+        return Database::insert(self::TABLE_SUBSCRIPTION_ITEM, $values);
+    }
+
+    /**
+     * Remove all subscriptions items for a product type and subscription ID.
+     *
+     * @param int $productType The product type
+     * @param int $subscriptionId   The subscription ID
+     *
+     * @return int Rows affected. Otherwise return false
+     */
+    private function deleteSubscriptionItemsBySubscription($productType, $subscriptionId)
+    {
+        return Database::delete(
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_ITEM),
+            [
+                'product_type = ? AND ' => (int) $productType,
+                'subscription_id = ?' => (int) $subscriptionId,
+            ]
+        );
+    }
+
+    /**
+     * Register a subscription frecuency.
+     *
+     * @param int $subscriptionId           The subscription ID
+     * @param array $subscriptionFrecuency  The subscription frecuency
+     *
+     * @return int
+     */
+    private function registerSubscriptionFrecuency($subscriptionId, $subscriptionFrecuency)
+    {
+        $subscription = $this->getDataSubscription($subscriptionId);
+        if (empty($subscription)) {
+            Display::addFlash(
+                Display::return_message(
+                    $this->get_lang('SubscriptionNoExists'),
+                    'error',
+                    false
+                )
+            );
+
+            return false;
+        }
+
+        $values = [
+            'subscription_id' => (int) $subscriptionId,
+            'days' => (int) $subscriptionFrecuency['days'],
+            'price' => (float) $subscriptionFrecuency['price'],
+            'tax_perc' => (int) $subscriptionFrecuency['tax_perc'],
+            'active' => (int) $subscriptionFrecuency['active'],
+        ];
+
+        return Database::insert(self::TABLE_SUBSCRIPTION_FRECUENCY, $values);
+    }
+
+    /**
+     * Remove all subscriptions frecuency for a subscription ID.
+     *
+     * @param int $subscriptionId   The subscription ID
+     *
+     * @return int Rows affected. Otherwise return false
+     */
+    private function deleteSubscriptionFrecuencyBySubscription($subscriptionId)
+    {
+        return Database::delete(
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_ITEM),
+            [
+                'subscription_id = ?' => (int) $subscriptionId,
             ]
         );
     }
