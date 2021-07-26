@@ -40,6 +40,10 @@ class BuyCoursesPlugin extends Plugin
     const TABLE_COUPON_SALE = 'plugin_buycourses_coupon_rel_sale';
     const TABLE_COUPON_SERVICE_SALE = 'plugin_buycourses_coupon_rel_service_sale';
     const TABLE_COUNTRY_REL_PAYMENT = 'plugin_buycourses_country_rel_payment';
+    const TABLE_SUBSCRIPTION = 'plugin_buycourses_subscription';
+    const TABLE_SUBSCRIPTION_FRECUENCY = 'plugin_buycourses_subscription_frequency';
+    const TABLE_SUBSCRIPTION_ITEM = 'plugin_buycourses_subscription_item';
+    const TABLE_SUBSCRIPTION_SALE = 'plugin_buycourses_subscription_rel_sale';
     const PRODUCT_TYPE_COURSE = 1;
     const PRODUCT_TYPE_SESSION = 2;
     const PRODUCT_TYPE_SERVICE = 3;
@@ -157,6 +161,10 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUNTRY_REL_PAYMENT,
+            self::TABLE_SUBSCRIPTION,
+            self::TABLE_SUBSCRIPTION_FRECUENCY,
+            self::TABLE_SUBSCRIPTION_ITEM,
+            self::TABLE_SUBSCRIPTION_SALE,
         ];
         $em = Database::getManager();
         $cn = $em->getConnection();
@@ -196,6 +204,10 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUNTRY_REL_PAYMENT,
+            self::TABLE_SUBSCRIPTION,
+            self::TABLE_SUBSCRIPTION_FRECUENCY,
+            self::TABLE_SUBSCRIPTION_ITEM,
+            self::TABLE_SUBSCRIPTION_SALE,
         ];
 
         foreach ($tablesToBeDeleted as $tableToBeDeleted) {
@@ -422,6 +434,47 @@ class BuyCoursesPlugin extends Plugin
             currency_id int unsigned NOT NULL,
             payment_type int unsigned NOT NULL,
             date_reg datetime NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_SUBSCRIPTION;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            currecty_id int unsigned NOT NULL,
+            name varchar(255) NOT NULL,
+            description varchar(255) NOT NULL,
+            active tinyint NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_SUBSCRIPTION_FRECUENCY;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            subscription_id int unsigned NOT NULL,
+            days int unsigned NOT NULL,
+            price decimal(10, 2) NOT NULL,
+            tax_perc int unsigned NULL,
+            active tinyint NOT NULL,
+            PRIMARY KEY (subscription_id, days)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_SUBSCRIPTION_ITEM;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            subscription_id int unsigned NOT NULL,
+            product_type int unsigned NOT NULL,
+            product_id int unsigned NOT NULL,
+            PRIMARY KEY (subscription_id, product_type, product_id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_SUBSCRIPTION_SALE;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            subscription_id int unsigned NOT NULL,
+            sale_id int unsigned NOT NULL,
+            subscription_end datetime NOT NULL,
             PRIMARY KEY (id)
         )";
         Database::query($sql);

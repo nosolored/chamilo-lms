@@ -514,6 +514,71 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUNTRY_REL_PAYMENT)) {
     $countryPaymentTable->setPrimaryKey(['id']);
 }
 
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION)) {
+    $subscriptionTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION);
+    $subscriptionTable->addColumn(
+        'id',
+        Types::INTEGER,
+        ['autoincrement' => true, 'unsigned' => true]
+    );
+    $subscriptionTable->addColumn('currency_id', Types::INTEGER);
+    $subscriptionTable->addColumn('name', Types::STRING);
+    $subscriptionTable->addColumn('description', Types::STRING);
+    $subscriptionTable->addColumn('active', Types::INTEGER);
+    $subscriptionTable->setPrimaryKey(['id']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FRECUENCY)) {
+    $subscriptionFrecuencyTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FRECUENCY);
+    $subscriptionFrecuencyTable->addColumn(
+        'subscription_id',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionFrecuencyTable->addColumn(
+        'days',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionFrecuencyTable->addColumn('price', Types::DECIMAL);
+    $subscriptionFrecuencyTable->addColumn('tax_perc', Types::INTEGER);
+    $subscriptionFrecuencyTable->addColumn('active', Types::INTEGER);
+    $subscriptionFrecuencyTable->setPrimaryKey(['subscription_id', 'days']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_ITEM)) {
+    $subscriptionItemTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_ITEM);
+    $subscriptionItemTable->addColumn(
+        'subscription_id',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionItemTable->addColumn(
+        'product_type',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionItemTable->addColumn(
+        'product_id',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionItemTable->setPrimaryKey(['subscription_id', 'product_type', 'product_id']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_SALE)) {
+    $subscriptionSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_SALE);
+    $subscriptionSaleTable->addColumn(
+        'id',
+        Types::INTEGER,
+        ['autoincrement' => true, 'unsigned' => true]
+    );
+    $subscriptionSaleTable->addColumn('subscription_id', Types::INTEGER);
+    $subscriptionSaleTable->addColumn('sale_id', Types::INTEGER);
+    $subscriptionSaleTable->addColumn('subscription_end', Types::DATETIME_MUTABLE);
+    $subscriptionSaleTable->setPrimaryKey(['id']);
+}
+
 $queries = $pluginSchema->toSql($platform);
 
 foreach ($queries as $query) {
