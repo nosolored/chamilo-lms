@@ -789,7 +789,7 @@ class BuyCoursesPlugin extends Plugin
         return Database::select(
             ['cp.id', 'cp.currency_id', 'c.country_name', 'c.iso_code', 'cp.payment_type', 'cp.date_reg'],
             $from,
-            ['WHERE' => $where ]
+            ['WHERE' => $where]
         );
     }
 
@@ -817,7 +817,7 @@ class BuyCoursesPlugin extends Plugin
             ['cp.*'],
             $from,
             [
-                'where' => ['c.country_name = ?' => (string) $country]
+                'where' => ['c.country_name = ?' => (string) $country],
             ]
         );
     }
@@ -855,7 +855,7 @@ class BuyCoursesPlugin extends Plugin
                 $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_PAYPAL);
             }
         }
-        
+
         if (!empty($transferSelectedCountries)) {
             $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_TRANSFER);
             foreach ($transferSelectedCountries as $countryCurrency) {
@@ -877,7 +877,7 @@ class BuyCoursesPlugin extends Plugin
             }
         }
     }
-    
+
     /**
      * Get registered item data.
      *
@@ -3628,9 +3628,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Register a subscription sale.
      *
-     * @param int $subscriptionId   The subscription ID
-     * @param int $saleId           The sale ID
-     * @param int $subscriptionEnd  The subscription end date
+     * @param int $subscriptionId  The subscription ID
+     * @param int $saleId          The sale ID
+     * @param int $subscriptionEnd The subscription end date
      *
      * @return int
      */
@@ -3791,9 +3791,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get data of the subscription.
      *
-     * @param string $subscriptionId    The subscription ID
-     * @param int    $productId         The product ID
-     * @param int    $productType       The product type
+     * @param string $subscriptionId The subscription ID
+     * @param int    $productId      The product ID
+     * @param int    $productType    The product type
      *
      * @return array The subscription data
      */
@@ -4679,8 +4679,8 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get the items (courses or sessions) of a subscription.
      *
-     * @param string $subscriptionId    The subscription ID
-     * @param int    $productType The product type
+     * @param string $subscriptionId The subscription ID
+     * @param int    $productType    The product type
      *
      * @return array The item data
      */
@@ -4715,7 +4715,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get the frequency subscription.
      *
-     * @param string $frecuencyId    The frecuency ID
+     * @param string $frecuencyId The frecuency ID
      *
      * @return array The frequency data
      */
@@ -4738,7 +4738,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get the frequency subscription by the subscription id and days.
      *
-     * @param string $frecuencyId    The frecuency ID
+     * @param string $frecuencyId The frecuency ID
      *
      * @return array The frequency data
      */
@@ -4762,7 +4762,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get the frequencies of a subscription.
      *
-     * @param string $subscriptionId    The subscription ID
+     * @param string $subscriptionId The subscription ID
      *
      * @return array The frequency data
      */
@@ -4817,9 +4817,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get data of a subscription for a product (course or service) by the subscription ID.
      *
-     * @param int $subscriptionId    The subscription ID
-     * @param int $productType The product type
-     * @param int $productId   The product ID
+     * @param int $subscriptionId The subscription ID
+     * @param int $productType    The product type
+     * @param int $productId      The product ID
      *
      * @return array The subscription data
      */
@@ -4919,9 +4919,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Register a subscription item.
      *
-     * @param int $subscriptionId   The subscription ID
-     * @param int $productType      The product type
-     * @param int $productId        The product ID
+     * @param int $subscriptionId The subscription ID
+     * @param int $productType    The product type
+     * @param int $productId      The product ID
      *
      * @return int
      */
@@ -4952,8 +4952,8 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Remove all subscriptions items for a product type and subscription ID.
      *
-     * @param int $productType The product type
-     * @param int $subscriptionId   The subscription ID
+     * @param int $productType    The product type
+     * @param int $subscriptionId The subscription ID
      *
      * @return int Rows affected. Otherwise return false
      */
@@ -4971,7 +4971,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Register a subscription frequency.
      *
-     * @param array $subscriptionFrequency  The subscription frequency
+     * @param array $subscriptionFrequency The subscription frequency
      *
      * @return int
      */
@@ -5002,7 +5002,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Remove all subscriptions frequency for a subscription ID.
      *
-     * @param int $subscriptionId   The subscription ID
+     * @param int $subscriptionId The subscription ID
      *
      * @return int Rows affected. Otherwise return false
      */
