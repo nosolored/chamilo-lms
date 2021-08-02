@@ -528,8 +528,8 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION)) {
     $subscriptionTable->setPrimaryKey(['id']);
 }
 
-if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FRECUENCY)) {
-    $subscriptionFrecuencyTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FRECUENCY);
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FREQUENCY)) {
+    $subscriptionFrecuencyTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FREQUENCY);
     $subscriptionFrecuencyTable->addColumn(
         'subscription_id',
         Types::INTEGER,
@@ -541,8 +541,6 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_FRECUENCY)) 
         ['unsigned' => true]
     );
     $subscriptionFrecuencyTable->addColumn('price', Types::DECIMAL);
-    $subscriptionFrecuencyTable->addColumn('tax_perc', Types::INTEGER);
-    $subscriptionFrecuencyTable->addColumn('active', Types::INTEGER);
     $subscriptionFrecuencyTable->setPrimaryKey(['subscription_id', 'days']);
 }
 
