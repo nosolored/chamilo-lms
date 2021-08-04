@@ -41,7 +41,7 @@ $frequencySelect = $form->addSelect(
 );
 
 foreach ($frequencies as $frequency) {
-    $currencySelect->addOption($frequency['Text'], $frequency['Value']);
+    $frequencySelect->addOption($frequency['Text'], $frequency['Value']);
 }
 
 $form->addElement(
