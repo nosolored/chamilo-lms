@@ -12,17 +12,17 @@ require_once __DIR__.'/../../../main/inc/global.inc.php';
 
 api_protect_admin_script(true);
 
-$productId = $_REQUEST['id'];
-$productType = $_REQUEST['type'];
+$id = isset($_REQUEST['id']) ? (int) $_REQUEST['id'] : 0;
+$type = isset($_REQUEST['type']) ? (int) $_REQUEST['type'] : 0;
 
-if (!isset($productId) || !isset($productType)) {
+if (empty($id) || empty($type)) {
     api_not_allowed();
 }
 
 $queryString = 'id='.intval($_REQUEST['id']).'&type='.intval($_REQUEST['type']);
 
-$editingCourse = $productType === BuyCoursesPlugin::PRODUCT_TYPE_COURSE;
-$editingSession = $productType === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
+$editingCourse = $type === BuyCoursesPlugin::PRODUCT_TYPE_COURSE;
+$editingSession = $type === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 
 $plugin = BuyCoursesPlugin::create();
 

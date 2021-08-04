@@ -444,7 +444,8 @@ class BuyCoursesPlugin extends Plugin
             duration int unsigned NOT NULL,
             currency_id int unsigned NOT NULL,
             price decimal(10, 2) NOT NULL,
-            PRIMARY KEY (product_type, product_id, days)
+            tax_perc int unsigned,
+            PRIMARY KEY (product_type, product_id, duration)
         )";
         Database::query($sql);
 
@@ -926,6 +927,46 @@ class BuyCoursesPlugin extends Plugin
         }
 
         $this->setPriceSettings($product, self::TAX_APPLIES_TO_ONLY_COURSE, $coupon);
+
+        return $product;
+    }
+
+    /**
+     * Get the item data.
+     *
+     * @param int   $productId The item ID
+     * @param int   $itemType  The item type
+     *
+     * @return array
+     */
+    public function getItemSubscriptionByProduct($productId, $itemType)
+    {
+        $buySubscriptionItemTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+        $buyCurrencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+
+        $fakeItemFrom = "
+            $buySubscriptionItemTable s
+            INNER JOIN $buyCurrencyTable c
+                ON s.currency_id = c.id
+        ";
+
+        $product = Database::select(
+            ['s.*', 'c.iso_code'],
+            $fakeItemFrom,
+            [
+                'where' => [
+                    's.product_id = ? AND s.product_type = ?' => [
+                        (int) $productId,
+                        (int) $itemType,
+                    ],
+                ],
+            ],
+            'first'
+        );
+
+        if (empty($product)) {
+            return false;
+        }
 
         return $product;
     }

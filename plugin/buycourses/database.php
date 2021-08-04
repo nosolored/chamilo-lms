@@ -533,6 +533,7 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION)) {
     );
     $subscriptionTable->addColumn('currency_id', Types::INTEGER);
     $subscriptionTable->addColumn('price', Types::DECIMAL);
+    $subscriptionTable->addColumn('tax_perc', Types::INTEGER);
     $subscriptionTable->setPrimaryKey(['product_type', 'product_id', 'duration']);
 }
 

@@ -12,17 +12,17 @@ require_once __DIR__.'/../../../main/inc/global.inc.php';
 
 api_protect_admin_script(true);
 
-$productId = $_REQUEST['id'];
-$productType = $_REQUEST['type'];
+$id = isset($_REQUEST['id']) ? (int) $_REQUEST['id'] : 0;
+$type = isset($_REQUEST['type']) ? (int) $_REQUEST['type'] : 0;
 
-if (!isset($productId) || !isset($productType)) {
+if (!isset($id) || !isset($type)) {
     api_not_allowed();
 }
 
 $queryString = 'id='.intval($_REQUEST['id']).'&type='.intval($_REQUEST['type']);
 
-$editingCourse = $productType === BuyCoursesPlugin::PRODUCT_TYPE_COURSE;
-$editingSession = $productType === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
+$editingCourse = $type === BuyCoursesPlugin::PRODUCT_TYPE_COURSE;
+$editingSession = $type === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 
 $plugin = BuyCoursesPlugin::create();
 
@@ -36,7 +36,7 @@ if (empty($currency)) {
     );
 }
 
-$subscriptions = $plugin->getSubscriptions($productType, $productId );
+$subscriptions = $plugin->getSubscriptions($type, $id );
 
 $taxtPerc = $subscriptions[0]['tax_perc'];
 
@@ -142,8 +142,8 @@ $frequencyForm->addElement(
 $frequencyForm->addButtonCreate('');
 
 $frequencyFormDefaults = [
-    'id' => $productId,
-    'type' => $productType,
+    'id' => $id,
+    'type' => $type,
     'tax_perc' => $taxtPerc,
 ];
 
@@ -161,11 +161,11 @@ if (empty($currency)) {
 
 if ($form->validate()) {
     $formValues = $form->getSubmitValues();
-    $productId = $formValues['id'];
-    $productType = $formValues['type'];
+    $id = $formValues['id'];
+    $type = $formValues['type'];
     $taxPerc = $formValues['tax_perc'] != '' ? (int) $formValues['tax_perc'] : null;
 
-    $result = $plugin->updateSubscriptions($productType, $productId, $taxPerc);
+    $result = $plugin->updateSubscriptions($type, $id, $taxPerc);
 
     if ($result) {
         header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscriptions.php');

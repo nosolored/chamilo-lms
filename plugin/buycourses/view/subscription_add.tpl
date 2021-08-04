@@ -13,8 +13,8 @@
 <script>
     $(function () {
         $("a[name='add']").click(function () {
-            var selectedFrequency = $("#frequency_value").val();
-            var selectedFrecuencyPrice = $("#frequency_price").val();
+            var selectedFrequency = $("#duration").val();
+            var selectedFrecuencyPrice = $("#price").val();
 
             if (selectedFrecuencyPrice === "0") {
                 return;
