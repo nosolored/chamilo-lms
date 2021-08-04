@@ -3786,15 +3786,28 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
-     * Get a list of subscriptions.
+     * Add a new subscription.
      *
-     * @param int $status The subscription activation status
+     * @param array $subscription
+     *
+     * @return bool
+     */
+    public function updateSubscriptions($productType, $productId, $taxPerc)
+    {
+        $this->updateSubscription($productType, $productId, $taxPerc);
+    }
+
+    /**
+     * Get a list of subscriptions by product ID and type.
+     *
+     * @param string $productId     The product ID
+     * @param int    $productType   The product type
      *
      * @return array Subscriptions data
      */
-    public function getSubscriptionsListByStatus($status)
+    public function getSubscriptions($productType, $productId)
     {
-        $subscriptions = $this->getDataSubscriptions($status);
+        $subscriptions = $this->getDataSubscriptions($productType, $productId);
 
         return $subscriptions;
     }
@@ -4690,10 +4703,12 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get an array of subscriptions.
      *
+     * @param int $productType  The product type
+     * @param int $productId    The product ID
      *
      * @return array Subscriptions data
      */
-    private function getDataSubscriptions()
+    private function getDataSubscriptions($productType, $productId)
     {
         $subscriptionTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
 
@@ -4701,7 +4716,11 @@ class BuyCoursesPlugin extends Plugin
             ['*'],
             $subscriptionTable,
             [
-                'order' => 'duration DESC',
+                'where' => [
+                    'productType = ? AND ' => (int) $productType,
+                    'productId = ?  ' => (int) $productId,
+                ],
+                'order' => 'duration ASC',
             ]
         );
     }
@@ -4725,8 +4744,8 @@ class BuyCoursesPlugin extends Plugin
             [
                 'where' => [
                     'productType = ? AND ' => (int) $productType,
-                    'productIdd = ? AND ' => (int) $productId,
-                    'duration = ? AND ' => (int) $duration,
+                    'productId = ? AND ' => (int) $productId,
+                    'duration = ? ' => (int) $duration,
                 ],
             ],
             'first'
@@ -4740,34 +4759,22 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return int
      */
-    private function updateSubscription($subscription)
+    private function updateSubscription($productType, $productId, $taxPerc)
     {
-        $subscriptionExist = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $subscription['duration']);
-        if (!$subscriptionExist) {
-            Display::addFlash(
-                Display::return_message(
-                    $this->get_lang('SubscriptionNoExists'),
-                    'error',
-                    false
-                )
-            );
-
-            return false;
-        }
-
         $values = [
-            'product_type' => (int) $subscription['product_type'],
-            'product_id' => (int) $subscription['product_id'],
-            'duration' => (int) $subscription['duration'],
-            'currency_id' => (int) $subscription['currency_id'],
-            'price' => (float) $subscription['price'],
+            'taxt_perc' => (int) $taxPerc,
         ];
 
         return Database::update(
             self::TABLE_SUBSCRIPTION,
             $values,
-            ['id = ?' => $subscription['id']]
+            [
+                'product_type = ? AND ' => $productType,
+                'product_id = ? AND ' => $productId
+            ]
         );
+
+        return true;
     }
 
     /**
