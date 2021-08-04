@@ -3741,27 +3741,41 @@ class BuyCoursesPlugin extends Plugin
      */
     public function addNewSubscription($subscription)
     {
-        $subscriptionDb = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $subscription['duration']);
+        if(isset($subscription['frequencies'])) {
+            foreach ($subscription['frequencies'] as $frequency) {
+                $subscriptionDb = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $frequency['duration']);
 
-        if (isset($subscriptionDb)) {
-            Display::addFlash(
-                Display::return_message(
-                    $this->get_lang('SubscriptionAlreadyExists'),
-                    'error',
-                    false
-                )
-            );
+                if (isset($subscriptionDb) || empty($subscription)) {
+                    Display::addFlash(
+                        Display::return_message(
+                            $this->get_lang('SubscriptionAlreadyExists').' ('.$frequency['duration'].')',
+                            'error',
+                            false
+                        )
+                    );
 
-            return false;            
-        }
+                    return false;
+                } else {
+                    $subscriptionId = $this->registerSubscription($subscription, $frequency);
+                    if ($subscriptionId) {
+                        return true;
+                    } else {
+                        Display::addFlash(
+                            Display::return_message(
+                                $this->get_lang('SubscriptionErrorInsert'),
+                                'error',
+                                false
+                            )
+                        );
 
-        $subscriptionId = $this->registerSubscription($subscription);
-        if ($subscriptionId) {
-            return true;
+                        return false;
+                    }
+                }
+            }
         } else {
             Display::addFlash(
                 Display::return_message(
-                    $this->get_lang('SubscriptionErrorInsert'),
+                    $this->get_lang('FrequenciesNotSetError'),
                     'error',
                     false
                 )
@@ -4763,14 +4777,14 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return int
      */
-    private function registerSubscription($subscription)
+    private function registerSubscription($subscription, $frequency)
     {
         $values = [
             'product_type' => (int) $subscription['product_type'],
             'product_id' => (int) $subscription['product_id'],
-            'duration' => (int) $subscription['duration'],
+            'duration' => (int) $frequency['duration'],
             'currency_id' => (int) $subscription['currency_id'],
-            'price' => (float) $subscription['price'],
+            'price' => (float) $frequency['price'],
         ];
 
         return Database::insert(self::TABLE_SUBSCRIPTION, $values);

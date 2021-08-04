@@ -12,9 +12,19 @@ require_once __DIR__.'/../../../main/inc/global.inc.php';
 
 api_protect_admin_script(true);
 
-$plugin = BuyCoursesPlugin::create();
+$productId = $_REQUEST['id'];
+$productType = $_REQUEST['type'];
 
-$includeSession = $plugin->get('include_sessions') === 'true';
+if (!isset($productId) || !isset($productType)) {
+    api_not_allowed();
+}
+
+$queryString = 'id='.intval($_REQUEST['id']).'&type='.intval($_REQUEST['type']);
+
+$editingCourse = $productType === BuyCoursesPlugin::PRODUCT_TYPE_COURSE;
+$editingSession = $productType === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
+
+$plugin = BuyCoursesPlugin::create();
 
 $entityManager = Database::getManager();
 $userRepo = UserManager::getRepository();
@@ -28,51 +38,56 @@ if (empty($currency)) {
 
 $currencyIso = null;
 
-$coursesList = CourseManager::get_courses_list(
-    0,
-    0,
-    'title',
-    'asc',
-    -1,
-    null,
-    api_get_current_access_url_id(),
-    false,
-    [],
-    []
-);
+if ($editingCourse) {
+    $course = $entityManager->find('ChamiloCoreBundle:Course', $id);
+    if (!$course) {
+        api_not_allowed(true);
+    }
 
-foreach ($coursesList as $course) {
-    $courses[$course['id']] = $course['title'];
-}
+    $courseItem = $plugin->getCourseForConfiguration($course, $currency);
 
-$sessionsList = SessionManager::get_sessions_list(
-    [],
-    [],
-    null,
-    null,
-    api_get_current_access_url_id(),
-    []
-);
+    $currencyIso = $courseItem['currency'];
+    $formDefaults = [
+        'product_type' => get_lang('Course'),
+        'id' => $courseItem['course_id'],
+        'type' => BuyCoursesPlugin::PRODUCT_TYPE_COURSE,
+        'name' => $courseItem['course_title'],
+        'visible' => $courseItem['visible'],
+        'price' => $courseItem['price'],
+        'tax_perc' => $courseItem['tax_perc'],
+    ];
+} else if ($editingSession) {
+    if (!$includeSession) {
+        api_not_allowed(true);
+    }
 
-foreach ($sessionsList as $session) {
-    $sessions[$session['id']] = $session['name'];
+    $session = $entityManager->find('ChamiloCoreBundle:Session', $id);
+    if (!$session) {
+        api_not_allowed(true);
+    }
+
+    $sessionItem = $plugin->getSessionForConfiguration($session, $currency);
+
+    $currencyIso = $sessionItem['currency'];
+    $formDefaults = [
+        'product_type' => get_lang('Session'),
+        'id' => $session->getId(),
+        'type' => BuyCoursesPlugin::PRODUCT_TYPE_SESSION,
+        'name' => $sessionItem['session_name'],
+        'visible' => $sessionItem['visible'],
+        'price' => $sessionItem['price'],
+        'tax_perc' => $sessionItem['tax_perc'],
+    ];
+} else {
+    api_not_allowed(true);
 }
 
 $globalSettingsParams = $plugin->getGlobalParameters();
 
 $form = new FormValidator('add_subscription');
 
-$form->addElement(
-    'text',
-    'subscription_name',
-    $plugin->get_lang('SubscriptionName')
-);
-
-$form->addElement(
-    'text',
-    'subscription_description',
-    $plugin->get_lang('SubscriptionDescription')
-);
+$form->addText('product_type', $plugin->get_lang('ProductType'), false);
+$form->addText('name', get_lang('Name'), false);
 
 $form->addElement(
     'number',
@@ -80,23 +95,6 @@ $form->addElement(
     [$plugin->get_lang('TaxPerc'), $plugin->get_lang('TaxPercDescription'), '%'],
     ['step' => 1, 'placeholder' => $globalSettingsParams['global_tax_perc'].'% '.$plugin->get_lang('ByDefault')]
 );
-
-$form->addCheckBox('active', get_lang('Active'));
-$form->addElement(
-    'advmultiselect',
-    'courses',
-    get_lang('Courses'),
-    $courses
-);
-
-if ($includeSession) {
-    $form->addElement(
-        'advmultiselect',
-        'sessions',
-        get_lang('Sessions'),
-        $sessions
-    );
-}
 
 $frequencies = $plugin->getFrequencies();
 
@@ -113,13 +111,13 @@ $form->addHtml(
                     <div class="form-group">
                         <div class="col-sm-5">
                             <div class="form-group ">
-                                <label for="frequency_val" class="col-sm-3 control-label">
+                                <label for="duration" class="col-sm-3 control-label">
                                     Frequency
                                 </label>
                                 <div class="col-sm-8">
                                     <div class="dropdown bootstrap-select form-control bs3 dropup">
                                         <select class="selectpicker form-control"
-                                            data-live-search="true" name="frequency_value" id="frequency_value" tabindex="null">
+                                            data-live-search="true" name="duration" id="duration" tabindex="null">
                                             <option value="7">Weekly</option>
                                             <option value="30">Monthly</option>
                                             <option value="60">Quarterly</option>
@@ -131,11 +129,11 @@ $form->addHtml(
                                 <div class="col-sm-1"></div>
                             </div>
                             <div class="form-group ">
-                                <label for="frequency_price" class="col-sm-3 control-label">
+                                <label for="price" class="col-sm-3 control-label">
                                     Price
                                 </label>
                                 <div class="col-sm-8">
-                                    <input class=" form-control" name="frequency_price" type="text" id="frequency_price">
+                                    <input class="form-control" name="price" type="number" step="0.01" id="price">
                                 </div>
                                 <div class="col-sm-1"></div>
                             </div>
@@ -182,6 +180,8 @@ $form->addHtml(
     '
 );
 
+$form->addHidden('type', null);
+$form->addHidden('id', null);
 $button = $form->addButtonSave(get_lang('Save'));
 
 if (empty($currency)) {
@@ -190,14 +190,9 @@ if (empty($currency)) {
 
 if ($form->validate()) {
     $formValues = $form->getSubmitValues();
-
-    $subscription['name'] = $formValues['subscription_name'];
-    $subscription['description'] = $formValues['description_name'];
-    $subscription['tax_perc'] = $formValues['tax_perc'];
-    $subscription['active'] = $formValues['active'];
-
-    $subscription['courses'] = isset($formValues['courses']) ? $formValues['courses'] : [];
-    $subscription['sessions'] = isset($formValues['sessions']) ? $formValues['sessions'] : [];
+    $subscription['product_id'] = $formValues['id'];
+    $subscription['product_type'] = $formValues['type'];
+    $subscription['tax_perc'] = $formValues['tax_perc'] != '' ? (int) $formValues['tax_perc'] : null;
     $subscription['frequencies'] = isset($formValues['frequencies']) ? $formValues['frequencies'] : [];
 
     $result = $plugin->addNewSubscription($subscription);
