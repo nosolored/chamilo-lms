@@ -24,7 +24,7 @@
                         <table class="table table-striped table-hover">
                             <thead>
                             <tr>
-                                <th>{{ 'Days'|get_plugin_lang('BuyCoursesPlugin') }}</th>
+                                <th>{{ 'Duration'|get_plugin_lang('BuyCoursesPlugin') }}</th>
                                 <th>{{ 'Price'|get_plugin_lang('BuyCoursesPlugin') }}</th>
                                 <th>{{ 'Actions'|get_lang }}</th>
                             </tr>

@@ -38,7 +38,11 @@ if (empty($currency)) {
 
 $subscriptions = $plugin->getSubscriptions($type, $id );
 
-$taxtPerc = $subscriptions[0]['tax_perc'];
+$taxtPerc = 0;
+
+if (isset($subscriptions) && !empty($subscriptions )) {
+    $taxtPerc = $subscriptions[0]['tax_perc'];
+}
 
 $currencyIso = null;
 
@@ -89,6 +93,8 @@ $form = new FormValidator('add_subscription');
 $form->addText('product_type', $plugin->get_lang('ProductType'), false);
 $form->addText('name', get_lang('Name'), false);
 
+$form->freeze(['product_type', 'name']);
+
 $form->addElement(
     'number',
     'tax_perc',
@@ -98,7 +104,16 @@ $form->addElement(
 
 $frequenciesOptions = $plugin->getFrequencies();
 
-$frequencyForm = new FormValidator('frequency_config');
+$frequencyForm = new FormValidator('frequency_config', 'post', api_get_self().'?'.$queryString);
+
+$frequencyFormDefaults = [
+    'id' => $id,
+    'type' => $type,
+    'tax_perc' => $taxtPerc,
+    'currency_id' => $currency['id'],
+];
+
+$frequencyForm->setDefaults($frequencyFormDefaults);
 
 if ($frequencyForm->validate()) {
     $frequencyFormValues = $frequencyForm->getSubmitValues();
@@ -109,7 +124,7 @@ if ($frequencyForm->validate()) {
     $duration = $frequencyFormValues['duration'];
     $price = $frequencyFormValues['price'];
 
-    $subscription['frequencies'] = [[$duration, $price]];
+    $subscription['frequencies'] = [['duration' => $duration, 'price' => $price]];
 
     $result = $plugin->addNewSubscription($subscription);
 
@@ -121,7 +136,8 @@ if ($frequencyForm->validate()) {
     exit;
 }
 
-$frequencyForm->addSelect(
+$frequencyForm->addElement(
+    'select',
     'duration',
     $plugin->get_lang('Duration'),
     $frequenciesOptions,
@@ -131,7 +147,7 @@ $frequencyForm->addSelect(
 $frequencyForm->addElement(
     'number',
     'price',
-    $plugin->get_lang('Price'),
+    [$plugin->get_lang('Price'), null, $currencyIso],
     false,
     [
         'step' => 1,
@@ -139,20 +155,16 @@ $frequencyForm->addElement(
     ]
 );
 
+$frequencyForm->addHidden('type', $type);
+$frequencyForm->addHidden('id', $id);
+$frequencyForm->addHidden('tax_perc', $taxtPerc);
+$frequencyForm->addHidden('currency_id', $currency['id']);
 $frequencyForm->addButtonCreate('');
-
-$frequencyFormDefaults = [
-    'id' => $id,
-    'type' => $type,
-    'tax_perc' => $taxtPerc,
-];
-
-$frequencyForm->setDefaults($frequencyFormDefaults);
 
 $frequencies = $subscriptions;
 
-$form->addHidden('type', null);
-$form->addHidden('id', null);
+$form->addHidden('type', $type);
+$form->addHidden('id', $id);
 $button = $form->addButtonSave(get_lang('Save'));
 
 if (empty($currency)) {
