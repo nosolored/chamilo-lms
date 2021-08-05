@@ -32,8 +32,8 @@
                             <tbody>
                             {% for frequency in frequencies %}
                                 <tr>
-                                    <td>{{ frequency.duration }}</td>
-                                    <td>{{ frequency.price }}</td>
+                                    <td>{{ frequency.durationName }}</td>
+                                    <td>{{ frequency.price }} {{ currencyIso }}</td>
                                     <td>
                                         <a href="{{ _p.web_self ~ '?' ~ {'action':'delete_frequency', 'd': frequency.duration, 'id': frequency.product_id, 'type': frequency.product_type}|url_encode() }}"
                                            class="btn btn-danger btn-sm">

@@ -1911,7 +1911,7 @@ class BuyCoursesPlugin extends Plugin
             self::COUPON_SUBSCRIPTION_MONTHLY => $this->get_lang('Monthly'),
             self::COUPON_SUBSCRIPTION_QUARTERLY => $this->get_lang('Quarterly'),
             self::COUPON_SUBSCRIPTION_BIANNUAL => $this->get_lang('Biannual'),
-            self::COUPON_SUBSCRIPTION_ANNUAL => $this->get_lang('annual'),
+            self::COUPON_SUBSCRIPTION_ANNUAL => $this->get_lang('Annual'),
         ];
     }
 

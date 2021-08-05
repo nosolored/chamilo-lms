@@ -177,6 +177,20 @@ $frequencyForm->addButtonCreate('');
 
 $frequencies = $subscriptions;
 
+for ($i = 0; $i <= count($frequencies); $i++) {
+    if ($frequencies[$i]['duration'] == 7) {
+        $frequencies[$i]['durationName'] = 'Weekly';
+    } else if ($frequencies[$i]['duration'] == 30) {
+        $frequencies[$i]['durationName'] = 'Monthly';
+    } else if ($frequencies[$i]['duration'] == 60) {
+        $frequencies[$i]['durationName'] = 'Quarterly';
+    } else if ($frequencies[$i]['duration'] == 180) {
+        $frequencies[$i]['durationName'] = 'Biannual';
+    } else if ($frequencies[$i]['duration'] == 360) {
+        $frequencies[$i]['durationName'] = 'annual';
+    }
+}
+
 $form->addHidden('type', $type);
 $form->addHidden('id', $id);
 $button = $form->addButtonSave(get_lang('Save'));
