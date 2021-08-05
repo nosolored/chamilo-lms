@@ -91,6 +91,8 @@ $form = new FormValidator('add_subscription');
 $form->addText('product_type', $plugin->get_lang('ProductType'), false);
 $form->addText('name', get_lang('Name'), false);
 
+$form->freeze(['product_type', 'name']);
+
 $form->addElement(
     'number',
     'tax_perc',
