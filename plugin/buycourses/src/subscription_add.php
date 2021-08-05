@@ -55,6 +55,7 @@ if ($editingCourse) {
         'visible' => $courseItem['visible'],
         'price' => $courseItem['price'],
         'tax_perc' => $courseItem['tax_perc'],
+        'currency_id' => $currency['id'],
     ];
 } else if ($editingSession) {
     if (!$includeSession) {
@@ -77,6 +78,7 @@ if ($editingCourse) {
         'visible' => $sessionItem['visible'],
         'price' => $sessionItem['price'],
         'tax_perc' => $sessionItem['tax_perc'],
+        'currency_id' => $currency['id'],
     ];
 } else {
     api_not_allowed(true);
@@ -192,13 +194,14 @@ if ($form->validate()) {
     $formValues = $form->getSubmitValues();
     $subscription['product_id'] = $formValues['id'];
     $subscription['product_type'] = $formValues['type'];
+    $subscription['currency_id'] = $currency['id'];
     $subscription['tax_perc'] = $formValues['tax_perc'] != '' ? (int) $formValues['tax_perc'] : null;
     $subscription['frequencies'] = isset($formValues['frequencies']) ? $formValues['frequencies'] : [];
 
     $result = $plugin->addNewSubscription($subscription);
 
     if ($result) {
-        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscriptions.php');
+        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscriptions_courses.php');
     } else {
         header('Location:'.api_get_self().'?'.$queryString);
     }
@@ -214,7 +217,7 @@ $interbreadcrumb[] = [
     'name' => get_lang('Configuration'),
 ];
 $interbreadcrumb[] = [
-    'url' => 'subscriptions.php',
+    'url' => 'subscriptions_courses.php',
     'name' => $plugin->get_lang('SubscriptionList'),
 ];
 

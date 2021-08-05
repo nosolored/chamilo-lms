@@ -168,7 +168,7 @@ if ($form->validate()) {
     $result = $plugin->updateSubscriptions($type, $id, $taxPerc);
 
     if ($result) {
-        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscriptions.php');
+        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscriptions_courses.php');
     } else {
         header('Location:'.api_get_self().'?'.$queryString);
     }
@@ -184,7 +184,7 @@ $interbreadcrumb[] = [
     'name' => get_lang('Configuration'),
 ];
 $interbreadcrumb[] = [
-    'url' => 'subscriptions.php',
+    'url' => 'subscriptions_courses.php',
     'name' => $plugin->get_lang('SubscriptionList'),
 ];
 

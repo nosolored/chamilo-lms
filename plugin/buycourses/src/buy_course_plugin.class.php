@@ -3786,7 +3786,7 @@ class BuyCoursesPlugin extends Plugin
             foreach ($subscription['frequencies'] as $frequency) {
                 $subscriptionDb = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $frequency['duration']);
 
-                if (isset($subscriptionDb) || empty($subscription)) {
+                if (!isset($subscriptionDb) || empty($subscription)) {
                     Display::addFlash(
                         Display::return_message(
                             $this->get_lang('SubscriptionAlreadyExists').' ('.$frequency['duration'].')',
@@ -4758,8 +4758,8 @@ class BuyCoursesPlugin extends Plugin
             $subscriptionTable,
             [
                 'where' => [
-                    'productType = ? AND ' => (int) $productType,
-                    'productId = ?  ' => (int) $productId,
+                    'product_type = ? AND ' => (int) $productType,
+                    'product_id = ?  ' => (int) $productId,
                 ],
                 'order' => 'duration ASC',
             ]
@@ -4784,8 +4784,8 @@ class BuyCoursesPlugin extends Plugin
             $subscriptionTable,
             [
                 'where' => [
-                    'productType = ? AND ' => (int) $productType,
-                    'productId = ? AND ' => (int) $productId,
+                    'product_type = ? AND ' => (int) $productType,
+                    'product_id = ? AND ' => (int) $productId,
                     'duration = ? ' => (int) $duration,
                 ],
             ],
@@ -4832,9 +4832,12 @@ class BuyCoursesPlugin extends Plugin
             'product_id' => (int) $subscription['product_id'],
             'duration' => (int) $frequency['duration'],
             'currency_id' => (int) $subscription['currency_id'],
+            'tax_perc' => (int) $subscription['tax_perc'],
             'price' => (float) $frequency['price'],
         ];
 
-        return Database::insert(self::TABLE_SUBSCRIPTION, $values);
+        Database::insert(self::TABLE_SUBSCRIPTION, $values);
+
+        return true;
     }
 }
