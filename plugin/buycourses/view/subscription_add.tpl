@@ -14,6 +14,7 @@
     $(function () {
         $("a[name='add']").click(function () {
             var selectedFrequency = $("#duration").val();
+            var selectedFrequencyText = $("#duration option:selected").text();
             var selectedFrequencyPrice = $("#price").val();
 
             if (selectedFrequencyPrice === "0") {
@@ -29,7 +30,7 @@
             }
 
             var count = $("tbody tr").length;
-            var frequencyRow = '<tr><td><input class=\"frequency-days\" type="hidden" name=\"frequencies['+ (count + 1) + '][duration]\" value="'+selectedFrequency+'" />' + selectedFrequency + '</input></td><td><input type="hidden" name=\"frequencies['+ (count + 1) + '][price]\" value="' + selectedFrequencyPrice + '" />' + selectedFrequencyPrice + '</td><td><a name=\"delete\" class=\"btn btn-danger btn-sm\"><em class=\"fa fa-remove\"></em></a></td></tr>';
+            var frequencyRow = '<tr><td><input class=\"frequency-days\" type="hidden" name=\"frequencies['+ (count + 1) + '][duration]\" value="'+selectedFrequency+'" />' + selectedFrequencyText + '</input></td><td><input type="hidden" name=\"frequencies['+ (count + 1) + '][price]\" value="' + selectedFrequencyPrice + '" />' + selectedFrequencyPrice + ' {{ currencyIso }} </td><td><a name=\"delete\" class=\"btn btn-danger btn-sm\"><em class=\"fa fa-remove\"></em></a></td></tr>';
 
             $("tbody").append(frequencyRow);
         });

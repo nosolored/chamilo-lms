@@ -137,7 +137,9 @@ $form->addHtml(
                                 <div class="col-sm-8">
                                     <input class="form-control" name="price" type="number" step="0.01" id="price">
                                 </div>
-                                <div class="col-sm-1"></div>
+                                <div class="col-sm-1">
+                                    '. $currencyIso . '
+                                </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-12">
@@ -224,6 +226,7 @@ $interbreadcrumb[] = [
 $template = new Template($templateName);
 $template->assign('header', $templateName);
 $template->assign('items_form', $form->returnForm());
+$template->assign('currencyIso', $currencyIso);
 
 $content = $template->fetch('buycourses/view/subscription_add.tpl');
 $template->assign('content', $content);

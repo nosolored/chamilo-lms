@@ -219,6 +219,7 @@ $template->assign('header', $templateName);
 $template->assign('items_form', $form->returnForm());
 $template->assign('frequency_form', $frequencyForm->returnForm());
 $template->assign('frequencies', $frequencies);
+$template->assign('currencyIso', $currencyIso);
 
 $content = $template->fetch('buycourses/view/configure_subscription.tpl');
 $template->assign('content', $content);
