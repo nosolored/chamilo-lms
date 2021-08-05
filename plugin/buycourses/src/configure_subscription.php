@@ -26,6 +26,19 @@ $editingSession = $type === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 
 $plugin = BuyCoursesPlugin::create();
 
+if (isset($_GET['action'], $_GET['d'])) {
+    if ($_GET['action'] == 'delete_frequency') {
+        $plugin->deleteSubscription($type, $id, $_GET['d']);
+
+        Display::addFlash(
+            Display::return_message(get_lang('ItemRemoved'), 'success')
+        );
+
+        header('Location: '.api_get_self().'?'.$queryString);
+        exit;
+    }
+}
+
 $entityManager = Database::getManager();
 $userRepo = UserManager::getRepository();
 $currency = $plugin->getSelectedCurrency();
@@ -121,6 +134,7 @@ if ($frequencyForm->validate()) {
     $subscription['product_id'] = $frequencyFormValues['id'];
     $subscription['product_type'] = $frequencyFormValues['type'];
     $subscription['tax_perc'] = $frequencyFormValues['tax_perc'] != '' ? (int) $frequencyFormValues['tax_perc'] : null;
+    $subscription['currency_id'] = $currency['id'];
     $duration = $frequencyFormValues['duration'];
     $price = $frequencyFormValues['price'];
 

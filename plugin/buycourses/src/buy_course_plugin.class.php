@@ -3839,6 +3839,27 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
+     * Delete a subscription.
+     *
+     * @param int $productType
+     * @param int $productId
+     * @param int $duration
+     *
+     * @return int
+     */
+    public function deleteSubscription($productType, $productId, $duration)
+    {
+        return Database::delete(
+            Database::get_main_table(self::TABLE_SUBSCRIPTION),
+            [
+                'product_type = ? AND ' => (int) $productType,
+                'product_id = ? AND ' => (int) $productId,
+                'duration = ? ' => (int) $duration,
+            ]
+        );
+    }
+
+    /**
      * Get a list of subscriptions by product ID and type.
      *
      * @param string $productId     The product ID
