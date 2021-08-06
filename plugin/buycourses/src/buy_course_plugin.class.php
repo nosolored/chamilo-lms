@@ -970,6 +970,44 @@ class BuyCoursesPlugin extends Plugin
 
         return $product;
     }
+    /**
+     * Get the item data.
+     *
+     * @param int   $productId The item ID
+     * @param int   $itemType  The item type
+     *
+     * @return array
+     */
+    public function getItemsSubscriptionsByProduct($productId, $itemType)
+    {
+        $buySubscriptionItemTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+        $buyCurrencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+
+        $fakeItemFrom = "
+            $buySubscriptionItemTable s
+            INNER JOIN $buyCurrencyTable c
+                ON s.currency_id = c.id
+        ";
+
+        $product = Database::select(
+            ['s.*', 'c.iso_code'],
+            $fakeItemFrom,
+            [
+                'where' => [
+                    's.product_id = ? AND s.product_type = ?' => [
+                        (int) $productId,
+                        (int) $itemType,
+                    ],
+                ],
+            ]
+        );
+
+        if (empty($product)) {
+            return false;
+        }
+
+        return $product;
+    }
 
     /**
      * List courses details from the configuration page.
@@ -3886,6 +3924,8 @@ class BuyCoursesPlugin extends Plugin
     public function getSubscription($productType, $productId, $duration)
     {
         $subscription = $this->getDataSubscription($productType, $productId, $duration);
+
+        $this->setPriceSettings($subscription, self::TAX_APPLIES_TO_ONLY_COURSE);
 
         return $subscription;
     }
