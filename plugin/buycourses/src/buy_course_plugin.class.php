@@ -1155,6 +1155,140 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
+     * Lists current user subscription session details, including each session course details.
+     *
+     * It can return the number of rows when $typeResult is 'count'.
+     *
+     * @param int    $start
+     * @param int    $end
+     * @param string $name       Optional. The name filter.
+     * @param string $typeResult Optional. 'all', 'first' or 'count'.
+     *
+     * @return array|int
+     */
+    public function getCatalogSubscriptionSessionList($start, $end, $name = null, $typeResult = 'all', $sessionCategory = 0)
+    {
+        $sessions = $this->filterSubscriptionSessionList($start, $end, $name, $typeResult, $sessionCategory);
+
+        if ($typeResult === 'count') {
+            return $sessions;
+        }
+
+        $sessionCatalog = [];
+        // loop through all sessions
+        foreach ($sessions as $session) {
+            $sessionCourses = $session->getCourses();
+
+            if (empty($sessionCourses)) {
+                continue;
+            }
+
+            $item = $this->getItemSubscriptionByProduct(
+                $session->getId(),
+                self::PRODUCT_TYPE_SESSION
+            );
+
+            if (empty($item)) {
+                continue;
+            }
+
+            $sessionData = $this->getSessionInfo($session->getId());
+            $sessionData['coach'] = $session->getGeneralCoach()->getCompleteName();
+            $sessionData['enrolled'] = $this->getUserStatusForSession(
+                api_get_user_id(),
+                $session
+            );
+            $sessionData['courses'] = [];
+
+            foreach ($sessionCourses as $sessionCourse) {
+                $course = $sessionCourse->getCourse();
+
+                $sessionCourseData = [
+                    'title' => $course->getTitle(),
+                    'coaches' => [],
+                ];
+
+                $userCourseSubscriptions = $session->getUserCourseSubscriptionsByStatus(
+                    $course,
+                    Chamilo\CoreBundle\Entity\Session::COACH
+                );
+
+                foreach ($userCourseSubscriptions as $userCourseSubscription) {
+                    $user = $userCourseSubscription->getUser();
+                    $sessionCourseData['coaches'][] = $user->getCompleteName();
+                }
+                $sessionData['courses'][] = $sessionCourseData;
+            }
+
+            $sessionCatalog[] = $sessionData;
+        }
+
+        return $sessionCatalog;
+    }
+
+    /**
+     * Lists current user subscription course details.
+     *
+     * @param int    $start
+     * @param int    $end
+     * @param string $name       Optional. The name filter.
+     * @param string $typeResult Optional. 'all', 'first' or 'count'.
+     *
+     * @return array|int
+     */
+    public function getCatalogSubscriptionCourseList($first, $pageSize, $name = null, $typeResult = 'all')
+    {
+        $courses = $this->filterSubscriptionCourseList($first, $pageSize, $name, $typeResult);
+
+        if ($typeResult === 'count') {
+            return $courses;
+        }
+
+        if (empty($courses)) {
+            return [];
+        }
+
+        $courseCatalog = [];
+        foreach ($courses as $course) {
+            $item = $this->getItemSubscriptionByProduct(
+                $course->getId(),
+                self::PRODUCT_TYPE_COURSE
+            );
+
+            if (empty($item)) {
+                continue;
+            }
+
+            $courseItem = [
+                'id' => $course->getId(),
+                'title' => $course->getTitle(),
+                'code' => $course->getCode(),
+                'course_img' => null,
+                'item' => $item,
+                'teachers' => [],
+                'enrolled' => $this->getUserStatusForCourse(api_get_user_id(), $course),
+            ];
+
+            foreach ($course->getTeachers() as $courseUser) {
+                $teacher = $courseUser->getUser();
+                $courseItem['teachers'][] = $teacher->getCompleteName();
+            }
+
+            // Check images
+            $possiblePath = api_get_path(SYS_COURSE_PATH);
+            $possiblePath .= $course->getDirectory();
+            $possiblePath .= '/course-pic.png';
+
+            if (file_exists($possiblePath)) {
+                $courseItem['course_img'] = api_get_path(WEB_COURSE_PATH).$course->getDirectory().'/course-pic.png';
+            }
+            $courseCatalog[] = $courseItem;
+        }
+
+        return $courseCatalog;
+    }
+
+    /**
      * @param $price
      * @param $isoCode
      *
@@ -3925,9 +4059,86 @@ class BuyCoursesPlugin extends Plugin
     {
         $subscription = $this->getDataSubscription($productType, $productId, $duration);
 
+        $currency = $this->getSelectedCurrency();
+        $isoCode = $currency['iso_code'];
+
+        $subscription['iso_code'] = $isoCode;
+
         $this->setPriceSettings($subscription, self::TAX_APPLIES_TO_ONLY_COURSE);
 
         return $subscription;
+    }
+
+    /**
+     * Get subscription sale data by ID.
+     *
+     * @param int $saleId The sale ID
+     *
+     * @return array
+     */
+    public function getSubscriptionSale($saleId)
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE),
+            [
+                'where' => ['id = ?' => (int) $saleId],
+            ],
+            'first'
+        );
+    }
+
+    /**
+     * Complete subscription sale process. Update sale status to completed.
+     *
+     * @param int $saleId The sale ID
+     *
+     * @return bool
+     */
+    public function completeSubscriptionSale($saleId)
+    {
+        $sale = $this->getSubscriptionSale($saleId);
+
+        if ($sale['status'] == self::SALE_STATUS_COMPLETED) {
+            return true;
+        }
+
+        $saleIsCompleted = false;
+        switch ($sale['product_type']) {
+            case self::PRODUCT_TYPE_COURSE:
+                $course = api_get_course_info_by_id($sale['product_id']);
+                $saleIsCompleted = CourseManager::subscribeUser($sale['user_id'], $course['code']);
+                break;
+            case self::PRODUCT_TYPE_SESSION:
+                SessionManager::subscribeUsersToSession(
+                    $sale['product_id'],
+                    [$sale['user_id']],
+                    api_get_session_visibility($sale['product_id']),
+                    false
+                );
+
+                $saleIsCompleted = true;
+                break;
+        }
+
+        if ($saleIsCompleted) {
+            $this->updateSubscriptionSaleStatus($sale['id'], self::SALE_STATUS_COMPLETED);
+            if ($this->get('invoicing_enable') === 'true') {
+                $this->setInvoice($sale['id']);
+            }
+        }
+
+        return $saleIsCompleted;
+    }
+
+    /**
+     * Update subscription sale status to canceled.
+     *
+     * @param int $saleId The sale ID
+     */
+    public function cancelSubscriptionSale($saleId)
+    {
+        $this->updateSubscriptionSaleStatus($saleId, self::SALE_STATUS_CANCELED);
     }
 
     /**
@@ -4278,6 +4489,129 @@ class BuyCoursesPlugin extends Plugin
             "$courseTable c
             INNER JOIN $itemTable i
             ON c.id = i.product_id
+            INNER JOIN $urlTable url
+            ON c.id = url.c_id
+            ",
+            ['where' => $whereConditions, 'limit' => "$start, $end"],
+            $typeResult
+        );
+
+        if ($typeResult === 'count') {
+            return $courseIds;
+        }
+
+        if (!$courseIds) {
+            return [];
+        }
+
+        $courses = [];
+        foreach ($courseIds as $courseId) {
+            $courses[] = Database::getManager()->find(
+                'ChamiloCoreBundle:Course',
+                $courseId
+            );
+        }
+
+        return $courses;
+    }
+
+    /**
+     * Search filtered sessions by name, and range of price.
+     *
+     * @param int    $start
+     * @param int    $end
+     * @param string $name            Optional. The name filter
+     * @param string $max             Optional. all and count
+     * @param int    $sessionCategory Optional. Session category id
+     *
+     * @return array
+     */
+    private function filterSubscriptionSessionList($start, $end, $name = null, $typeResult = 'all', $sessionCategory = 0)
+    {
+        $subscriptionTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+        $sessionTable = Database::get_main_table(TABLE_MAIN_SESSION);
+
+        $sessionCategory = (int) $sessionCategory;
+
+        $innerJoin = "$subscriptionTable st ON s.id = st.product_id";
+        $whereConditions = [
+            'st.product_type = ? ' => self::PRODUCT_TYPE_SESSION,
+        ];
+
+        if (!empty($name)) {
+            $whereConditions['AND s.name LIKE %?%'] = $name;
+        }
+
+        $start = (int) $start;
+        $end = (int) $end;
+
+        if ($sessionCategory != 0) {
+            $whereConditions['AND s.session_category_id = ?'] = $sessionCategory;
+        }
+
+        $sessionIds = Database::select(
+            'DISTINCT s.id',
+            "$sessionTable s INNER JOIN $innerJoin",
+            ['where' => $whereConditions, 'limit' => "$start, $end"],
+            $typeResult
+        );
+
+        if ($typeResult === 'count') {
+            return $sessionIds;
+        }
+
+        if (!$sessionIds) {
+            return [];
+        }
+
+        $sessions = [];
+
+        foreach ($sessionIds as $sessionId) {
+            $sessions[] = Database::getManager()->find(
+                'ChamiloCoreBundle:Session',
+                $sessionId
+            );
+        }
+
+        return $sessions;
+    }
+
+    /**
+     * Search filtered subscriptions courses by name, and range of price.
+     *
+     * @param int    $start
+     * @param int    $end
+     * @param string $name            Optional. The name filter
+     * @param string $max             Optional. all and count
+     * @param int    $sessionCategory Optional. Session category id
+     *
+     * @return array
+     */
+    private function filterSubscriptionCourseList($start, $end, $name = '', $typeResult = 'all')
+    {
+        $subscriptionTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
+        $courseTable = Database::get_main_table(TABLE_MAIN_COURSE);
+        $urlTable = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE);
+
+        $urlId = api_get_current_access_url_id();
+
+        $whereConditions = [
+            'st.product_type = ? ' => self::PRODUCT_TYPE_COURSE,
+        ];
+
+        if (!empty($name)) {
+            $whereConditions['AND c.title LIKE %?%'] = $name;
+        }
+
+        $whereConditions['AND url.access_url_id = ?'] = $urlId;
+        $start = (int) $start;
+        $end = (int) $end;
+
+        $courseIds = Database::select(
+            'DISTINCT c.id',
+            "$courseTable c
+            INNER JOIN $subscriptionTable st
+            ON c.id = st.product_id
             INNER JOIN $urlTable url
             ON c.id = url.c_id
             ",
@@ -4900,5 +5234,24 @@ class BuyCoursesPlugin extends Plugin
         Database::insert(self::TABLE_SUBSCRIPTION, $values);
 
         return true;
+    }
+
+    /**
+     * Update the subscription sale status.
+     *
+     * @param int $saleId    The sale ID
+     * @param int $newStatus The new status
+     *
+     * @return bool
+     */
+    private function updateSubscriptionSaleStatus($saleId, $newStatus = self::SALE_STATUS_PENDING)
+    {
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+
+        return Database::update(
+            $saleTable,
+            ['status' => (int) $newStatus],
+            ['id = ?' => (int) $saleId]
+        );
     }
 }
