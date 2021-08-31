@@ -3,19 +3,13 @@
         <ul class="nav nav-tabs buy-courses-tabs" role="tablist">
             {% if coursesExist %}
             <li id="buy-courses-tab" class="{{ showing_courses ? 'active' : '' }}" role="presentation">
-                <a href="course_catalog.php" aria-controls="buy-courses" role="tab">{{ 'Courses'|get_lang }}</a>
+                <a href="subscription_course_catalog.php" aria-controls="buy-courses" role="tab">{{ 'Courses'|get_lang }}</a>
             </li>
             {% endif %}
             {% if sessionExist %}
             <li id="buy-sessions-tab" class="{{ showing_sessions ? 'active' : '' }}" role="presentation">
-                <a href="session_catalog.php" aria-controls="buy-sessions" role="tab">{{ 'Sessions'|get_lang }}</a>
+                <a href="subscription_session_catalog.php" aria-controls="buy-sessions" role="tab">{{ 'Sessions'|get_lang }}</a>
             </li>
-            {% endif %}
-            {% if services_are_included %}
-                <li id="buy-services-tab" class="{{ showing_services ? 'active' : '' }}" role="presentation">
-                    <a href="service_catalog.php" aria-controls="buy-services"
-                       role="tab">{{ 'Services'|get_plugin_lang('BuyCoursesPlugin') }}</a>
-                </li>
             {% endif %}
         </ul>
     {% endif %}
@@ -100,22 +94,6 @@
                                                     {{ session.dates.display }}
                                                 {% endif %}
                                             </p>
-                                            <!--
-                                            <ul class="list-unstyled">
-                                                {% for course in session.courses %}
-                                                    <li>
-                                                        <em class="fa fa-book fa-fw"></em> {{ course.title }}
-                                                        {% if course.coaches|length %}
-                                                            <ul>
-                                                                {% for coach in course.coaches %}
-                                                                    <li>{{ coach }}</li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        {% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                            -->
                                             {% if session.enrolled == "YES" %}
                                                 <div class="alert alert-success">
                                                     <em class="fa fa-check-square-o fa-fw"></em> {{ 'TheUserIsAlreadyRegisteredInTheSession'|get_plugin_lang('BuyCoursesPlugin') }}
@@ -123,7 +101,7 @@
                                             {% elseif session.enrolled == "NO" %}
                                                 <div class="toolbar">
                                                     <a class="btn btn-success btn-block btn-sm"
-                                                       href="{{ _p.web_plugin ~ 'buycourses/src/service_process.php?' ~ {'i': session.id, 't': 2}|url_encode() }}">
+                                                       href="{{ _p.web_plugin ~ 'buycourses/src/subscription_process.php?' ~ {'i': session.id, 't': 2}|url_encode() }}">
                                                         <em class="fa fa-shopping-cart"></em> {{ 'Buy'|get_plugin_lang('BuyCoursesPlugin') }}
                                                     </a>
                                                 </div>
