@@ -79,7 +79,7 @@ if ($form->validate()) {
         exit;
     }
 
-    $saleId = $plugin->registerSale($item['id'], $formValues['payment_type'], $formValues['c']);
+    $saleId = $plugin->registerSubscriptionSale($item['id'], $formValues['payment_type'], $formValues['d'], $formValues['c']);
 
     if ($saleId !== false) {
         $_SESSION['bc_sale_id'] = $saleId;
@@ -92,7 +92,7 @@ if ($form->validate()) {
             }
         }
 
-        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/process_confirm.php');
+        header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/process_subscription_confirm.php');
     }
 
     exit;
@@ -209,14 +209,17 @@ foreach($subscriptionItems as $si) {
     }
 }
 
-
 $durationSelection = $formSubscription->addSelect('duration', $plugin->get_lang('Duration'), $selectedFrequencies);
 
 $durationSelection->setSelected($subscriptionItem['duration']);
 
+$selectedDurationName = $frequencies[$subscriptionItem['duration']];
+
 $formSubscription->addHidden('t', intval($_GET['t']));
 $formSubscription->addHidden('i', intval($_GET['i']));
 $formSubscription->addButton('submit', $plugin->get_lang('SelectSubscription'), 'check', 'success', 'btn-lg pull-right');
+
+$form->addHidden('d', $subscriptionItem['duration']);
 
 // View
 $templateName = $plugin->get_lang('PaymentMethods');
@@ -228,6 +231,7 @@ $tpl->assign('buying_course', $buyingCourse);
 $tpl->assign('buying_session', $buyingSession);
 $tpl->assign('user', api_get_user_info());
 $tpl->assign('message_payment', $messagePayment);
+$tpl->assign('selected_duration_name', $selectedDurationName);
 $tpl->assign('form', $form->returnForm());
 $tpl->assign('form_subscription', $formSubscription->returnForm());
 

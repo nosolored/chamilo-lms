@@ -39,7 +39,7 @@
                                 {% endif %}
                                 <div class="price">
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                    {{ subscription.total_price_formatted }}
+                                    {{ subscription.total_price_formatted }} {{ selected_duration_name }}
                                 </div>
                                 <div class="subscription">
                                     {{ form_subscription }}
