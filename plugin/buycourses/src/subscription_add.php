@@ -57,7 +57,7 @@ if ($editingCourse) {
         'tax_perc' => $courseItem['tax_perc'],
         'currency_id' => $currency['id'],
     ];
-} else if ($editingSession) {
+} elseif ($editingSession) {
     if (!$includeSession) {
         api_not_allowed(true);
     }
@@ -140,7 +140,7 @@ $form->addHtml(
                                     <input class="form-control" name="price" type="number" step="0.01" id="price">
                                 </div>
                                 <div class="col-sm-1">
-                                    '. $currencyIso . '
+                                    '.$currencyIso.'
                                 </div>
                             </div>
                             <div class="form-group">
