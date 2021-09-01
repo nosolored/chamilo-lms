@@ -2693,6 +2693,45 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Register the users payouts.
      *
+     * @param int $saleId The subscription sale ID
+     *
+     * @return array
+     */
+    public function storeSubscriptionPayouts($saleId)
+    {
+        $payoutsTable = Database::get_main_table(self::TABLE_PAYPAL_PAYOUTS);
+        $platformCommission = $this->getPlatformCommission();
+
+        $sale = $this->getSubscriptionSale($saleId);
+        $commission = (int) $platformCommission['commission'];
+        $teachersCommission = number_format(
+            (floatval($sale['price']) * $commission) / 100,
+            2
+        );
+
+        $beneficiaries = $this->getBeneficiariesBySale($saleId);
+        foreach ($beneficiaries as $beneficiary) {
+            $beneficiaryCommission = (int) $beneficiary['commissions'];
+            Database::insert(
+                $payoutsTable,
+                [
+                    'date' => $sale['date'],
+                    'payout_date' => api_get_utc_datetime(),
+                    'sale_id' => (int) $saleId,
+                    'user_id' => $beneficiary['user_id'],
+                    'commission' => number_format(
+                        (floatval($teachersCommission) * $beneficiaryCommission) / 100,
+                        2
+                    ),
+                    'status' => self::PAYOUT_STATUS_PENDING,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Register the users payouts.
+     *
      * @param int $payoutId The payout ID
      * @param int $status   The status to set (-1 to cancel, 0 to pending, 1 to completed)
      *
@@ -4091,7 +4130,7 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Complete subscription sale process. Update sale status to completed.
      *
-     * @param int $saleId The sale ID
+     * @param int $saleId The subscription sale ID
      *
      * @return bool
      */
@@ -4134,11 +4173,278 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Update subscription sale status to canceled.
      *
-     * @param int $saleId The sale ID
+     * @param int $saleId The subscription sale ID
      */
     public function cancelSubscriptionSale($saleId)
     {
         $this->updateSubscriptionSaleStatus($saleId, self::SALE_STATUS_CANCELED);
+    }
+
+   /**
+     * Get a list of subscription sales by the status.
+     *
+     * @param int $status The status to filter
+     *
+     * @return array The sale list. Otherwise return false
+     */
+    public function getSubscriptionSaleListByStatus($status = self::SALE_STATUS_PENDING)
+    {
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+
+        return Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 'u.email', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'where' => ['s.status = ?' => (int) $status],
+                'order' => 'id DESC',
+            ]
+        );
+    }
+
+    /**
+     * Get the list statuses for subscriptions sales.
+     *
+     * @param string $dateStart
+     * @param string $dateEnd
+     *
+     * @throws Exception
+     *
+     * @return array
+     */
+    public function getSubscriptionSaleListReport($dateStart = null, $dateEnd = null)
+    {
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+        $list = Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 'u.email', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'order' => 'id DESC',
+            ]
+        );
+        $listExportTemp = [];
+        $listExport = [];
+        $textStatus = null;
+        $paymentTypes = $this->getPaymentTypes();
+        $productTypes = $this->getProductTypes();
+        foreach ($list as $item) {
+            $statusSaleOrder = $item['status'];
+            switch ($statusSaleOrder) {
+                case 0:
+                    $textStatus = $this->get_lang('SaleStatusPending');
+                    break;
+                case 1:
+                    $textStatus = $this->get_lang('SaleStatusCompleted');
+                    break;
+                case -1:
+                    $textStatus = $this->get_lang('SaleStatusCanceled');
+                    break;
+            }
+            $dateFilter = new DateTime($item['date']);
+            $listExportTemp[] = [
+                'id' => $item['id'],
+                'reference' => $item['reference'],
+                'status' => $textStatus,
+                'status_filter' => $item['status'],
+                'date' => $dateFilter->format('Y-m-d'),
+                'order_time' => $dateFilter->format('H:i:s'),
+                'price' => $item['iso_code'].' '.$item['price'],
+                'product_type' => $productTypes[$item['product_type']],
+                'product_name' => $item['product_name'],
+                'payment_type' => $paymentTypes[$item['payment_type']],
+                'complete_user_name' => api_get_person_name($item['firstname'], $item['lastname']),
+                'email' => $item['email'],
+            ];
+        }
+        $listExport[] = [
+            get_lang('Number'),
+            $this->get_lang('OrderStatus'),
+            $this->get_lang('OrderDate'),
+            $this->get_lang('OrderTime'),
+            $this->get_lang('PaymentMethod'),
+            $this->get_lang('SalePrice'),
+            $this->get_lang('ProductType'),
+            $this->get_lang('ProductName'),
+            $this->get_lang('UserName'),
+            get_lang('Email'),
+        ];
+        //Validation Export
+        $dateStart = strtotime($dateStart);
+        $dateEnd = strtotime($dateEnd);
+        foreach ($listExportTemp as $item) {
+            $dateFilter = strtotime($item['date']);
+            if (($dateFilter >= $dateStart) && ($dateFilter <= $dateEnd)) {
+                $listExport[] = [
+                    'id' => $item['id'],
+                    'status' => $item['status'],
+                    'date' => $item['date'],
+                    'order_time' => $item['order_time'],
+                    'payment_type' => $item['payment_type'],
+                    'price' => $item['price'],
+                    'product_type' => $item['product_type'],
+                    'product_name' => $item['product_name'],
+                    'complete_user_name' => $item['complete_user_name'],
+                    'email' => $item['email'],
+                ];
+            }
+        }
+
+        return $listExport;
+    }
+
+   /**
+     * Get a list of subscription sales by the user.
+     *
+     * @param string $term The search term
+     *
+     * @return array The sale list. Otherwise return false
+     */
+    public function getSubscriptionSaleListByUser($term)
+    {
+        $term = trim($term);
+
+        if (empty($term)) {
+            return [];
+        }
+
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+
+        return Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 'u.email', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'where' => [
+                    'u.username LIKE %?% OR ' => $term,
+                    'u.lastname LIKE %?% OR ' => $term,
+                    'u.firstname LIKE %?%' => $term,
+                ],
+                'order' => 'id DESC',
+            ]
+        );
+    }
+
+    /**
+     * Get a list of subscription sales by the user id.
+     *
+     * @param int $id The user id
+     *
+     * @return array The sale list. Otherwise return false
+     */
+    public function getSubscriptionSaleListByUserId($id)
+    {
+        if (empty($id)) {
+            return [];
+        }
+
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+
+        return Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'where' => [
+                    'u.id = ? AND s.status = ?' => [(int) $id, self::SALE_STATUS_COMPLETED],
+                ],
+                'order' => 'id DESC',
+            ]
+        );
+    }
+
+    /**
+     * Get a list of subscription sales by date range.
+     *
+     * @param string $dateStart
+     * @param string $dateEnd
+     *
+     * @return array The sale list. Otherwise return false
+     */
+    public function getSubscriptionSaleListByDate($dateStart, $dateEnd)
+    {
+        $dateStart = trim($dateStart);
+        $dateEnd = trim($dateEnd);
+        if (empty($dateStart)) {
+            return [];
+        }
+        if (empty($dateEnd)) {
+            return [];
+        }
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+
+        return Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 'u.email', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'where' => [
+                    's.date BETWEEN ? AND ' => $dateStart,
+                    ' ? ' => $dateEnd,
+                ],
+                'order' => 'id DESC',
+            ]
+        );
+    }
+
+    /**
+     * Get a list of subscription sales by the user Email.
+     *
+     * @param string $term The search term
+     *
+     * @return array The sale list. Otherwise return false
+     */
+    public function getSubscriptionSaleListByEmail($term)
+    {
+        $term = trim($term);
+        if (empty($term)) {
+            return [];
+        }
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+        $currencyTable = Database::get_main_table(self::TABLE_CURRENCY);
+        $userTable = Database::get_main_table(TABLE_MAIN_USER);
+        $innerJoins = "
+            INNER JOIN $currencyTable c ON s.currency_id = c.id
+            INNER JOIN $userTable u ON s.user_id = u.id
+        ";
+
+        return Database::select(
+            ['c.iso_code', 'u.firstname', 'u.lastname', 'u.email', 's.*'],
+            "$saleTable s $innerJoins",
+            [
+                'where' => [
+                    'u.email LIKE %?% ' => $term,
+                ],
+                'order' => 'id DESC',
+            ]
+        );
     }
 
     /**
