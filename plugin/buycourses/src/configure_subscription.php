@@ -138,6 +138,15 @@ if ($frequencyForm->validate()) {
     $duration = $frequencyFormValues['duration'];
     $price = $frequencyFormValues['price'];
 
+    if ($frequenciesOptions[$duration]) {
+        Display::addFlash(
+            Display::return_message($plugin->get_lang('SubscriptionAlreadyExists'), 'error')
+        );
+
+        header('Location:'.api_get_self().'?'.$queryString);
+        exit;
+    }
+
     $subscription['frequencies'] = [['duration' => $duration, 'price' => $price]];
 
     $result = $plugin->addNewSubscription($subscription);
@@ -175,19 +184,9 @@ $frequencyForm->addHidden('tax_perc', $taxtPerc);
 $frequencyForm->addHidden('currency_id', $currency['id']);
 $frequencyForm->addButtonCreate('');
 
-$frequencies = $subscriptions;
-
-for ($i = 0; $i <= count($frequencies); $i++) {
-    if ($frequencies[$i]['duration'] == 7) {
-        $frequencies[$i]['durationName'] = 'Weekly';
-    } else if ($frequencies[$i]['duration'] == 30) {
-        $frequencies[$i]['durationName'] = 'Monthly';
-    } else if ($frequencies[$i]['duration'] == 60) {
-        $frequencies[$i]['durationName'] = 'Quarterly';
-    } else if ($frequencies[$i]['duration'] == 180) {
-        $frequencies[$i]['durationName'] = 'Biannual';
-    } else if ($frequencies[$i]['duration'] == 360) {
-        $frequencies[$i]['durationName'] = 'annual';
+for ($i = 0; $i <= count($subscriptions); $i++) {
+    if ($subscriptions[$i]['duration'] > 0) {
+        $subscriptions[$i]['durationName'] = $frequenciesOptions[$subscriptions[$i]['duration']];
     }
 }
 
@@ -232,7 +231,7 @@ $template = new Template($templateName);
 $template->assign('header', $templateName);
 $template->assign('items_form', $form->returnForm());
 $template->assign('frequency_form', $frequencyForm->returnForm());
-$template->assign('frequencies', $frequencies);
+$template->assign('subscriptions', $subscriptions);
 $template->assign('currencyIso', $currencyIso);
 
 $content = $template->fetch('buycourses/view/configure_subscription.tpl');

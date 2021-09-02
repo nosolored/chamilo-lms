@@ -30,12 +30,12 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for frequency in frequencies %}
+                            {% for subscription in subscriptions %}
                                 <tr>
-                                    <td>{{ frequency.durationName }}</td>
-                                    <td>{{ frequency.price }} {{ currencyIso }}</td>
+                                    <td>{{ subscription.durationName }}</td>
+                                    <td>{{ subscription.price }} {{ currencyIso }}</td>
                                     <td>
-                                        <a href="{{ _p.web_self ~ '?' ~ {'action':'delete_frequency', 'd': frequency.duration, 'id': frequency.product_id, 'type': frequency.product_type}|url_encode() }}"
+                                        <a href="{{ _p.web_self ~ '?' ~ {'action':'delete_frequency', 'd': subscription.duration, 'id': subscription.product_id, 'type': subscription.product_type}|url_encode() }}"
                                            class="btn btn-danger btn-sm">
                                             <em class="fa fa-remove"></em>
                                         </a>
