@@ -4194,7 +4194,7 @@ class BuyCoursesPlugin extends Plugin
                 } else {
                     $subscriptionId = $this->registerSubscription($subscription, $frequency);
                     if ($subscriptionId) {
-                        return true;
+                        //return true;
                     } else {
                         Display::addFlash(
                             Display::return_message(
