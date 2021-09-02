@@ -26,6 +26,8 @@ $editingSession = $type === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 
 $plugin = BuyCoursesPlugin::create();
 
+$includeSession = $plugin->get('include_sessions') === 'true';
+
 $entityManager = Database::getManager();
 $userRepo = UserManager::getRepository();
 $currency = $plugin->getSelectedCurrency();
