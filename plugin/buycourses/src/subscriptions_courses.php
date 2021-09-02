@@ -34,7 +34,7 @@ $qb = $plugin->getCourseList($first, $pageSize);
 $query = $qb->getQuery();
 $courses = new Paginator($query, $fetchJoinCollection = true);
 foreach ($courses as $course) {
-    $item = $plugin->getItemSubscriptionByProduct($course->getId(), BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
+    $item = $plugin->getSubscriptionItemByProduct($course->getId(), BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
     $course->buyCourseData = [];
     if ($item !== false) {
         $course->buyCourseData = $item;

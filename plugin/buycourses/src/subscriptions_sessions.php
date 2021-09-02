@@ -54,7 +54,7 @@ $tpl->assign('tax_enable', $taxEnable);
 $query = CoursesAndSessionsCatalog::browseSessions(null, ['start' => $first, 'length' => $pageSize], true);
 $sessions = new Paginator($query, $fetchJoinCollection = true);
 foreach ($sessions as $session) {
-    $item = $plugin->getItemSubscriptionByProduct($session->getId(), BuyCoursesPlugin::PRODUCT_TYPE_SESSION);
+    $item = $plugin->getSubscriptionItemByProduct($session->getId(), BuyCoursesPlugin::PRODUCT_TYPE_SESSION);
     $session->buyCourseData = [];
     if ($item !== false) {
         $session->buyCourseData = $item;
