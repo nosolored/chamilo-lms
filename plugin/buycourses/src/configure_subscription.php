@@ -49,11 +49,11 @@ if (empty($currency)) {
     );
 }
 
-$subscriptions = $plugin->getSubscriptions($type, $id );
+$subscriptions = $plugin->getSubscriptions($type, $id);
 
 $taxtPerc = 0;
 
-if (isset($subscriptions) && !empty($subscriptions )) {
+if (isset($subscriptions) && !empty($subscriptions)) {
     $taxtPerc = $subscriptions[0]['tax_perc'];
 }
 
@@ -75,7 +75,7 @@ if ($editingCourse) {
         'name' => $courseItem['course_title'],
         'visible' => $courseItem['visible'],
     ];
-} else if ($editingSession) {
+} elseif ($editingSession) {
     if (!$includeSession) {
         api_not_allowed(true);
     }
@@ -165,7 +165,7 @@ $frequencyForm->addElement(
     false,
     [
         'step' => 1,
-        'cols-size' => [3, 8, 1]
+        'cols-size' => [3, 8, 1],
     ]
 );
 
@@ -180,13 +180,13 @@ $frequencies = $subscriptions;
 for ($i = 0; $i <= count($frequencies); $i++) {
     if ($frequencies[$i]['duration'] == 7) {
         $frequencies[$i]['durationName'] = 'Weekly';
-    } else if ($frequencies[$i]['duration'] == 30) {
+    } elseif ($frequencies[$i]['duration'] == 30) {
         $frequencies[$i]['durationName'] = 'Monthly';
-    } else if ($frequencies[$i]['duration'] == 60) {
+    } elseif ($frequencies[$i]['duration'] == 60) {
         $frequencies[$i]['durationName'] = 'Quarterly';
-    } else if ($frequencies[$i]['duration'] == 180) {
+    } elseif ($frequencies[$i]['duration'] == 180) {
         $frequencies[$i]['durationName'] = 'Biannual';
-    } else if ($frequencies[$i]['duration'] == 360) {
+    } elseif ($frequencies[$i]['duration'] == 360) {
         $frequencies[$i]['durationName'] = 'annual';
     }
 }

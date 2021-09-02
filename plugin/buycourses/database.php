@@ -552,7 +552,7 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_SALE)) {
     $subscriptionSaleTable->addColumn('product_name', Types::STRING);
     $subscriptionSaleTable->addColumn('product_id', Types::INTEGER);
     $subscriptionSaleTable->addColumn('price', Types::DECIMAL);
-    $subscriptionSaleTable->addColumn('price_without_tax', Types::DECIMAL);        
+    $subscriptionSaleTable->addColumn('price_without_tax', Types::DECIMAL);
     $subscriptionSaleTable->addColumn('tax_perc', Types::INTEGER);
     $subscriptionSaleTable->addColumn('tax_amount', Types::DECIMAL);
     $subscriptionSaleTable->addColumn('status', Types::INTEGER);
