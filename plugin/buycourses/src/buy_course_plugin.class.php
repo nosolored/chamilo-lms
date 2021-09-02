@@ -469,6 +469,7 @@ class BuyCoursesPlugin extends Plugin
             price_without_discount decimal(10,2),
             discount_amount decimal(10,2),
             subscription_end datetime NOT NULL,
+            expired tinyint NULL,
             PRIMARY KEY (id)
         )";
         Database::query($sql);
@@ -4630,6 +4631,76 @@ class BuyCoursesPlugin extends Plugin
                 ],
                 'order' => 'id DESC',
             ]
+        );
+    }
+
+    /**
+     * Get subscription sale data by ID.
+     *
+     * @param date $date The date
+     *
+     * @return array
+     */
+    public function getSubscriptionsDue($date)
+    {
+        return Database::select(
+            'id, user_id, product_id, product_type',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE),
+            [
+                'where' => ['subscription_end < ? AND expired <> ? AND status <> ? ' => [
+                    $date,
+                    1,
+                    self::SALE_STATUS_COMPLETED,
+                    ]
+                ],
+            ],
+            'first'
+        );
+    }
+
+    /**
+     * Get subscription sale data by ID.
+     *
+     * @param int $userId      The user ID
+     * @param int $productId   The product ID
+     * @param int $productType The product type
+     *
+     * @return array
+     */
+    public function checkItemSubscriptionActive($userId, $productId, $productType)
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE),
+            [
+                'where' => ['subscription_end >= ? AND userId = ? AND productId = ? AND productType = ? AND status <> ? ' => [
+                    api_get_utc_datetime(),
+                    $userId,
+                    $productId,
+                    $productType,
+                    self::SALE_STATUS_COMPLETED,
+                    ]
+                ],
+            ],
+            'first'
+        );
+    }
+
+    /**
+     * Get subscription sale data by ID.
+     *
+     * @param int $date The date
+     *
+     * @return array
+     */
+    public function updateSubscriptionSaleExpirationStatus($id)
+    {
+        $saleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+
+        return Database::update(
+            $saleTable,
+            ['expired' => 1],
+            ['id = ?' => (int) $id]
         );
     }
 

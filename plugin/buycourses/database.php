@@ -561,6 +561,7 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_SALE)) {
     $subscriptionSaleTable->addColumn('price_without_discount', Types::DECIMAL);
     $subscriptionSaleTable->addColumn('discount_amount', Types::DECIMAL);
     $subscriptionSaleTable->addColumn('subscription_end', Types::DATETIME_MUTABLE);
+    $subscriptionSaleTable->addColumn('expired', Types::BOOLEAN);
     $subscriptionSaleTable->setPrimaryKey(['id']);
 }
 
