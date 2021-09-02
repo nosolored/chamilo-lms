@@ -164,7 +164,7 @@ $frequencyForm->addElement(
     'duration',
     $plugin->get_lang('Duration'),
     $frequenciesOptions,
-    ['cols-size' => [3, 8, 1]]
+    ['cols-size' => [2, 8, 2]]
 );
 
 $frequencyForm->addElement(

@@ -104,14 +104,19 @@ $form->addElement(
 
 $frequencies = $plugin->getFrequencies();
 
+$selectOptions = '';
+foreach ($frequencies as $key => $frequency) {
+    $selectOptions .= '<option value="'.$key.'">'.$frequency.'</option>';
+}
+
 $platformCommission = $plugin->getPlatformCommission();
 $form->addHtml(
     '
     <div class="form-group">
-        <div class="col-sm-10">
+        <div class="col-sm-11">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Frequencies</h3>
+                    <h3 class="panel-title">'.$plugin->get_lang('FrequencyConfig').'</h3>
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
@@ -124,11 +129,7 @@ $form->addHtml(
                                     <div class="dropdown bootstrap-select form-control bs3 dropup">
                                         <select class="selectpicker form-control"
                                             data-live-search="true" name="duration" id="duration" tabindex="null">
-                                            <option value="7">Weekly</option>
-                                            <option value="30">Monthly</option>
-                                            <option value="60">Quarterly</option>
-                                            <option value="180">Biannual</option>
-                                            <option value="360">annual</option>
+                                            '.$selectOptions.'
                                         </select>
                                     </div>
                                 </div>
@@ -136,13 +137,13 @@ $form->addHtml(
                             </div>
                             <div class="form-group ">
                                 <label for="price" class="col-sm-3 control-label">
-                                    Price
+                                    '.$plugin->get_lang('Duration').'
                                 </label>
                                 <div class="col-sm-8">
                                     <input class="form-control" name="price" type="number" step="0.01" id="price">
                                 </div>
                                 <div class="col-sm-1">
-                                    '. $currencyIso . '
+                                    '.$currencyIso.'
                                 </div>
                             </div>
                             <div class="form-group">
@@ -157,23 +158,12 @@ $form->addHtml(
                                 <table class="table table-striped table-hover">
                                     <thead>
                                     <tr>
-                                        <th>Days</th>
-                                        <th>Price</th>
-                                        <th>Actions</th>
+                                        <th>'.$plugin->get_lang('Duration').'</th>
+                                        <th>'.$plugin->get_lang('Price').'</th>
+                                        <th>'.$plugin->get_lang('Actions').'</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <!--{% for frequency in frequencies %}
-                                        <tr>
-                                            <td>{{ frequency.days }}</td>
-                                            <td>{{ account.price }}</td>
-                                            <td>
-                                                <a class="btn btn-danger btn-sm">
-                                                    <em class="fa fa-remove"></em>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}-->
                                     </tbody>
                                 </table>
                             </div>
