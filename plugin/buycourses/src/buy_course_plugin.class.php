@@ -4177,6 +4177,8 @@ class BuyCoursesPlugin extends Plugin
      */
     public function addNewSubscription($subscription)
     {
+        $result = false;
+
         if(isset($subscription['frequencies'])) {
             foreach ($subscription['frequencies'] as $frequency) {
                 $subscriptionDb = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $frequency['duration']);
@@ -4194,7 +4196,7 @@ class BuyCoursesPlugin extends Plugin
                 } else {
                     $subscriptionId = $this->registerSubscription($subscription, $frequency);
                     if ($subscriptionId) {
-                        //return true;
+                        $result = true;
                     } else {
                         Display::addFlash(
                             Display::return_message(
@@ -4217,7 +4219,7 @@ class BuyCoursesPlugin extends Plugin
                 )
             );
 
-            return false;
+            return $result ;
         }
     }
 
