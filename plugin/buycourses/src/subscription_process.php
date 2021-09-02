@@ -49,7 +49,7 @@ if (empty($currentUserId)) {
     exit;
 }
 
-$subscriptionItems = $plugin->getItemsSubscriptionsByProduct($_REQUEST['i'], $_REQUEST['t']);
+$subscriptionItems = $plugin->getSubscriptionsItemsByProduct($_REQUEST['i'], $_REQUEST['t']);
 
 if (!isset($subscriptionItems) || empty($subscriptionItems)) {
     api_not_allowed(true);
@@ -60,11 +60,11 @@ if (!isset($subscriptionItem) || empty($subscriptionItem)) {
 }
 
 if ($buyingCourse) {
-    $courseInfo = $plugin->getCourseInfo($_REQUEST['i'], $coupon);
-    $item = $plugin->getItemByProduct($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
+    $courseInfo = $plugin->getSubscriptionCourseInfo($_REQUEST['i'], $coupon);
+    $item = $plugin->getSubscriptionItemByProduct($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
 } elseif ($buyingSession) {
-    $sessionInfo = $plugin->getSessionInfo($_REQUEST['i'], $coupon);
-    $item = $plugin->getItemByProduct($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION);
+    $sessionInfo = $plugin->getSubscriptionSessionInfo($_REQUEST['i'], $coupon);
+    $item = $plugin->getSubscriptionItemByProduct($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION);
 }
 
 $form = new FormValidator('confirm_sale');
@@ -79,7 +79,7 @@ if ($form->validate()) {
         exit;
     }
 
-    $saleId = $plugin->registerSubscriptionSale($item['id'], $formValues['payment_type'], $formValues['d'], $formValues['c']);
+    $saleId = $plugin->registerSubscriptionSale($item['product_id'], $item['product_type'], $formValues['payment_type'], $formValues['d'], $formValues['c']);
 
     if ($saleId !== false) {
         $_SESSION['bc_sale_id'] = $saleId;
@@ -182,12 +182,12 @@ if ($formSubscription->validate()) {
     }
 
     if ($buyingCourse) {
-        $coupon = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $formSubscriptionValues['duration']);
+        $subscription = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $formSubscriptionValues['duration']);
     } else {
-        $coupon = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $formSubscriptionValues['duration']);
+        $subscription = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $formSubscriptionValues['duration']);
     }
 
-    if ($coupon == null) {
+    if ($subscription == null) {
         Display::addFlash(
             Display::return_message($plugin->get_lang('SubscriptionNotValid'), 'error', false)
         );
