@@ -1218,7 +1218,7 @@ class BuyCoursesPlugin extends Plugin
 
             $sessionData = $this->getSessionInfo($session->getId());
             $sessionData['coach'] = $session->getGeneralCoach()->getCompleteName();
-            $sessionData['enrolled'] = $this->getUserStatusForSession(
+            $sessionData['enrolled'] = $this->getUserStatusForSubscriptionSession(
                 api_get_user_id(),
                 $session
             );
@@ -1290,7 +1290,7 @@ class BuyCoursesPlugin extends Plugin
                 'course_img' => null,
                 'item' => $item,
                 'teachers' => [],
-                'enrolled' => $this->getUserStatusForCourse(api_get_user_id(), $course),
+                'enrolled' => $this->getUserStatusForSubscriptionCourse(api_get_user_id(), $course),
             ];
 
             foreach ($course->getTeachers() as $courseUser) {
@@ -5816,5 +5816,112 @@ class BuyCoursesPlugin extends Plugin
             ['status' => (int) $newStatus],
             ['id = ?' => (int) $saleId]
         );
+    }
+
+    /**
+     * Get the user status for the subscription session.
+     *
+     * @param int     $userId  The user ID
+     * @param Session $session The session
+     *
+     * @return string
+     */
+    private function getUserStatusForSubscriptionSession($userId, Session $session)
+    {
+        if (empty($userId)) {
+            return 'NO';
+        }
+
+        $entityManager = Database::getManager();
+        $scuRepo = $entityManager->getRepository('ChamiloCoreBundle:SessionRelCourseRelUser');
+
+        $buySaleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+
+        // Check if user bought the course
+        $sale = Database::select(
+            'COUNT(1) as qty',
+            $buySaleTable,
+            [
+                'where' => [
+                    'user_id = ? AND product_type = ? AND product_id = ? AND status = ? AND (expired is NULL OR expired <> ?)' => [
+                        $userId,
+                        self::PRODUCT_TYPE_SESSION,
+                        $session->getId(),
+                        self::SALE_STATUS_PENDING,
+                        1,
+                    ],
+                ],
+            ],
+            'first'
+        );
+
+        if ($sale['qty'] > 0) {
+            return 'TMP';
+        }
+
+        // Check if user is already subscribe to session
+        $userSubscription = $scuRepo->findBy([
+            'session' => $session,
+            'user' => $userId,
+        ]);
+
+        if (!empty($userSubscription)) {
+            return 'YES';
+        }
+
+        return 'NO';
+    }
+
+    /**
+     * Get the user status for the subscription course.
+     *
+     * @param int    $userId The user Id
+     * @param Course $course The course
+     *
+     * @return string
+     */
+    private function getUserStatusForSubscriptionCourse($userId, Course $course)
+    {
+        if (empty($userId)) {
+            return 'NO';
+        }
+
+        $entityManager = Database::getManager();
+        $cuRepo = $entityManager->getRepository('ChamiloCoreBundle:CourseRelUser');
+        $buySaleTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE);
+
+        // Check if user bought the course
+        $sale = Database::select(
+            'COUNT(1) as qty',
+            $buySaleTable,
+            [
+                'where' => [
+                    'user_id = ? AND product_type = ? AND product_id = ? AND status = ? AND (expired is NULL OR expired <> ?)' => [
+                        $userId,
+                        self::PRODUCT_TYPE_COURSE,
+                        $course->getId(),
+                        self::SALE_STATUS_PENDING,
+                        1,
+                    ],
+                ],
+            ],
+            'first'
+        );
+
+        if ($sale['qty'] > 0) {
+            return 'TMP';
+        }
+
+        // Check if user is already subscribe to course
+        $userSubscription = $cuRepo->findBy([
+            'course' => $course,
+            'user' => $userId,
+        ]);
+
+        if (!empty($userSubscription)) {
+            return 'YES';
+        }
+
+        return 'NO';
     }
 }
