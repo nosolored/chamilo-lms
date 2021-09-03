@@ -123,7 +123,7 @@ $form->addHtml(
                         <div class="col-sm-5">
                             <div class="form-group ">
                                 <label for="duration" class="col-sm-3 control-label">
-                                    Frequency
+                                '.$plugin->get_lang('Duration').'
                                 </label>
                                 <div class="col-sm-8">
                                     <div class="dropdown bootstrap-select form-control bs3 dropup">
@@ -137,7 +137,7 @@ $form->addHtml(
                             </div>
                             <div class="form-group ">
                                 <label for="price" class="col-sm-3 control-label">
-                                    '.$plugin->get_lang('Duration').'
+                                    '.$plugin->get_lang('Price').'
                                 </label>
                                 <div class="col-sm-8">
                                     <input class="form-control" name="price" type="number" step="0.01" id="price">
