@@ -26,6 +26,8 @@ $editingSession = $type === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 
 $plugin = BuyCoursesPlugin::create();
 
+$includeSession = $plugin->get('include_sessions') === 'true';
+
 if (isset($_GET['action'], $_GET['d'])) {
     if ($_GET['action'] == 'delete_frequency') {
         $plugin->deleteSubscription($type, $id, $_GET['d']);
