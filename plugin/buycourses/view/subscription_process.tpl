@@ -29,7 +29,7 @@
                                 {% if course.tax_enable %}
                                     <div class="price-details-tax">
                                         {{ 'Price'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                        {{ subscription.price_formatted }}
+                                        {{ subscription.price_formatted }} {{ selected_duration_name }}
                                         <br>
                                         {{ course.tax_name }} ({{ subscription.item.tax_perc_show }}%):
                                         {{ subscription.tax_amount_formatted }}
@@ -80,15 +80,15 @@
                                 {% if session.tax_enable %}
                                     <div class="price-details-tax">
                                         {{ 'Price'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                        {{ subscription.item.price_formatted }}
+                                        {{ subscription.price_formatted }}
                                         <br>
                                         {{ session.tax_name }} ({{ subscription.item.tax_perc_show }}%):
-                                        {{ subscription.item.tax_amount_formatted }}
+                                        {{ subscription.tax_amount_formatted }} {{ selected_duration_name }}
                                     </div>
                                 {% endif %}
                                 <div class="price">
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                    {{ subscription.item.total_price_formatted }}
+                                    {{ subscription.total_price_formatted }} {{ selected_duration_name }}
                                 </div>
                                 <div class="subscription">
                                     {{ form_subscription }}

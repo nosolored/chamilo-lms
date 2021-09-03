@@ -37,9 +37,9 @@ $queryString = 'i='.intval($_REQUEST['i']).'&t='.intval($_REQUEST['t']);
 if (isset($_REQUEST['d'])) {
     $duration = $_REQUEST['d'];
     if ($buyingCourse) {
-        $subscriptionItem = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $duration);
+        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i'], $duration);
     } else {
-        $subscriptionItem = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $duration);
+        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i'], $duration);
     }
 }
 
@@ -56,7 +56,7 @@ if (!isset($subscriptionItems) || empty($subscriptionItems)) {
 }
 
 if (!isset($subscriptionItem) || empty($subscriptionItem)) {
-    $subscriptionItem = $plugin->getSubscription($subscriptionItems[0]['product_id'], $subscriptionItems[0]['product_type'], $subscriptionItems[0]['duration']);
+    $subscriptionItem = $plugin->getSubscription($subscriptionItems[0]['product_type'], $subscriptionItems[0]['product_id'], $subscriptionItems[0]['duration']);
 }
 
 if ($buyingCourse) {
@@ -182,9 +182,9 @@ if ($formSubscription->validate()) {
     }
 
     if ($buyingCourse) {
-        $subscription = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $formSubscriptionValues['duration']);
+        $subscription = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i'], $formSubscriptionValues['duration']);
     } else {
-        $subscription = $plugin->getSubscription($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $formSubscriptionValues['duration']);
+        $subscription = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i'], $formSubscriptionValues['duration']);
     }
 
     if ($subscription == null) {
