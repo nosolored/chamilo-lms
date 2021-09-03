@@ -1216,7 +1216,7 @@ class BuyCoursesPlugin extends Plugin
                 continue;
             }
 
-            $sessionData = $this->getSessionInfo($session->getId());
+            $sessionData = $this->getSubscriptionSessionInfo($session->getId());
             $sessionData['coach'] = $session->getGeneralCoach()->getCompleteName();
             $sessionData['enrolled'] = $this->getUserStatusForSubscriptionSession(
                 api_get_user_id(),
