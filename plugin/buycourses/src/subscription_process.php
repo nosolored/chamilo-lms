@@ -223,7 +223,7 @@ $form->addHidden('d', $subscriptionItem['duration']);
 
 // View
 $templateName = $plugin->get_lang('PaymentMethods');
-$interbreadcrumb[] = ['url' => 'course_catalog.php', 'name' => $plugin->get_lang('CourseListOnSale')];
+$interbreadcrumb[] = ['url' => 'subscription_course_catalog.php', 'name' => $plugin->get_lang('CourseListOnSale')];
 
 $tpl = new Template($templateName);
 $tpl->assign('item_type', (int) $_GET['t']);
