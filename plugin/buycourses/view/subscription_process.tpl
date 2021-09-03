@@ -1,10 +1,8 @@
 <div class="actions">
     {% if item_type == 1 %}
-        {% set back_url = _p.web_plugin ~ 'buycourses/src/course_catalog.php' %}
+        {% set back_url = _p.web_plugin ~ 'buycourses/src/subscription_course_catalog.php' %}
     {% elseif item_type == 2 %}
-        {% set back_url = _p.web_plugin ~ 'buycourses/src/session_catalog.php' %}
-    {% else %}
-        {% set back_url = _p.web_plugin ~ 'buycourses/src/service_catalog.php' %}
+        {% set back_url = _p.web_plugin ~ 'buycourses/src/subscriptionsession_catalog.php' %}
     {% endif %}
 
     <a href="{{ back_url }}" title="{{ "Back"|get_lang }}">

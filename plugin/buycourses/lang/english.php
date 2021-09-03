@@ -267,3 +267,15 @@ $strings['DiscountCoupon'] = "Discount coupon";
 $strings['DiscountCoupon'] = "Discount coupons";
 $strings['CouponsCode'] = "Code";
 $strings['DoYouHaveACoupon'] = "Do you have a coupon?";
+$strings['Duration'] = "Duration";
+$strings['SubscriptionAdd'] = "Add subscription";
+$strings['SubscriptionList'] = "Subscription list";
+$strings['SubscriptionListOnSale'] = "Subscriptions on sale";
+$strings['SelectSubscription'] = "Select duration";
+$strings['SubscriptionNotValid'] = "Subscription not valid";
+$strings['SubscriptionSalesReport'] = "Sales report";
+$strings['BuySubscriptions'] = "Buy subscriptions";
+$strings['ConfigurationOfSubscriptionsAndPrices'] = "Subscriptions and prices configuration";
+$strings['FrequencyConfig'] = "Frequency config";
+$strings['Subscriptions'] = "Subscriptions";
+

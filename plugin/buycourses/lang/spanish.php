@@ -272,4 +272,15 @@ $strings['PaymentType'] = "Tipo de pago";
 $strings['CountryRelPaymentConfig'] = "Configuración del tipo de pago por país";
 $strings['CountryRelPaymentMessage'] = "Para realizar un pedido es necesario definir el tipo de pago por país, en caso contrario no se permite la realización del pedido";
 $strings['CountryEmpty'] = "Para realizar un pedido es necesario definir en el perfil del usuario el campo país";
+$strings['Duration'] = "Duración";
+$strings['SubscriptionAdd'] = "Añadir suscripción";
+$strings['SubscriptionList'] = "Lista de suscripciones";
+$strings['SubscriptionListOnSale'] = "Lista de suscripciones a la venta";
+$strings['SelectSubscription'] = "Seleciona duración";
+$strings['SubscriptionNotValid'] = "Suscripción no valida";
+$strings['SubscriptionSalesReport'] = "Reporte de ventas";
+$strings['BuySubscriptions'] = "Compra suscripciones";
+$strings['ConfigurationOfSubscriptionsAndPrices'] = "Configuración de suscripciones y precios";
+$strings['FrequencyConfig'] = "Configuración frecuencia";
+$strings['Subscriptions'] = "Suscripciones";
 
