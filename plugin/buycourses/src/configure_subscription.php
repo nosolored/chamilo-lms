@@ -225,7 +225,7 @@ $form->setDefaults($formDefaults);
 
 $templateName = $plugin->get_lang('SubscriptionAdd');
 $interbreadcrumb[] = [
-    'url' => 'index.php',
+    'url' => 'subscriptions_courses.php',
     'name' => get_lang('Configuration'),
 ];
 $interbreadcrumb[] = [
