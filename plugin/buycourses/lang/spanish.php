@@ -283,4 +283,5 @@ $strings['BuySubscriptions'] = "Compra suscripciones";
 $strings['ConfigurationOfSubscriptionsAndPrices'] = "Configuración de suscripciones y precios";
 $strings['FrequencyConfig'] = "Configuración frecuencia";
 $strings['Subscriptions'] = "Suscripciones";
+$strings['HasSubscriptions'] = "Tiene suscripciones";
 
