@@ -33,6 +33,19 @@
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="thumbnail">
+            <a href="src/subscription_course_catalog.php">
+                <img src="resources/img/128/buysubscriptions.png">
+            </a>
+            <div class="caption">
+                <p class="text-center">
+                    <a class="btn btn-default btn-sm"
+                       href="src/subscription_course_catalog.php">{{ 'BuySubscriptions'|get_plugin_lang('BuyCoursesPlugin') }}</a>
+                </p>
+            </div>
+        </div>
+    </div>
 
     {% if _u.is_admin %}
         <div class="col-md-4">
@@ -51,7 +64,7 @@
         <div class="col-md-4">
             <div class="thumbnail">
                 <a href="src/subscriptions_courses.php">
-                    <img src="resources/img/128/settings.png">
+                    <img src="resources/img/128/subscriptionssettings.png">
                 </a>
                 <div class="caption">
                     <p class="text-center">

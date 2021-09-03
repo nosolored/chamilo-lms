@@ -78,7 +78,7 @@ $pagination = BuyCoursesPlugin::returnPagination(api_get_self(), $currentPage, $
 // View
 if (api_is_platform_admin()) {
     $interbreadcrumb[] = [
-        'url' => 'subscriptions_courses.php',
+        'url' => 'subscriptions_sessions.php',
         'name' => $plugin->get_lang('AvailableCoursesConfiguration'),
     ];
     $interbreadcrumb[] = [
