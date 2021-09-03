@@ -278,4 +278,3 @@ $strings['BuySubscriptions'] = "Buy subscriptions";
 $strings['ConfigurationOfSubscriptionsAndPrices'] = "Subscriptions and prices configuration";
 $strings['FrequencyConfig'] = "Frequency config";
 $strings['Subscriptions'] = "Subscriptions";
-
