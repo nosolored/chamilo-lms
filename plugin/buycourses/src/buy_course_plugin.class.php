@@ -4647,10 +4647,10 @@ class BuyCoursesPlugin extends Plugin
             'id, user_id, product_id, product_type',
             Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE),
             [
-                'where' => ['subscription_end < ? AND expired <> ? AND status <> ? ' => [
+                'where' => ['subscription_end < ? AND status <> ? AND (expired is NULL OR expired <> ?)' => [
                     $date,
-                    1,
                     self::SALE_STATUS_COMPLETED,
+                    1,
                     ]
                 ],
             ],
@@ -4673,7 +4673,7 @@ class BuyCoursesPlugin extends Plugin
             '*',
             Database::get_main_table(self::TABLE_SUBSCRIPTION_SALE),
             [
-                'where' => ['subscription_end >= ? AND userId = ? AND productId = ? AND productType = ? AND status <> ? ' => [
+                'where' => ['subscription_end >= ? AND userId = ? AND productId = ? AND productType = ? AND status <> ?' => [
                     api_get_utc_datetime(),
                     $userId,
                     $productId,
