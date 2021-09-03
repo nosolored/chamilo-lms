@@ -74,6 +74,7 @@ if ($editingCourse) {
         'type' => BuyCoursesPlugin::PRODUCT_TYPE_COURSE,
         'name' => $courseItem['course_title'],
         'visible' => $courseItem['visible'],
+        'tax_perc' => $taxtPerc,
     ];
 } else if ($editingSession) {
     if (!$includeSession) {
@@ -94,6 +95,7 @@ if ($editingCourse) {
         'type' => BuyCoursesPlugin::PRODUCT_TYPE_SESSION,
         'name' => $sessionItem['session_name'],
         'visible' => $sessionItem['visible'],
+        'tax_perc' => $taxtPerc,
     ];
 } else {
     api_not_allowed(true);

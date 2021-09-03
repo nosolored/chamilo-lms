@@ -5763,7 +5763,7 @@ class BuyCoursesPlugin extends Plugin
     private function updateSubscription($productType, $productId, $taxPerc)
     {
         $values = [
-            'taxt_perc' => (int) $taxPerc,
+            'tax_perc' => (int) $taxPerc,
         ];
 
         return Database::update(
@@ -5771,7 +5771,7 @@ class BuyCoursesPlugin extends Plugin
             $values,
             [
                 'product_type = ? AND ' => $productType,
-                'product_id = ? AND ' => $productId
+                'product_id = ?' => $productId
             ]
         );
 
