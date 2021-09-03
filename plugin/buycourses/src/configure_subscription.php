@@ -138,13 +138,15 @@ if ($frequencyForm->validate()) {
     $duration = $frequencyFormValues['duration'];
     $price = $frequencyFormValues['price'];
 
-    if ($frequenciesOptions[$duration]) {
-        Display::addFlash(
-            Display::return_message($plugin->get_lang('SubscriptionAlreadyExists'), 'error')
-        );
+    for ($i = 0; $i <= count($subscriptions); $i++) {
+        if ($subscriptions[$i]['duration'] == $duration) {
+            Display::addFlash(
+                Display::return_message($plugin->get_lang('SubscriptionAlreadyExists'), 'error')
+            );
 
-        header('Location:'.api_get_self().'?'.$queryString);
-        exit;
+            header('Location:'.api_get_self().'?'.$queryString);
+            exit;
+        }
     }
 
     $subscription['frequencies'] = [['duration' => $duration, 'price' => $price]];
