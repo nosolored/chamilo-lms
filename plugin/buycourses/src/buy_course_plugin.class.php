@@ -781,7 +781,7 @@ class BuyCoursesPlugin extends Plugin
         return Database::select(
             ['cp.id', 'cp.currency_id', 'c.country_name', 'c.iso_code', 'cp.payment_type', 'cp.date_reg'],
             $from,
-            ['WHERE' => $where ]
+            ['WHERE' => $where]
         );
     }
 
@@ -809,7 +809,7 @@ class BuyCoursesPlugin extends Plugin
             ['cp.*'],
             $from,
             [
-                'where' => ['c.country_name = ?' => (string) $country]
+                'where' => ['c.country_name = ?' => (string) $country],
             ]
         );
     }
@@ -847,7 +847,7 @@ class BuyCoursesPlugin extends Plugin
                 $this->saveCountryPayment($countryCurrency, self::PAYMENT_TYPE_PAYPAL);
             }
         }
-        
+
         if (!empty($transferSelectedCountries)) {
             $this->deleteCountryPaymentsByPaymentType(self::PAYMENT_TYPE_TRANSFER);
             foreach ($transferSelectedCountries as $countryCurrency) {
@@ -869,7 +869,7 @@ class BuyCoursesPlugin extends Plugin
             }
         }
     }
-    
+
     /**
      * Get registered item data.
      *
@@ -947,7 +947,7 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_SUBSCRIPTION),
             [
                 'where' => ['product_id = ? AND product_type = ?' => [
-                     (int) $itemId],
+                     (int) $itemId, ],
                      (int) $productType,
                 ],
             ],
@@ -958,8 +958,8 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get the item data.
      *
-     * @param int   $productId The item ID
-     * @param int   $itemType  The item type
+     * @param int $productId The item ID
+     * @param int $itemType  The item type
      *
      * @return array
      */
@@ -994,11 +994,12 @@ class BuyCoursesPlugin extends Plugin
 
         return $product;
     }
+
     /**
      * Get the item data.
      *
-     * @param int   $productId The item ID
-     * @param int   $itemType  The item type
+     * @param int $productId The item ID
+     * @param int $itemType  The item type
      *
      * @return array
      */
@@ -4141,7 +4142,7 @@ class BuyCoursesPlugin extends Plugin
             $price = $priceWithoutTax + $taxAmount;
         }
 
-        $subscriptionEnd = Date('y:m:d', strtotime('+'. $duration .' days'));
+        $subscriptionEnd = date('y:m:d', strtotime('+'.$duration.' days'));
 
         $values = [
             'reference' => $this->generateReference(
@@ -4180,7 +4181,7 @@ class BuyCoursesPlugin extends Plugin
     {
         $result = false;
 
-        if(isset($subscription['frequencies'])) {
+        if (isset($subscription['frequencies'])) {
             foreach ($subscription['frequencies'] as $frequency) {
                 $subscriptionDb = $this->getSubscription($subscription['product_type'], $subscription['product_id'], $frequency['duration']);
 
@@ -4220,10 +4221,10 @@ class BuyCoursesPlugin extends Plugin
                 )
             );
 
-            return false ;
+            return false;
         }
 
-        return $result ;
+        return $result;
     }
 
     /**
@@ -4262,8 +4263,8 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get a list of subscriptions by product ID and type.
      *
-     * @param string $productId     The product ID
-     * @param int    $productType   The product type
+     * @param string $productId   The product ID
+     * @param int    $productType The product type
      *
      * @return array Subscriptions data
      */
@@ -4277,9 +4278,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get data of the subscription.
      *
-     * @param string $productId     The product ID
-     * @param int    $productType   The product type
-     * @param int    $duration      The duration
+     * @param string $productId   The product ID
+     * @param int    $productType The product type
+     * @param int    $duration    The duration
      *
      * @return array The subscription data
      */
@@ -4369,7 +4370,7 @@ class BuyCoursesPlugin extends Plugin
         $this->updateSubscriptionSaleStatus($saleId, self::SALE_STATUS_CANCELED);
     }
 
-   /**
+    /**
      * Get a list of subscription sales by the status.
      *
      * @param int $status The status to filter
@@ -4493,7 +4494,7 @@ class BuyCoursesPlugin extends Plugin
         return $listExport;
     }
 
-   /**
+    /**
      * Get a list of subscription sales by the user.
      *
      * @param string $term The search term
@@ -4653,7 +4654,7 @@ class BuyCoursesPlugin extends Plugin
                     $date,
                     self::SALE_STATUS_COMPLETED,
                     1,
-                    ]
+                    ],
                 ],
             ],
             'first'
@@ -4681,7 +4682,7 @@ class BuyCoursesPlugin extends Plugin
                     $productId,
                     $productType,
                     self::SALE_STATUS_COMPLETED,
-                    ]
+                    ],
                 ],
             ],
             'first'
@@ -5704,8 +5705,8 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get an array of subscriptions.
      *
-     * @param int $productType  The product type
-     * @param int $productId    The product ID
+     * @param int $productType The product type
+     * @param int $productId   The product ID
      *
      * @return array Subscriptions data
      */
@@ -5729,9 +5730,9 @@ class BuyCoursesPlugin extends Plugin
     /**
      * Get data of a subscription for a product (course or service) by the subscription ID.
      *
-     * @param int $productType  The product type
-     * @param int $productId    The product ID
-     * @param int $duration     The duration
+     * @param int $productType The product type
+     * @param int $productId   The product ID
+     * @param int $duration    The duration
      *
      * @return array The subscription data
      */
@@ -5771,7 +5772,7 @@ class BuyCoursesPlugin extends Plugin
             $values,
             [
                 'product_type = ? AND ' => $productType,
-                'product_id = ?' => $productId
+                'product_id = ?' => $productId,
             ]
         );
 
