@@ -4220,8 +4220,10 @@ class BuyCoursesPlugin extends Plugin
                 )
             );
 
-            return $result ;
+            return false ;
         }
+
+        return $result ;
     }
 
     /**
