@@ -42,6 +42,7 @@ class BuyCoursesPlugin extends Plugin
     const TABLE_COUNTRY_REL_PAYMENT = 'plugin_buycourses_country_rel_payment';
     const TABLE_SUBSCRIPTION = 'plugin_buycourses_subscription';
     const TABLE_SUBSCRIPTION_SALE = 'plugin_buycourses_subscription_rel_sale';
+    const TABLE_SUBSCRIPTION_PERIOD = 'plugin_buycourses_subscription_period';
     const COUPON_SUBSCRIPTION_WEEKLY = 7;
     const COUPON_SUBSCRIPTION_MONTHLY = 30;
     const COUPON_SUBSCRIPTION_QUARTERLY = 60;
@@ -166,6 +167,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUNTRY_REL_PAYMENT,
             self::TABLE_SUBSCRIPTION,
             self::TABLE_SUBSCRIPTION_SALE,
+            self::TABLE_SUBSCRIPTION_PERIOD,
         ];
         $em = Database::getManager();
         $cn = $em->getConnection();
@@ -207,6 +209,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUNTRY_REL_PAYMENT,
             self::TABLE_SUBSCRIPTION,
             self::TABLE_SUBSCRIPTION_SALE,
+            self::TABLE_SUBSCRIPTION_PERIOD,
         ];
 
         foreach ($tablesToBeDeleted as $tableToBeDeleted) {
@@ -471,6 +474,14 @@ class BuyCoursesPlugin extends Plugin
             subscription_end datetime NOT NULL,
             expired tinyint NULL,
             PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_SUBSCRIPTION_PERIOD;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            duration int unsigned NOT NULL,
+            name varchar(50) NOT NULL,
+            PRIMARY KEY (duration)
         )";
         Database::query($sql);
 

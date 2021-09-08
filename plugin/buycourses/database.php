@@ -565,6 +565,16 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_SALE)) {
     $subscriptionSaleTable->setPrimaryKey(['id']);
 }
 
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_PERIOD)) {
+    $subscriptionPeriodTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_SUBSCRIPTION_PERIOD);
+    $subscriptionPeriodTable->addColumn(
+        'duration',
+        Types::INTEGER,
+        ['unsigned' => true]
+    );
+    $subscriptionPeriodTable->setPrimaryKey(['duration']);
+}
+
 $queries = $pluginSchema->toSql($platform);
 
 foreach ($queries as $query) {
