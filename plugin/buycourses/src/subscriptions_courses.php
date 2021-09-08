@@ -64,6 +64,18 @@ $htmlHeadXtra[] = api_get_css(api_get_path(WEB_PLUGIN_PATH).'buycourses/resource
 
 $tpl = new Template($templateName);
 
+$toolbar = Display::url(
+    Display::returnFontAwesomeIcon('fa-calendar-alt').
+    get_lang('ConfigureSubscriptionsFrequencies'),
+    api_get_path(WEB_PLUGIN_PATH).'buycourses/src/configure_frequency.php',
+    ['class' => 'btn btn-primary']
+);
+
+$tpl->assign(
+    'actions',
+    Display::toolbarAction('toolbar', [$toolbar])
+);
+
 $tpl->assign('product_type_course', BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
 $tpl->assign('product_type_session', BuyCoursesPlugin::PRODUCT_TYPE_SESSION);
 $tpl->assign('courses', $courses);
