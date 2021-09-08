@@ -1331,9 +1331,9 @@ class SocialManager extends UserManager
 
         return $html;
     }
-    
+
     /**
-     * Shows the quick access menu
+     * Shows the quick access menu.
      *
      * @param string $show                       highlight link possible values:
      *                                           quick_access,
@@ -1351,7 +1351,8 @@ class SocialManager extends UserManager
      * @param bool   $show_full_profile          show profile or not (show or hide the user image/information)
      * @param bool   $show_delete_account_button
      */
-    public static function show_quick_access_menu($show = '') {
+    public static function show_quick_access_menu($show = '')
+    {
         $items = [];
         $html = '';
 
@@ -1379,35 +1380,34 @@ class SocialManager extends UserManager
             'link' => api_get_path(WEB_CODE_PATH).'messages/new_message.php',
             'title' => get_lang('Compose'),
         ];
-        
+
         $items[] = [
             'class' => 'browse-groups-icon',
             'icon' => Display::return_icon('sn-groups.png', get_lang('SocialGroups'), null, ICON_SIZE_SMALL),
             'link' => api_get_path(WEB_CODE_PATH).'social/groups.php',
             'title' => get_lang('SocialGroups'),
         ];
-        
+
         $items[] = [
             'class' => 'list-course',
             'icon' => Display::return_icon('catalog-course.png', get_lang('CourseManagement'), null, ICON_SIZE_SMALL),
             'link' => api_get_path(WEB_CODE_PATH).'auth/courses.php',
             'title' => get_lang('CourseManagement'),
         ];
-        
+
         $items[] = [
             'class' => 'list-group-item',
             'icon' => Display::return_icon('skill-badges.png', get_lang('MyCompetences'), null, ICON_SIZE_SMALL),
             'link' => api_get_path(WEB_CODE_PATH).'social/my_skills_report.php',
             'title' => get_lang('MyCompetences'),
         ];
-        
+
         foreach ($items as $item) {
             $links .= '<li class="'.$item['class'].'">';
             $links .= '<a href="'.$item['link'].'">'.$item['icon'].' '.$item['title'].'</a>';
             $links .= '</li>';
         }
 
-        
         $html .= '<div class="panel-group" id="quick_access" role="tablist" aria-multiselectable="true">';
         $html .= '<div class="panel panel-default" id="quick_access_block">';
         $html .= '<div class="panel-heading" role="tab">';
@@ -1430,7 +1430,7 @@ class SocialManager extends UserManager
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
 
@@ -2726,10 +2726,10 @@ class SocialManager extends UserManager
             'count' => $countPost,
         ];
     }
-    
+
     /**
-     * @param int   $start
-     * @param int   $length
+     * @param int $start
+     * @param int $length
      *
      * @return array
      */
@@ -2749,24 +2749,22 @@ class SocialManager extends UserManager
                     '' as thread_id,
                     '' as c_id
                   ";
-        
+
         $sqlBase = "$select FROM $tblMessage m WHERE ";
         $sql = $sqlBase."msg_status <> ".MESSAGE_STATUS_WALL_DELETE.' AND ';
-        
+
         // Get my own posts
         $userReceiverCondition = ' (
             msg_status IN ('.MESSAGE_STATUS_WALL_POST.', '.MESSAGE_STATUS_WALL.') AND
             parent_id = 0
         )';
-        
+
         $sql .= $userReceiverCondition;
-        
-        
-        
+
         $sql .= ' ORDER BY send_date DESC ';
         $sql .= " LIMIT $start, $length ";
         $messages = [];
-        
+
         $res = Database::query($sql);
         if (Database::num_rows($res) > 0) {
             $groups = [];
@@ -2784,13 +2782,12 @@ class SocialManager extends UserManager
                         $row['group_info'] = $groups[$row['group_id']];
                     }
                 }
-                
+
                 // Forums
                 $row['post_title'] = '';
                 $row['forum_title'] = '';
                 $row['thread_url'] = '';
 
-                
                 $messages[$row['id']] = $row;
             }
         }
@@ -2799,10 +2796,10 @@ class SocialManager extends UserManager
         // latest first, as there is currently no option to edit messages
         // afterwards
         krsort($messages);
-        
+
         $countPost = count($messages);
         $messages = self::formatWallMessages($messages);
-        
+
         $html = '';
         foreach ($messages as $message) {
             $post = $message['html'];
@@ -2810,10 +2807,10 @@ class SocialManager extends UserManager
             if (in_array($message['msg_status'], [MESSAGE_STATUS_WALL_POST, MESSAGE_STATUS_PROMOTED])) {
                 $comments = self::getWallPostComments($userId, $message);
             }
-            
+
             $html .= self::wrapPost($message, $post.$comments);
         }
-        
+
         return [
             'posts' => $html,
             'count' => $countPost,
