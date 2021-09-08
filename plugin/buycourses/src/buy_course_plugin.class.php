@@ -4714,6 +4714,7 @@ class BuyCoursesPlugin extends Plugin
             []
         );
 
+        $frequenciesList = $this->getFrequenciesList();
         $frequencies = array();
 
         foreach($data as $key => $items) {
@@ -4721,6 +4722,20 @@ class BuyCoursesPlugin extends Plugin
         }
 
         return $frequencies;
+    }
+
+    /**
+     * Get the list of frequencies discount types.
+     *
+     * @return array
+     */
+    public function getFrequenciesList()
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
+            []
+        );
     }
 
     /**

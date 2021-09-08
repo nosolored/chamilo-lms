@@ -37,7 +37,7 @@ if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
     }
 }
 
-$frequencies = $plugin->getFrequencies();
+$frequencies = $plugin->getFrequenciesList();
 
 $globalSettingsParams = $plugin->getGlobalParameters();
 
@@ -99,7 +99,7 @@ $interbreadcrumb[] = [
 $template = new Template($templateName);
 $template->assign('header', $templateName);
 $template->assign('items_form', $form->returnForm());
-$template->assign('frequencies', $frequencies);
+$template->assign('frequencies_list', $frequencies);
 
 $content = $template->fetch('buycourses/view/configure_frequency.tpl');
 $template->assign('content', $content);
