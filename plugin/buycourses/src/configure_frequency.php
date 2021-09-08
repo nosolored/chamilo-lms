@@ -16,7 +16,6 @@ $plugin = BuyCoursesPlugin::create();
 
 if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
     if ($_GET['action'] == 'delete_frequency') {
-
         $frequency = $plugin->selectFrequency($duration, $name);
 
         if (isset($frequency)) {
@@ -25,8 +24,7 @@ if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
             Display::addFlash(
                 Display::return_message(get_lang('ItemRemoved'), 'success')
             );
-        }
-        else{
+        } else {
             Display::addFlash(
                 Display::return_message(get_lang('FrequencyNotExits'), 'error')
             );
