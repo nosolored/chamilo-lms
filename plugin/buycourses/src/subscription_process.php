@@ -59,6 +59,8 @@ if (!isset($subscriptionItem) || empty($subscriptionItem)) {
     $subscriptionItem = $plugin->getSubscription($subscriptionItems[0]['product_type'], $subscriptionItems[0]['product_id'], $subscriptionItems[0]['duration']);
 }
 
+$queryString .= 'd='.intval($subscriptionItem['duration']);
+
 if ($buyingCourse) {
     $courseInfo = $plugin->getSubscriptionCourseInfo($_REQUEST['i'], $coupon);
     $item = $plugin->getSubscriptionItemByProduct($_REQUEST['i'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE);
@@ -205,19 +207,16 @@ $selectedFrequencies = [];
 
 foreach($subscriptionItems as $si) {
     if (isset($frequencies[$si['duration']])) {
-        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']];
+        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']].' - '.$si['price'] . ' ' . $si['iso_code'];
     }
 }
 
-$durationSelection = $formSubscription->addSelect('duration', $plugin->get_lang('Duration'), $selectedFrequencies);
-
-$durationSelection->setSelected($subscriptionItem['duration']);
+$formSubscription->addRadio('duration', null, $selectedFrequencies);
 
 $selectedDurationName = $frequencies[$subscriptionItem['duration']];
 
 $formSubscription->addHidden('t', intval($_GET['t']));
 $formSubscription->addHidden('i', intval($_GET['i']));
-$formSubscription->addButton('submit', $plugin->get_lang('SelectSubscription'), 'check', 'success', 'btn-lg pull-right');
 
 $form->addHidden('d', $subscriptionItem['duration']);
 

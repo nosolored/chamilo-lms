@@ -147,5 +147,11 @@
         $('.form_required').remove();
         $("small").remove();
         $("label[for=submit]").remove();
+        $('input[name=duration]').click(function(){
+            var selected = $('input[name=duration]:checked').val();
+            if (selected != null) {
+                $('form[name=confirm_subscription]').submit();
+            }
+        })
     });
 </script>
