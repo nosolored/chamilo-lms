@@ -2267,22 +2267,6 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
-     * Get the list of coupon discount types.
-     *
-     * @return array
-     */
-    public function getFrequencies()
-    {
-        return [
-            self::COUPON_SUBSCRIPTION_WEEKLY => $this->get_lang('Weekly'),
-            self::COUPON_SUBSCRIPTION_MONTHLY => $this->get_lang('Monthly'),
-            self::COUPON_SUBSCRIPTION_QUARTERLY => $this->get_lang('Quarterly'),
-            self::COUPON_SUBSCRIPTION_BIANNUAL => $this->get_lang('Biannual'),
-            self::COUPON_SUBSCRIPTION_ANNUAL => $this->get_lang('Annual'),
-        ];
-    }
-
-    /**
      * Generates a random text (used for order references).
      *
      * @param int  $length    Optional. Length of characters
@@ -4714,6 +4698,75 @@ class BuyCoursesPlugin extends Plugin
             $saleTable,
             ['expired' => 1],
             ['id = ?' => (int) $id]
+        );
+    }
+
+    /**
+     * Get the list of frequencies discount types.
+     *
+     * @return array
+     */
+    public function getFrequencies()
+    {
+        $data = Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
+            []
+        );
+
+        $frequencies = array();
+
+        foreach($data as $key => $items) {
+            $frequencies[$items['duration']] = $items['name'];
+        }
+
+        return $frequencies;
+    }
+
+    /**
+     * Add a new subscription frequency.
+     *
+     * @return array
+     */
+    public function addFrequency($duration, $name)
+    {
+        $values = [
+            'duration' => (int) $duration,
+            'name' => (string) $name,
+        ];
+
+        return Database::insert(self::TABLE_SUBSCRIPTION_PERIOD, $values);
+    }
+
+    /**
+     * Update a subscription frequency.
+     *
+     * @return array
+     */
+    public function updateFrequency($duration, $name)
+    {
+        $periodTable = Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD);
+
+        return Database::update(
+            $periodTable,
+            ['duration = ?' => (int) $duration],
+            ['name = ?' => (string) $name]
+        );
+    }
+
+    /**
+     * Delete a subscription frequency.
+     *
+     * @return array
+     */
+    public function deleteFrequency($duration, $name)
+    {
+        return Database::delete(
+            Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
+            [
+                'duration = ? AND ' => (int) $duration,
+                'name = ?' => (string) $name,
+            ]
         );
     }
 
