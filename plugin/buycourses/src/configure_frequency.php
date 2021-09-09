@@ -17,7 +17,7 @@ $plugin = BuyCoursesPlugin::create();
 if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
     if ($_GET['action'] == 'delete_frequency') {
 
-        $frequency = $plugin->selectFrequency($_GET['d'], $_GET['n']);
+        $frequency = $plugin->selectFrequency($_GET['d']);
 
         if (!empty($frequency)) {
             $plugin->deleteFrequency($_GET['d'], $_GET['n']);
@@ -59,7 +59,7 @@ if ($form->validate()) {
     $duration = $formValues['duration'];
     $name = $formValues['name'];
 
-    $frequency = $plugin->selectFrequency($duration, $name);
+    $frequency = $plugin->selectFrequency($duration);
 
     if (!empty($frequency)) {
         Display::addFlash(

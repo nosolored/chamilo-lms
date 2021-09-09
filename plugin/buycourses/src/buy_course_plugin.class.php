@@ -4743,16 +4743,15 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return array
      */
-    public function selectFrequency($duration, $name)
+    public function selectFrequency($duration)
     {
         return Database::select(
             '*',
             Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
             [
                 'where' => [
-                    'duration = ? AND name = ?' => [
+                    'duration = ?' => [
                         (int) $duration,
-                        (string) $name,
                     ],
                 ],
             ],
