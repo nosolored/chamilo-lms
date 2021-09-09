@@ -284,4 +284,3 @@ $strings['ConfigurationOfSubscriptionsAndPrices'] = "Configuración de suscripci
 $strings['FrequencyConfig'] = "Configuración frecuencia";
 $strings['Subscriptions'] = "Suscripciones";
 $strings['HasSubscriptions'] = "Tiene suscripciones";
-
