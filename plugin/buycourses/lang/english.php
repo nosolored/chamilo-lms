@@ -279,4 +279,3 @@ $strings['ConfigurationOfSubscriptionsAndPrices'] = "Subscriptions and prices co
 $strings['FrequencyConfig'] = "Frequency config";
 $strings['Subscriptions'] = "Subscriptions";
 $strings['HasSubscriptions'] = "Has subscriptions";
-
