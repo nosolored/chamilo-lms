@@ -572,6 +572,7 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_PERIOD)) {
         Types::INTEGER,
         ['unsigned' => true]
     );
+    $subscriptionSaleTable->addColumn('name', Types::STRING);
     $subscriptionPeriodTable->setPrimaryKey(['duration']);
 }
 
