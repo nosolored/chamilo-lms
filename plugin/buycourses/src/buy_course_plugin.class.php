@@ -4745,27 +4745,19 @@ class BuyCoursesPlugin extends Plugin
      */
     public function selectFrequency($duration, $name)
     {
-        $data = Database::select(
+        return Database::select(
             '*',
             Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
             [
                 'where' => [
                     'duration = ? AND name = ?' => [
-                        $duration,
-                        $name,
+                        (int) $duration,
+                        (string) $name,
                     ],
                 ],
             ],
             'first'
         );
-
-        $frequencies = array();
-
-        foreach($data as $key => $items) {
-            $frequencies[$items['duration']] = $items['name'];
-        }
-
-        return $frequencies;
     }
 
     /**

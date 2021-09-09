@@ -17,13 +17,13 @@ $plugin = BuyCoursesPlugin::create();
 if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
     if ($_GET['action'] == 'delete_frequency') {
 
-        $frequency = $plugin->selectFrequency($duration, $name);
+        $frequency = $plugin->selectFrequency($_GET['d'], $_GET['n']);
 
-        if (isset($frequency)) {
+        if (!empty($frequency)) {
             $plugin->deleteFrequency($_GET['d'], $_GET['n']);
 
             Display::addFlash(
-                Display::return_message(get_lang('ItemRemoved'), 'success')
+                Display::return_message(get_lang('FrequencyRemoved'), 'success')
             );
         }
         else{
@@ -47,7 +47,7 @@ $form->addElement(
     'number',
     'duration',
     [$plugin->get_lang('Duration'), $plugin->get_lang('Days')],
-    ['step' => 1, 'placeholder' => $globalSettingsParams['DurationDays'].'% '.$plugin->get_lang('ByDefault')]
+    ['step' => 1, 'placeholder' => $plugin->get_lang('SubscriptionFrequencyValueDays')]
 );
 
 $form->addText('name', get_lang('Name'), false);
@@ -61,21 +61,17 @@ if ($form->validate()) {
 
     $frequency = $plugin->selectFrequency($duration, $name);
 
-    if (isset($frequency)) {
-        if (empty($currency)) {
-            Display::addFlash(
-                Display::return_message($plugin->get_lang('FrequencyAlreadySaved'), 'error')
-            );
-        }
+    if (!empty($frequency)) {
+        Display::addFlash(
+            Display::return_message($plugin->get_lang('FrequencyAlreadySaved'), 'error')
+        );
     } else {
         $result = $plugin->addFrequency($duration, $name);
 
-        if (!$result) {
-            if (empty($currency)) {
-                Display::addFlash(
-                    Display::return_message($plugin->get_lang('FrequencyNotSaved'), 'error')
-                );
-            }
+        if (empty($result)) {
+            Display::addFlash(
+                Display::return_message($plugin->get_lang('FrequencyNotSaved'), 'error')
+            );
         }
     }
 
