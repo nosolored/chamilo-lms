@@ -43,14 +43,14 @@ $globalSettingsParams = $plugin->getGlobalParameters();
 
 $form = new FormValidator('add_frequency');
 
+$form->addText('name', get_lang('Name'), false);
+
 $form->addElement(
     'number',
     'duration',
     [$plugin->get_lang('Duration'), $plugin->get_lang('Days')],
     ['step' => 1, 'placeholder' => $plugin->get_lang('SubscriptionFrequencyValueDays')]
 );
-
-$form->addText('name', get_lang('Name'), false);
 
 $button = $form->addButtonSave(get_lang('Save'));
 
