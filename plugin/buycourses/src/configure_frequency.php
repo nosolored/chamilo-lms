@@ -68,7 +68,7 @@ if ($form->validate()) {
     } else {
         $result = $plugin->addFrequency($duration, $name);
 
-        if (empty($result)) {
+        if (!isset($result)) {
             Display::addFlash(
                 Display::return_message($plugin->get_lang('FrequencyNotSaved'), 'error')
             );
