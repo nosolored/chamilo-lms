@@ -109,6 +109,12 @@ foreach ($frequencies as $key => $frequency) {
     $selectOptions .= '<option value="'.$key.'">'.$frequency.'</option>';
 }
 
+if (empty($frequencies)) {
+    Display::addFlash(
+        Display::return_message($plugin->get_lang('FrequencyIsNotConfigured'), 'error')
+    );
+}
+
 $platformCommission = $plugin->getPlatformCommission();
 $form->addHtml(
     '
@@ -182,7 +188,7 @@ $form->addHidden('type', null);
 $form->addHidden('id', null);
 $button = $form->addButtonSave(get_lang('Save'));
 
-if (empty($currency)) {
+if (empty($currency) || empty($frequencies)) {
     $button->setAttribute('disabled');
 }
 
