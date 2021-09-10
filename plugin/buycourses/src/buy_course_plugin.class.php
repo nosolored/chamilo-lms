@@ -4857,13 +4857,12 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return array
      */
-    public function deleteFrequency($duration, $name)
+    public function deleteFrequency($duration)
     {
         return Database::delete(
             Database::get_main_table(self::TABLE_SUBSCRIPTION_PERIOD),
             [
-                'duration = ? AND ' => (int) $duration,
-                'name = ?' => (string) $name,
+                'duration = ?' => (int) $duration,
             ]
         );
     }

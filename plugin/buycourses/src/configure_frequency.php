@@ -23,7 +23,7 @@ if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
             $subscriptionsItems = $plugin->getSubscriptiosnItemsByDuration($_GET['d']);
 
             if (empty($subscriptionsItems)) {
-                $plugin->deleteFrequency($_GET['d'], $_GET['n']);
+                $plugin->deleteFrequency($_GET['d']);
 
                 Display::addFlash(
                     Display::return_message($plugin->get_lang('FrequencyRemoved'), 'success')
