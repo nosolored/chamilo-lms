@@ -279,4 +279,14 @@ $strings['ConfigurationOfSubscriptionsAndPrices'] = "Subscriptions and prices co
 $strings['FrequencyConfig'] = "Frequency config";
 $strings['Subscriptions'] = "Subscriptions";
 $strings['HasSubscriptions'] = "Has subscriptions";
+$strings['FrequencyRemoved'] = "Frequency removed";
+$strings['SubscriptionPeriodOnUse'] = "Subscription period in use";
+$strings['FrequencyNotExits'] = "Frequency not exists";
+$strings['SubscriptionFrequencyValueDays'] = "Value on days";
+$strings['FrequencyNotUpdated'] = "Frequency not updated";
+$strings['FrequencyNotSaved'] = "Frequency not saved";
+$strings['NeedToAddDuration'] = "Need to add duration";
+$strings['SubscriptionNotValid'] = "Subscription not valid";
+$strings['SelecSubscription'] = "Select a subscription";
+$strings['ConfigureSubscriptionsFrequencies'] = "Configure subscriptions periods";
 

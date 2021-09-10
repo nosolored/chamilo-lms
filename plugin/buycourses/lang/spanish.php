@@ -284,4 +284,14 @@ $strings['ConfigurationOfSubscriptionsAndPrices'] = "Configuración de suscripci
 $strings['FrequencyConfig'] = "Configuración frecuencia";
 $strings['Subscriptions'] = "Suscripciones";
 $strings['HasSubscriptions'] = "Tiene suscripciones";
+$strings['FrequencyRemoved'] = "Frecuencia eliminada";
+$strings['SubscriptionPeriodOnUse'] = "Período de suscription en uso";
+$strings['FrequencyNotExits'] = "La frecuencia no existe";
+$strings['SubscriptionFrequencyValueDays'] = "Valor de la suscripción en días";
+$strings['FrequencyNotUpdated'] = "Frecuencia no actualizada";
+$strings['FrequencyNotSaved'] = "Frequencia no guardada";
+$strings['NeedToAddDuration'] = "Hay que especificar una duración";
+$strings['SubscriptionNotValid'] = "Suscripción no valida";
+$strings['SelecSubscription'] = "Seleccione una suscripción";
+$strings['ConfigureSubscriptionsFrequencies'] = "Configurar los períodos de suscriptciones";
 
