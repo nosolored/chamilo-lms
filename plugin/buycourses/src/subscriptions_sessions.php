@@ -47,7 +47,7 @@ $tpl = new Template($templateName);
 
 $toolbar = Display::url(
     Display::returnFontAwesomeIcon('fa-calendar-alt').
-    $plugin->('ConfigureSubscriptionsFrequencies'),
+    $plugin->get_lang('ConfigureSubscriptionsFrequencies'),
     api_get_path(WEB_PLUGIN_PATH).'buycourses/src/configure_frequency.php',
     ['class' => 'btn btn-primary']
 );
