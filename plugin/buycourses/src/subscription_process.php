@@ -34,12 +34,23 @@ $buyingCourse = intval($_REQUEST['t']) === BuyCoursesPlugin::PRODUCT_TYPE_COURSE
 $buyingSession = intval($_REQUEST['t']) === BuyCoursesPlugin::PRODUCT_TYPE_SESSION;
 $queryString = 'i='.intval($_REQUEST['i']).'&t='.intval($_REQUEST['t']);
 
+if (isset($_REQUEST['c'])) {
+    $couponCode = $_REQUEST['c'];
+    if ($buyingCourse) {
+        $coupon = $plugin->getCouponByCode($couponCode, BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i']);
+    } else {
+        $coupon = $plugin->getCouponByCode($couponCode, BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i']);
+    }
+
+    $queryString .= 'c='.$coupon['code'];
+}
+
 if (isset($_REQUEST['d'])) {
     $duration = $_REQUEST['d'];
     if ($buyingCourse) {
-        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i'], $duration);
+        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i'], $duration, $coupon);
     } else {
-        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i'], $duration);
+        $subscriptionItem = $plugin->getSubscription(BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i'], $duration, $coupon);
     }
 }
 
@@ -56,7 +67,7 @@ if (!isset($subscriptionItems) || empty($subscriptionItems)) {
 }
 
 if (!isset($subscriptionItem) || empty($subscriptionItem)) {
-    $subscriptionItem = $plugin->getSubscription($subscriptionItems[0]['product_type'], $subscriptionItems[0]['product_id'], $subscriptionItems[0]['duration']);
+    $subscriptionItem = $plugin->getSubscription($subscriptionItems[0]['product_type'], $subscriptionItems[0]['product_id'], $subscriptionItems[0]['duration'], $coupon);
 }
 
 $queryString .= 'd='.intval($subscriptionItem['duration']);
@@ -87,7 +98,7 @@ if ($form->validate()) {
         $_SESSION['bc_sale_id'] = $saleId;
 
         if (isset($formValues['c'])) {
-            $couponSaleId = $plugin->registerCouponSale($saleId, $formValues['c']);
+            $couponSaleId = $plugin->registerCouponSubscriptionSale($saleId, $formValues['c']);
             if ($couponSaleId !== false) {
                 $plugin->updateCouponDelivered($formValues['c']);
                 $_SESSION['bc_coupon_id'] = $formValues['c'];
@@ -207,11 +218,16 @@ $selectedFrequencies = [];
 
 foreach($subscriptionItems as $si) {
     if (isset($frequencies[$si['duration']])) {
-        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']].' - '.$si['price'] . ' ' . $si['iso_code'];
+        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']].' - '.$si['price_formatted'] . ' ' . $si['iso_code'];
     }
 }
 
 $formSubscription->addRadio('duration', null, $selectedFrequencies);
+
+if (!empty($selectedFrequencies)) {
+    $formSubscriptionDefaults['duration'] = $subscriptionItem['duration'];
+    $formSubscription->setDefaults($formSubscriptionDefaults);
+}
 
 $selectedDurationName = $frequencies[$subscriptionItem['duration']];
 
@@ -219,6 +235,46 @@ $formSubscription->addHidden('t', intval($_GET['t']));
 $formSubscription->addHidden('i', intval($_GET['i']));
 
 $form->addHidden('d', $subscriptionItem['duration']);
+
+$formCoupon = new FormValidator('confirm_coupon');
+if ($formCoupon->validate()) {
+    $formCouponValues = $formCoupon->getSubmitValues();
+
+    if (!$formCouponValues['coupon_code']) {
+        Display::addFlash(
+            Display::return_message($plugin->get_lang('NeedToAddCouponCode'), 'error', false)
+        );
+        header('Location:'.api_get_self().'?'.$queryString);
+        exit;
+    }
+
+    if ($buyingCourse) {
+        $coupon = $plugin->getCouponByCode($formCouponValues['coupon_code'], BuyCoursesPlugin::PRODUCT_TYPE_COURSE, $_REQUEST['i']);
+    } else {
+        $coupon = $plugin->getCouponByCode($formCouponValues['coupon_code'], BuyCoursesPlugin::PRODUCT_TYPE_SESSION, $_REQUEST['i']);
+    }
+
+    if ($coupon == null) {
+        Display::addFlash(
+            Display::return_message($plugin->get_lang('CouponNotValid'), 'error', false)
+        );
+        header('Location:'.api_get_self().'?'.$queryString);
+        exit;
+    }
+
+    Display::addFlash(
+        Display::return_message($plugin->get_lang('CouponRedeemed'), 'success', false)
+    );
+
+    header('Location: '.api_get_path(WEB_PLUGIN_PATH).'buycourses/src/subscription_process.php?i='.$_REQUEST['i'].'&t='.$_REQUEST['t'].'&d='.$_REQUEST['d'].'&c='.$formCouponValues['coupon_code']);
+
+    exit;
+}
+$formCoupon->addText('coupon_code', $plugin->get_lang('CouponsCode'), true);
+$formCoupon->addHidden('t', intval($_GET['t']));
+$formCoupon->addHidden('i', intval($_GET['i']));
+$formCoupon->addHidden('d', $subscriptionItem['duration']);
+$formCoupon->addButton('submit', $plugin->get_lang('RedeemCoupon'), 'check', 'success', 'btn-lg pull-right');
 
 // View
 $templateName = $plugin->get_lang('PaymentMethods');
@@ -229,6 +285,7 @@ $tpl->assign('item_type', (int) $_GET['t']);
 $tpl->assign('buying_course', $buyingCourse);
 $tpl->assign('buying_session', $buyingSession);
 $tpl->assign('user', api_get_user_info());
+$tpl->assign('form_coupon', $formCoupon->returnForm());
 $tpl->assign('message_payment', $messagePayment);
 $tpl->assign('selected_duration_name', $selectedDurationName);
 $tpl->assign('form', $form->returnForm());

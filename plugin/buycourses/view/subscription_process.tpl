@@ -29,7 +29,7 @@
                                 {% if course.tax_enable %}
                                     <div class="price-details-tax">
                                         {{ 'Price'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                        {{ subscription.price_formatted }} {{ selected_duration_name }}
+                                        {{ subscription.price_formatted }}
                                         <br>
                                         {{ course.tax_name }} ({{ subscription.item.tax_perc_show }}%):
                                         {{ subscription.tax_amount_formatted }}
@@ -37,10 +37,25 @@
                                 {% endif %}
                                 <div class="price">
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                    {{ subscription.total_price_formatted }} {{ selected_duration_name }}
+                                    {{ subscription.total_price_formatted }}
+                                </div>
+                                {% if course.has_coupon %}
+                                    <div class="price-details-tax">
+                                        {{ 'DiscountAmount'|get_plugin_lang('BuyCoursesPlugin') }}:
+                                        {{ course.discount_amount_formatted }}
+                                    </div>
+                                {% endif %}
+                                <div class="coupon-question">
+                                    {{ 'SelecSubscription'|get_plugin_lang('BuyCoursesPlugin') }}
                                 </div>
                                 <div class="subscription">
                                     {{ form_subscription }}
+                                </div>
+                                <div class="coupon-question">
+                                    {{ 'DoYouHaveACoupon'|get_plugin_lang('BuyCoursesPlugin') }}
+                                </div>
+                                <div class="coupon">
+                                    {{ form_coupon }}
                                 </div>
                             </div>
                             <div class="col-md-7">
@@ -83,15 +98,30 @@
                                         {{ subscription.price_formatted }}
                                         <br>
                                         {{ session.tax_name }} ({{ subscription.item.tax_perc_show }}%):
-                                        {{ subscription.tax_amount_formatted }} {{ selected_duration_name }}
+                                        {{ subscription.tax_amount_formatted }}
                                     </div>
                                 {% endif %}
                                 <div class="price">
                                     {{ 'Total'|get_plugin_lang('BuyCoursesPlugin') }} :
-                                    {{ subscription.total_price_formatted }} {{ selected_duration_name }}
+                                    {{ subscription.total_price_formatted }}
+                                </div>
+                                {% if session.has_coupon %}
+                                    <div class="price-details-tax">
+                                        {{ 'DiscountAmount'|get_plugin_lang('BuyCoursesPlugin') }}:
+                                        {{ session.discount_amount_formatted }}
+                                    </div>
+                                {% endif %}
+                                <div class="coupon-question">
+                                    {{ 'SelecSubscription'|get_plugin_lang('BuyCoursesPlugin') }}
                                 </div>
                                 <div class="subscription">
                                     {{ form_subscription }}
+                                </div>
+                                <div class="coupon-question">
+                                    {{ 'DoYouHaveACoupon'|get_plugin_lang('BuyCoursesPlugin') }}
+                                </div>
+                                <div class="coupon">
+                                    {{ form_coupon }}
                                 </div>
                             </div>
                             <div class="col-md-7">

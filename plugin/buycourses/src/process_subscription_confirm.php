@@ -100,11 +100,11 @@ switch ($sale['payment_type']) {
         switch ($sale['product_type']) {
             case BuyCoursesPlugin::PRODUCT_TYPE_COURSE:
                 $buyingCourse = true;
-                $course = $plugin->getCourseInfo($sale['product_id'], $coupon);
+                $course = $plugin->getSubscriptionCourseInfo($sale['product_id'], $coupon);
                 break;
             case BuyCoursesPlugin::PRODUCT_TYPE_SESSION:
                 $buyingSession = true;
-                $session = $plugin->getSessionInfo($sale['product_id'], $coupon);
+                $session = $plugin->getSubscriptionSessionInfo($sale['product_id'], $coupon);
                 break;
         }
 
@@ -223,7 +223,7 @@ switch ($sale['payment_type']) {
         $template->assign('form', $form->returnForm());
         $template->assign('is_bank_transfer', true);
 
-        $content = $template->fetch('buycourses/view/process_confirm.tpl');
+        $content = $template->fetch('buycourses/view/subscription_process_confirm.tpl');
 
         $template->assign('content', $content);
         $template->display_one_col_template();
@@ -239,11 +239,11 @@ switch ($sale['payment_type']) {
         switch ($sale['product_type']) {
             case BuyCoursesPlugin::PRODUCT_TYPE_COURSE:
                 $buyingCourse = true;
-                $course = $plugin->getCourseInfo($sale['product_id'], $coupon);
+                $course = $plugin->getSubscriptionCourseInfo($sale['product_id'], $coupon);
                 break;
             case BuyCoursesPlugin::PRODUCT_TYPE_SESSION:
                 $buyingSession = true;
-                $session = $plugin->getSessionInfo($sale['product_id'], $coupon);
+                $session = $plugin->getSubscriptionSessionInfo($sale['product_id'], $coupon);
                 break;
         }
 
@@ -316,7 +316,7 @@ switch ($sale['payment_type']) {
         $template->assign('is_culqi_payment', true);
         $template->assign('culqi_params', $culqiParams = $plugin->getCulqiParams());
 
-        $content = $template->fetch('buycourses/view/process_confirm.tpl');
+        $content = $template->fetch('buycourses/view/subscription_process_confirm.tpl');
 
         $template->assign('content', $content);
         $template->display_one_col_template();

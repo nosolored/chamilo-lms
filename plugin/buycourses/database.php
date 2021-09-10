@@ -477,30 +477,6 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SERVICE)) {
     $couponService->setPrimaryKey(['id']);
 }
 
-if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SALE)) {
-    $couponSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUPON_SALE);
-    $couponSaleTable->addColumn(
-        'id',
-        Types::INTEGER,
-        ['autoincrement' => true, 'unsigned' => true]
-    );
-    $couponSaleTable->addColumn('coupon_id', Types::INTEGER);
-    $couponSaleTable->addColumn('sale_id', Types::INTEGER);
-    $couponSaleTable->setPrimaryKey(['id']);
-}
-
-if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SERVICE_SALE)) {
-    $couponSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUPON_SERVICE_SALE);
-    $couponSaleTable->addColumn(
-        'id',
-        Types::INTEGER,
-        ['autoincrement' => true, 'unsigned' => true]
-    );
-    $couponSaleTable->addColumn('coupon_id', Types::INTEGER);
-    $couponSaleTable->addColumn('service_sale_id', Types::INTEGER);
-    $couponSaleTable->setPrimaryKey(['id']);
-}
-
 if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUNTRY_REL_PAYMENT)) {
     $countryPaymentTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUNTRY_REL_PAYMENT);
     $countryPaymentTable->addColumn(
@@ -574,6 +550,42 @@ if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_SUBSCRIPTION_PERIOD)) {
     );
     $subscriptionPeriodTable->addColumn('name', Types::STRING);
     $subscriptionPeriodTable->setPrimaryKey(['duration']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SALE)) {
+    $couponSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUPON_SALE);
+    $couponSaleTable->addColumn(
+        'id',
+        Types::INTEGER,
+        ['autoincrement' => true, 'unsigned' => true]
+    );
+    $couponSaleTable->addColumn('coupon_id', Types::INTEGER);
+    $couponSaleTable->addColumn('sale_id', Types::INTEGER);
+    $couponSaleTable->setPrimaryKey(['id']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SERVICE_SALE)) {
+    $couponSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUPON_SERVICE_SALE);
+    $couponSaleTable->addColumn(
+        'id',
+        Types::INTEGER,
+        ['autoincrement' => true, 'unsigned' => true]
+    );
+    $couponSaleTable->addColumn('coupon_id', Types::INTEGER);
+    $couponSaleTable->addColumn('service_sale_id', Types::INTEGER);
+    $couponSaleTable->setPrimaryKey(['id']);
+}
+
+if (false === $sm->tablesExist(BuyCoursesPlugin::TABLE_COUPON_SUBSCRIPTION_SALE)) {
+    $couponSubscriptionSaleTable = $pluginSchema->createTable(BuyCoursesPlugin::TABLE_COUPON_SUBSCRIPTION_SALE);
+    $couponSubscriptionSaleTable->addColumn(
+        'id',
+        Types::INTEGER,
+        ['autoincrement' => true, 'unsigned' => true]
+    );
+    $couponSubscriptionSaleTable->addColumn('coupon_id', Types::INTEGER);
+    $couponSubscriptionSaleTable->addColumn('sale_id', Types::INTEGER);
+    $couponSubscriptionSaleTable->setPrimaryKey(['id']);
 }
 
 $queries = $pluginSchema->toSql($platform);

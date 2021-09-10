@@ -37,12 +37,13 @@ class BuyCoursesPlugin extends Plugin
     const TABLE_COUPON = 'plugin_buycourses_coupon';
     const TABLE_COUPON_ITEM = 'plugin_buycourses_coupon_rel_item';
     const TABLE_COUPON_SERVICE = 'plugin_buycourses_coupon_rel_service';
-    const TABLE_COUPON_SALE = 'plugin_buycourses_coupon_rel_sale';
-    const TABLE_COUPON_SERVICE_SALE = 'plugin_buycourses_coupon_rel_service_sale';
     const TABLE_COUNTRY_REL_PAYMENT = 'plugin_buycourses_country_rel_payment';
     const TABLE_SUBSCRIPTION = 'plugin_buycourses_subscription';
     const TABLE_SUBSCRIPTION_SALE = 'plugin_buycourses_subscription_rel_sale';
     const TABLE_SUBSCRIPTION_PERIOD = 'plugin_buycourses_subscription_period';
+    const TABLE_COUPON_SALE = 'plugin_buycourses_coupon_rel_sale';
+    const TABLE_COUPON_SERVICE_SALE = 'plugin_buycourses_coupon_rel_service_sale';
+    const TABLE_COUPON_SUBSCRIPTION_SALE = 'plugin_buycourses_coupon_rel_subscription_sale';
     const COUPON_SUBSCRIPTION_WEEKLY = 7;
     const COUPON_SUBSCRIPTION_MONTHLY = 30;
     const COUPON_SUBSCRIPTION_QUARTERLY = 60;
@@ -162,12 +163,13 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON,
             self::TABLE_COUPON_ITEM,
             self::TABLE_COUPON_SERVICE,
-            self::TABLE_COUPON_SALE,
-            self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUNTRY_REL_PAYMENT,
             self::TABLE_SUBSCRIPTION,
             self::TABLE_SUBSCRIPTION_SALE,
             self::TABLE_SUBSCRIPTION_PERIOD,
+            self::TABLE_COUPON_SALE,
+            self::TABLE_COUPON_SERVICE_SALE,
+            self::TABLE_COUPON_SUBSCRIPTION_SALE,
         ];
         $em = Database::getManager();
         $cn = $em->getConnection();
@@ -204,12 +206,13 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON,
             self::TABLE_COUPON_ITEM,
             self::TABLE_COUPON_SERVICE,
-            self::TABLE_COUPON_SALE,
-            self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUNTRY_REL_PAYMENT,
             self::TABLE_SUBSCRIPTION,
             self::TABLE_SUBSCRIPTION_SALE,
             self::TABLE_SUBSCRIPTION_PERIOD,
+            self::TABLE_COUPON_SALE,
+            self::TABLE_COUPON_SERVICE_SALE,
+            self::TABLE_COUPON_SUBSCRIPTION_SALE,
         ];
 
         foreach ($tablesToBeDeleted as $tableToBeDeleted) {
@@ -412,24 +415,6 @@ class BuyCoursesPlugin extends Plugin
         )";
         Database::query($sql);
 
-        $table = self::TABLE_COUPON_SALE;
-        $sql = "CREATE TABLE IF NOT EXISTS $table (
-            id int unsigned NOT NULL AUTO_INCREMENT,
-            coupon_id int unsigned NOT NULL,
-            sale_id int unsigned NOT NULL,
-            PRIMARY KEY (id)
-        )";
-        Database::query($sql);
-
-        $table = self::TABLE_COUPON_SERVICE_SALE;
-        $sql = "CREATE TABLE IF NOT EXISTS $table (
-            id int unsigned NOT NULL AUTO_INCREMENT,
-            coupon_id int unsigned NOT NULL,
-            service_sale_id int unsigned NOT NULL,
-            PRIMARY KEY (id)
-        )";
-        Database::query($sql);
-
         $table = self::TABLE_COUNTRY_REL_PAYMENT;
         $sql = "CREATE TABLE IF NOT EXISTS $table (
             id int unsigned NOT NULL AUTO_INCREMENT,
@@ -482,6 +467,33 @@ class BuyCoursesPlugin extends Plugin
             duration int unsigned NOT NULL,
             name varchar(50) NOT NULL,
             PRIMARY KEY (duration)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_COUPON_SALE;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            coupon_id int unsigned NOT NULL,
+            sale_id int unsigned NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_COUPON_SERVICE_SALE;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            coupon_id int unsigned NOT NULL,
+            service_sale_id int unsigned NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
+        $table = self::TABLE_COUPON_SUBSCRIPTION_SALE;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            coupon_id int unsigned NOT NULL,
+            sale_id int unsigned NOT NULL,
+            PRIMARY KEY (id)
         )";
         Database::query($sql);
 
@@ -974,7 +986,7 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return array
      */
-    public function getSubscriptionItemByProduct($productId, $itemType)
+    public function getSubscriptionItemByProduct($productId, $itemType, $coupon =null)
     {
         $buySubscriptionItemTable = Database::get_main_table(self::TABLE_SUBSCRIPTION);
         $buyCurrencyTable = Database::get_main_table(self::TABLE_CURRENCY);
@@ -985,7 +997,7 @@ class BuyCoursesPlugin extends Plugin
                 ON s.currency_id = c.id
         ";
 
-        $product = Database::select(
+        $item = Database::select(
             ['s.*', 'c.iso_code'],
             $fakeItemFrom,
             [
@@ -999,11 +1011,13 @@ class BuyCoursesPlugin extends Plugin
             'first'
         );
 
-        if (empty($product)) {
+        if (empty($item)) {
             return false;
         }
 
-        return $product;
+        $this->setPriceSettings($item, self::TAX_APPLIES_TO_ONLY_COURSE, $coupon);
+
+        return $item;
     }
     /**
      * Get the item data.
@@ -1024,7 +1038,7 @@ class BuyCoursesPlugin extends Plugin
                 ON s.currency_id = c.id
         ";
 
-        $product = Database::select(
+        $items = Database::select(
             ['s.*', 'c.iso_code'],
             $fakeItemFrom,
             [
@@ -1037,11 +1051,35 @@ class BuyCoursesPlugin extends Plugin
             ]
         );
 
-        if (empty($product)) {
+        for ($i = 0; $i < count($items); $i++) {
+            $this->setPriceSettings($items[$i], self::TAX_APPLIES_TO_ONLY_COURSE);
+        }
+
+        if (empty($items)) {
             return false;
         }
 
-        return $product;
+        return $items;
+    }
+
+    /**
+     * Get registered item data.by duration
+     *
+     * @param int $duration    The subscription duration
+     *
+     * @return array
+     */
+    public function getSubscriptiosnItemsByDuration($duration)
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SUBSCRIPTION),
+            [
+                'where' => ['duration = ?' => [
+                     (int) $duration],
+                ],
+            ]
+        );
     }
 
     /**
@@ -3788,6 +3826,30 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
+     * Register a coupon sale.
+     *
+     * @param int $saleId   The sale ID
+     * @param int $couponId The coupon ID
+     *
+     * @return int
+     */
+    public function registerCouponSubscriptionSale($saleId, $couponId)
+    {
+        $sale = $this->getSubscriptionSale($saleId);
+
+        if (empty($sale)) {
+            return false;
+        }
+
+        $values = [
+            'coupon_id' => (int) $couponId,
+            'sale_id' => (int) $saleId,
+        ];
+
+        return Database::insert(self::TABLE_COUPON_SUBSCRIPTION_SALE, $values);
+    }    
+
+    /**
      * Add a new coupon.
      *
      * @param int $coupon
@@ -4278,7 +4340,7 @@ class BuyCoursesPlugin extends Plugin
      *
      * @return array The subscription data
      */
-    public function getSubscription($productType, $productId, $duration)
+    public function getSubscription($productType, $productId, $duration, $coupon = null)
     {
         $subscription = $this->getDataSubscription($productType, $productId, $duration);
 
@@ -4287,7 +4349,7 @@ class BuyCoursesPlugin extends Plugin
 
         $subscription['iso_code'] = $isoCode;
 
-        $this->setPriceSettings($subscription, self::TAX_APPLIES_TO_ONLY_COURSE);
+        $this->setPriceSettings($subscription, self::TAX_APPLIES_TO_ONLY_COURSE, $coupon);
 
         return $subscription;
     }
@@ -4785,8 +4847,8 @@ class BuyCoursesPlugin extends Plugin
 
         return Database::update(
             $periodTable,
-            ['duration = ?' => (int) $duration],
-            ['name = ?' => (string) $name]
+            ['name' => (string) $name],
+            ['duration = ?' => (int) $duration]
         );
     }
 

@@ -20,15 +20,23 @@ if (isset($_GET['action'], $_GET['d'], $_GET['n'])) {
         $frequency = $plugin->selectFrequency($_GET['d']);
 
         if (!empty($frequency)) {
-            $plugin->deleteFrequency($_GET['d'], $_GET['n']);
+            $subscriptionsItems = $plugin->getSubscriptiosnItemsByDuration($_GET['d']);
 
-            Display::addFlash(
-                Display::return_message(get_lang('FrequencyRemoved'), 'success')
-            );
+            if (empty($subscriptionsItems)) {
+                $plugin->deleteFrequency($_GET['d'], $_GET['n']);
+
+                Display::addFlash(
+                    Display::return_message($plugin->get_lang('FrequencyRemoved'), 'success')
+                );
+            } else {
+                Display::addFlash(
+                    Display::return_message($plugin->get_lang('SubscriptionPeriodOnUse'), 'error')
+                );
+            }
         }
         else{
             Display::addFlash(
-                Display::return_message(get_lang('FrequencyNotExits'), 'error')
+                Display::return_message($plugin->get_lang('FrequencyNotExits'), 'error')
             );
         }
 
@@ -62,9 +70,13 @@ if ($form->validate()) {
     $frequency = $plugin->selectFrequency($duration);
 
     if (!empty($frequency)) {
-        Display::addFlash(
-            Display::return_message($plugin->get_lang('FrequencyAlreadySaved'), 'error')
-        );
+        $result = $plugin->updateFrequency($duration, $name);
+
+        if (!isset($result)) {
+            Display::addFlash(
+                Display::return_message($plugin->get_lang('FrequencyNotUpdated'), 'error')
+            );
+        }
     } else {
         $result = $plugin->addFrequency($duration, $name);
 
