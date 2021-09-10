@@ -295,4 +295,5 @@ $strings['SubscriptionNotValid'] = "Suscripción no valida";
 $strings['SelecSubscription'] = "Seleccione una suscripción";
 $strings['ConfigureSubscriptionsFrequencies'] = "Configurar los períodos de suscripciones";
 $strings['FrequencyAdd'] = "Agregar período";
+$strings['SubscriptionAlreadyExists'] = "La suscripción ya existe";
 
