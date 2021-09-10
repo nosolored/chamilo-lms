@@ -294,4 +294,3 @@ $strings['NeedToAddDuration'] = "Hay que especificar una duración";
 $strings['SubscriptionNotValid'] = "Suscripción no valida";
 $strings['SelecSubscription'] = "Seleccione una suscripción";
 $strings['ConfigureSubscriptionsFrequencies'] = "Configurar los períodos de suscriptciones";
-

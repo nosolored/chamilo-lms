@@ -289,4 +289,3 @@ $strings['NeedToAddDuration'] = "Need to add duration";
 $strings['SubscriptionNotValid'] = "Subscription not valid";
 $strings['SelecSubscription'] = "Select a subscription";
 $strings['ConfigureSubscriptionsFrequencies'] = "Configure subscriptions periods";
-
