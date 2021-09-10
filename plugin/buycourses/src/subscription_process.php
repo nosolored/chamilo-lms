@@ -142,7 +142,7 @@ if (empty($extraData['extra_country'])) {
 
     $paymentTypesRelCountries = [];
     foreach ($listCountryPayment as $itemCountryPayment) {
-        $paymentTypesRelCountries[] = $itemCountryPayment['payment_type']; 
+        $paymentTypesRelCountries[] = $itemCountryPayment['payment_type'];
     }
 
     foreach ($paymentTypesOptions as $key => $itemPayment) {
@@ -216,9 +216,9 @@ if ($formSubscription->validate()) {
 $frequencies = $plugin->getFrequencies();
 $selectedFrequencies = [];
 
-foreach($subscriptionItems as $si) {
+foreach ($subscriptionItems as $si) {
     if (isset($frequencies[$si['duration']])) {
-        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']].' - '.$si['price_formatted'] . ' ' . $si['iso_code'];
+        $selectedFrequencies[$si['duration']] = $frequencies[$si['duration']].' - '.$si['price_formatted'].' '.$si['iso_code'];
     }
 }
 
