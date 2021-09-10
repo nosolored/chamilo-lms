@@ -153,7 +153,7 @@ class Basic extends Toolbar
         if (api_get_configuration_value('plugin_furigana_ckeditor')) {
             $plugins[] = 'furigana';
         }
-        
+
         $this->defaultPlugins = array_unique(array_merge($this->defaultPlugins, $plugins));
 
         parent::__construct($toolbar, $config, $prefix);
