@@ -6,7 +6,6 @@
  *
  * @package chamilo.plugin.buycourses
  */
-
 $cidReset = true;
 
 require_once __DIR__.'/../../../main/inc/global.inc.php';
@@ -21,7 +20,7 @@ foreach ($subscriptionDue as $subscriptionsDue) {
     if (!$subscriptionActive) {
         if ($subscriptionDue['product_type'] === BuyCoursesPlugin::PRODUCT_TYPE_COURSE) {
             CourseManager::unsubscribe_user($subscriptionDue['product_id'], $subscriptionDue['user_id']);
-        } else if ($isSession = $subscriptionDue['product_type'] === BuyCoursesPlugin::PRODUCT_TYPE_SESSION) {
+        } elseif ($isSession = $subscriptionDue['product_type'] === BuyCoursesPlugin::PRODUCT_TYPE_SESSION) {
             SessionManager::unsubscribe_user_from_session($subscriptionDue['product_id'], $subscriptionDue['user_id']);
         }
 
