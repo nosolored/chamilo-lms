@@ -123,7 +123,7 @@ switch ($action) {
             echo '';
             break;
         }
-        
+
         $showEmail = api_get_setting('show_email_addresses') === 'true';
         $return = ['items' => []];
 
@@ -186,15 +186,15 @@ switch ($action) {
                 $_REQUEST['q'],
                 $_REQUEST['page_limit']
             );
-    
+
             /** @var User $user */
             foreach ($users as $user) {
                 $userName = UserManager::formatUserFullName($user, true);
-    
+
                 if ($showEmail) {
                     $userName .= " ({$user->getEmail()})";
                 }
-    
+
                 $return['items'][] = [
                     'text' => $userName,
                     'id' => $user->getId(),
