@@ -108,7 +108,7 @@ class Meeting
      * @ORM\Column(type="text", name="meeting_info_get_json", nullable=true)
      */
     protected $meetingInfoGetJson;
-    
+
     /**
      * @var User
      * @ORM\ManyToOne(targetEntity="Chamilo\UserBundle\Entity\User")
@@ -201,7 +201,7 @@ class Meeting
     {
         return $this->user;
     }
-    
+
     /**
      * @return User
      */
@@ -217,7 +217,7 @@ class Meeting
     {
         return $this->startTime;
     }
-    
+
     /**
      * @return Course
      */
@@ -342,7 +342,7 @@ class Meeting
 
         return $this;
     }
-    
+
     /**
      * @param User $user
      *
@@ -351,7 +351,7 @@ class Meeting
     public function setHost($host)
     {
         $this->host = $host;
-        
+
         return $this;
     }
 
@@ -361,7 +361,7 @@ class Meeting
     public function setStartTime($starTime)
     {
         $this->startTime = $starTime;
-        
+
         return $this;
     }
 
@@ -615,9 +615,9 @@ class Meeting
 
         return $introduction;
     }
-    
+
     /**
-     * Check starDateTime
+     * Check starDateTime.
      *
      * @return bool
      */
@@ -630,7 +630,7 @@ class Meeting
     }
 
     /**
-     * Check checkPassStartDateTime
+     * Check checkPassStartDateTime.
      *
      * @return bool
      */
@@ -638,10 +638,10 @@ class Meeting
     {
         $today = new DateTime("midnight");
         $today->setTimezone(new DateTimeZone(api_get_timezone()));
-        
+
         return $this->startDateTime > $today;
     }
-    
+
     /**
      * @throws Exception on unexpected start_time or duration
      */
