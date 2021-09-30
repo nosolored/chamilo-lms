@@ -116,6 +116,7 @@ switch ($sale['payment_type']) {
             }
 
             RedirectToPayPal($expressCheckout["TOKEN"]);
+            break;
         }
 
         $form->addButton(
