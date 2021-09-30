@@ -116,6 +116,7 @@ switch ($sale['payment_type']) {
             }
 
             RedirectToPayPal($expressCheckout["TOKEN"]);
+            break;
         }
 
         $form->addButton(
@@ -389,11 +390,11 @@ switch ($sale['payment_type']) {
         switch ($sale['product_type']) {
             case BuyCoursesPlugin::PRODUCT_TYPE_COURSE:
                 $buyingCourse = true;
-                $course = $plugin->getCourseInfo($sale['product_id'], $coupon);
+                $course = $plugin->getSubscriptionCourseInfo($sale['product_id'], $coupon);
                 break;
             case BuyCoursesPlugin::PRODUCT_TYPE_SESSION:
                 $buyingSession = true;
-                $session = $plugin->getSessionInfo($sale['product_id'], $coupon);
+                $session = $plugin->getSubscriptionSessionInfo($sale['product_id'], $coupon);
                 break;
         }
 
