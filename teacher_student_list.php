@@ -17,7 +17,7 @@ if (!api_is_teacher()) {
     api_not_allowed(true);
 }
 
-$sessionId = isset($_REQUEST['session_id']) ? (int) $_REQUEST['session_id'] : 0;
+$sessionId = isset($_REQUEST['id_session']) ? (int) $_REQUEST['id_session'] : 0;
 
 $codePath = api_get_path(WEB_CODE_PATH);
 $coursePath = api_get_path(WEB_COURSE_PATH);
