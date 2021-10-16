@@ -290,7 +290,9 @@ if (count($listActivos) > 0) {
             // Student
             echo '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
             if ($students > 0) {
+                echo '<a title="'.htmlspecialchars($value['name']).'" href="teacher_student_list.php?id_session='.$sessionId.'">';
                 echo '<span style="font-size:18px;">'.$students.'</span><br>matrículas activas';
+                echo '</a>';
             } else {
                 echo 'Sin alumnos matrículados';
             }
