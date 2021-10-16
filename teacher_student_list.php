@@ -150,7 +150,7 @@ if (Database::num_rows($res) > 0) {
         echo '<tr>';
         echo '<td><img src="'.$userData['avatar_small'].'" /></td>';
         echo '<td style="vertical-align:middle">';
-        echo '<a title="'.htmlspecialchars($userData['complete_name']).'" href="'.$userData['profile_url'].'">';
+        echo '<a title="'.htmlspecialchars($userData['complete_name']).'" href="main/mySpace/myStudents.php?student='.$userData['id'].'">';
         echo '<span style="font-weight: bold; font-size: 16px;">'.htmlspecialchars($userData['complete_name']).'</span>';
         echo '</a>';
         echo '</td>';
