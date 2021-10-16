@@ -17,6 +17,8 @@ if (!api_is_teacher()) {
     api_not_allowed(true);
 }
 
+$sessionId = isset($_REQUEST['session_id']) ? (int) $_REQUEST['session_id'] : 0;
+
 $codePath = api_get_path(WEB_CODE_PATH);
 $coursePath = api_get_path(WEB_COURSE_PATH);
 $pluginPath = api_get_path(WEB_PLUGIN_PATH);
@@ -49,6 +51,11 @@ $session_table = Database::get_main_table(TABLE_MAIN_SESSION);
 $session_rel_course_rel_user_table = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
 $sessionList = [];
 $sql = "SELECT DISTINCT session_id FROM $session_rel_course_rel_user_table WHERE user_id='".$userId."' AND status = 2";
+
+if (!empty($sessionId)) {
+    $sql = "SELECT DISTINCT session_id FROM $session_rel_course_rel_user_table WHERE session_id = $sessionId AND user_id='".$userId."' AND status = 2";
+}
+
 $result = Database::query($sql);
 while ($row = Database::fetch_assoc($result)) {
     $sessionList[] = $row['session_id'];
@@ -148,13 +155,24 @@ if (Database::num_rows($res) > 0) {
         echo '</a>';
         echo '</td>';
         echo '<td>';
-        $list_sessions = SessionManager::get_sessions_by_user($row['user_id'], true);
-        if (!empty($list_sessions)) {
-            foreach ($list_sessions as $session_item) {
-                echo '<li>'.$session_item['session_name'].'</li>';
+        if (!empty($sessionId)) {
+            $list_sessions = SessionManager::get_sessions_list(['s.id' => ['operator' => '=', 'value' => $sessionId]]);
+            if (!empty($list_sessions)) {
+                foreach ($list_sessions as $session_item) {
+                    echo '<li>'.$session_item['name'].'</li>';
+                }
+            } else {
+                echo get_lang('NoSessionsForThisUser');
             }
         } else {
-            echo get_lang('NoSessionsForThisUser');
+            $list_sessions = SessionManager::get_sessions_by_user($row['user_id'], true);
+            if (!empty($list_sessions)) {
+                foreach ($list_sessions as $session_item) {
+                    echo '<li>'.$session_item['session_name'].'</li>';
+                }
+            } else {
+                echo get_lang('NoSessionsForThisUser');
+            }
         }
         echo '</td>';
         echo '<td style="vertical-align:middle">'.$userData['email'].'</td>';
