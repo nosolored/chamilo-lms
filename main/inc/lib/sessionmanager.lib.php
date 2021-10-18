@@ -2839,14 +2839,14 @@ class SessionManager
                         SET nbr_users = $nbr_users
                         WHERE session_id = $sessionId AND c_id = $courseId";
                 Database::query($sql);
-                
+
                 // Create forum
                 require_once api_get_path(SYS_CODE_PATH).'forum/forumfunction.inc.php';
-                
+
                 $categoryParams = [];
                 $categoryParams['forum_category_title'] = 'General';
                 $catId = store_forumcategory($categoryParams, $courseInfo, false, $sessionId);
-                
+
                 $forumParams = [
                     'c_id' => $courseId,
                     'forum_title' => 'Foro General',
