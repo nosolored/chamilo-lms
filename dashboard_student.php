@@ -1,12 +1,7 @@
 <?php
 
 use Chamilo\CoreBundle\Entity\Course;
-use Chamilo\CoreBundle\Entity\Repository\SequenceResourceRepository;
-use Chamilo\CoreBundle\Entity\Repository\SessionRepository;
-use Chamilo\CoreBundle\Entity\SequenceResource;
 use Chamilo\CoreBundle\Entity\Session;
-use Chamilo\CoreBundle\Entity\SessionRelCourseRelUser;
-use Chamilo\CoreBundle\Entity\SessionRelCourse;
 
 $cidReset = true;
 require_once 'main/inc/global.inc.php';
@@ -58,7 +53,6 @@ $htmlHeadXtra[] = '
         }
     </style>';
 
-
 $htmlHeadXtra[] = '<script>
     $(function() {
         var height_max = 0;
@@ -93,7 +87,6 @@ $content .= '<script>
             });
         </script>';
 
-
 $content .= '<div id="tabs">';
 $content .= '<ul>';
 $listActivos = [];
@@ -101,13 +94,12 @@ $listFuturos = [];
 $listPasados = [];
 
 $categories = SessionManager::get_all_session_category();
-$orderedCategories = array();
+$orderedCategories = [];
 if (!empty($categories)) {
     foreach ($categories as $category) {
         $orderedCategories[$category['id']] = $category['name'];
     }
 }
-
 
 foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
     foreach ($sessionCategory['sessions'] as $sessionItem) {
@@ -130,7 +122,7 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
             : null,
             'courses' => $sessionItem['courses'],
         ];
-        
+
         $sessionId = $groupInfo['id'];
         $accessStartDate = $groupInfo['access_start_date'];
         $accessEndDate = $groupInfo['access_end_date'];
@@ -140,12 +132,12 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
             $listFuturos[$sessionId] = $groupInfo;
             continue;
         }
-        
+
         if (!empty($accessEndDate) && strtotime(api_get_local_time($accessEndDate)) < time()) {
             $listPasados[$sessionId] = $groupInfo;
             continue;
         }
-        
+
         //$coachList = CourseManager::get_coachs_from_course_to_string($row['session_id'], $infoCourse['id']);
         //$groupInfo['coach'] = $coachList;
         $listActivos[$sessionId] = $groupInfo;
@@ -155,10 +147,9 @@ foreach ($courseAndSessions['sessions'] as $key => $sessionCategory) {
 $iconSetting = Display::return_icon(
     'session.png',
     get_lang('Session'),
-    array(),
+    [],
     ICON_SIZE_MEDIUM
 );
-
 
 $content .= '<li><a href="#tabs-1">'.get_lang('ActiveGroups').'</a></li>';
 //$content .= '<li><a href="#tabs-2">Cursos futuros</a></li>';
@@ -175,41 +166,41 @@ $content .= '<div class="row">';
 $content .= '<div id="list-hot-courses" class="grid-courses">'; //$content .= '<div class="col-md-12">';
 if (count($listActivos) > 0) {
     //$content .= '<table class="table data_table">';
-    
+
     foreach ($listActivos as $key => $value) {
         $sessionId = $key;
         $sessionInfo = api_get_session_info($sessionId);
         $session = api_get_session_entity($sessionId);
-        
+
         foreach ($value['courses'] as $courseItem) {
             $course = api_get_course_entity($courseItem['real_id']);
             $course_info = api_get_course_info($course->getCode());
             $imagePath = $course_info['course_image_large']; //CourseManager::getPicturePath($course, true);
-            
+
             $content .= '<div class="col-xs-12 col-sm-6 col-md-4">';
             $content .= '<div class="items items-hotcourse">';
             $content .= '<div class="image">';
             $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
             $content .= '<img src="'.$imagePath.'" class="img-responsive" alt="'.htmlspecialchars($value['name']).'">';
             $content .= '</a>';
-            
+
             if (!empty($value['session_category_id'])) {
                 $content .= '<span class="category">'.$orderedCategories[$value['session_category_id']].'</span>';
                 $content .= '<div class="cribbon"></div>';
             }
-            
+
             $content .= '<div class="user-actions">'.CourseManager::returnDescriptionButton($course_info).'</div>';
             $content .= '</div>';
             $content .= '<div class="description">';
             $content .= '<div class="block-title">';
             $content .= '<h5 class="title">';
-                $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
-                $content .= htmlspecialchars($course->getTitle());
-                $content .= '</a>';
+            $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$coursePath.$course->getCode().'/index.php?id_session='.$sessionId.'">';
+            $content .= htmlspecialchars($course->getTitle());
+            $content .= '</a>';
             $content .= '</h5>';
             $content .= '<h5><em>'.htmlspecialchars($value['name']).'</em></h5>';
             $content .= '</div>';
-            
+
             if (api_get_configuration_value('hide_course_rating') === false) {
                 $point_info = CourseManager::get_course_ranking($course_info['real_id'], 0);
                 $rating_html = Display::return_rating_system(
@@ -222,7 +213,7 @@ if (count($listActivos) > 0) {
                 $content .= '</div>';
             }
             /*
-            
+
             $content .= '<div class="toolbar row">';
             $content .= '<div class="col-sm-4">';
             if (item.price) {
@@ -246,7 +237,7 @@ if (count($listActivos) > 0) {
             $content .= '<td>';
             $content .= '<img src="'.$imagePath.'" />';
             $content .= '</td>';
-            
+
             // Session name and course title
             $content .= '<td>';
             $content .= '<a title="'.htmlspecialchars($value['name']).'" href="'.$codePath.'session/index.php?session_id='.$sessionId.'">';
@@ -259,7 +250,7 @@ if (count($listActivos) > 0) {
                 $content .= '</span>';
             }
             $content .= '</td>';
-            
+
             // Dates
             $content .= '<td style="font-size:14px; ">';
             $newDates = SessionManager::convert_dates_to_local($sessionInfo, false);
@@ -268,24 +259,24 @@ if (count($listActivos) > 0) {
                 $content .= date("d/m/Y", strtotime($newDates['access_end_date']));
             }
             $content .= '</td>';
-            
+
             // Coach
             $namesOfCoaches = [];
             $coachSubscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
-            
+
             if ($coachSubscriptions) {
-               
+
                 foreach ($coachSubscriptions as $subscription) {
                     $namesOfCoaches[] = $subscription->getUser()->getCompleteNameWithUserName();
                 }
             }
             $coachHtml = ($namesOfCoaches ? implode('<br>', $namesOfCoaches) : 'Sin tutores');
-            
+
             $content .= '<td style="vertical-align:middle; font-size:14px; text-align:center" class="text-primary">';
             $content .= $coachHtml;
             $content .= '</td>';
-            
-            
+
+
             // Acciones
             $content .= '<td class="text-right" style="vertical-align:middle">';
             $actions = Display::url(
@@ -294,13 +285,12 @@ if (count($listActivos) > 0) {
             );
             $content .= $actions;
             $content .= '</td>';
-            
+
             $content .= '</tr>';
             */
         }
     }
     //$content .= '</table>';
-    
 }
 $content .= '</div>';
 
@@ -313,8 +303,8 @@ $content .= '<div class="row">';
 $content .= '<div class="col-md-12">';
 
 $content .= '<div class="sessions-items">';
-    
-    if (count($courseAndSessions['courses']) > 0) { 
+
+    if (count($courseAndSessions['courses']) > 0) {
         $content .= '<table class="table" style="margin-bottom:0px">';
         $content .= '<tr><th colspan="3">'.get_lang('Courses').'</th></tr>';
         foreach ($courseAndSessions['courses'] as $key => $courseItem) {
@@ -334,7 +324,7 @@ $content .= '<div class="sessions-items">';
             );
             $content .= '</td>';
             $content .= '<td class="text-right" style="vertical-align: middle;">';
-            
+
             $allowZoom = api_get_plugin_setting('zoom', 'tool_enable') === 'true';
             if ($allowZoom) {
                 $content .= Display::url(
@@ -342,27 +332,27 @@ $content .= '<div class="sessions-items">';
                     $pluginPath."zoom/start.php?id_session=$sessionId&cidReq=".$courseItem['code']
                 ).' ';
             }
-           
+
             $course_info = api_get_course_info_by_id($courseId);
-            
+
             $userInCourseStatus = CourseManager::getUserInCourseStatus($userId, $course_info['real_id']);
             $course_info['status'] = empty($sessionId) ? $userInCourseStatus : STUDENT;
             $course_info['id_session'] = $sessionId;
-            
+
             // For each course, get if there is any notification icon to show
             // (something that would have changed since the user's last visit).
             $show_notification = !api_get_configuration_value('hide_course_notification')
             ? Display::show_notification($course_info)
             : '';
             $content .= $show_notification;
-            
+
             $content .= '</td>';
             $content .= '</tr>';
         }
         $content .= '</table>';
     }
     $content .= '</div>';
-    
+
     $content .= '</div>';
     $content .= '</div>';
     $content .= '</div>';
@@ -397,7 +387,7 @@ foreach ($listFuturos as $key => $value) {
     $content .= '<a title="'.htmlspecialchars($value['name']).'" href="#">'.htmlspecialchars($value['name']).'</a>&nbsp;';
     $content .= '</h4>';
     $content .= '</div>';
-    
+
     if (count($value['courses']) === 0) {
         $content .= '<div class="alert alert-warning">'.get_lang('NoCoursesForThisSession').'</div>';
     } else {
@@ -405,7 +395,7 @@ foreach ($listFuturos as $key => $value) {
         foreach ($value['courses'] as $course) {
             $courseUrl = "#"; // api_get_course_url($course['course_code'], $sessionId);
             $courseId = $course['real_id'];
-            
+
             $content .= '<tr>';
             $content .= '<td>';
             $content .= Display::url(
@@ -413,14 +403,14 @@ foreach ($listFuturos as $key => $value) {
                 $courseUrl
             );
             $content .= '</td>';
-            
+
             $content .= '</tr>';
         } // foreach course
         $content .= '</table>';
     }
-    
+
     $content .= '</div>';
-    
+
     $content .= '</div>';
     $content .= '</div>';
     $content .= '</div>';
@@ -432,7 +422,7 @@ $content .= '</div>';
 */
 if (!empty($listPasados)) {
     $content .= '<div id="tabs-3">';
-        
+
     $content .= '<div class="row">';
     if (count($listPasados) > 0) {
         $content .= '<table class="data_table table">';
@@ -440,7 +430,7 @@ if (!empty($listPasados)) {
         foreach ($listPasados as $key => $value) {
             $sessionId = $key;
             $sessionInfo = api_get_session_info($sessionId);
-            
+
             if ($sessionInfo['visibility'] == SESSION_INVISIBLE) {
                 continue;
             }
@@ -449,7 +439,7 @@ if (!empty($listPasados)) {
             $dateSessionParse = SessionManager::parseSessionDates($sessionInfo, true);
             $content .= '<i class="fa fa-calendar" aria-hidden="true"></i> '.$dateSessionParse['access'];
             $content .= '</td>';
-            
+
             $tools = Display::url(
                 $iconSetting,
                 $codePath.'session/index.php?session_id='.$key
