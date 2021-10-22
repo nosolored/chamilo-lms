@@ -84,7 +84,6 @@ $htmlHeadXtra[] = "<script>
     });
 </script>";
 
-
 $tool_name = $plugin->get_lang('ZoomVideoConferences');
 $tpl = new Template($tool_name);
 
