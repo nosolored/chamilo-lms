@@ -302,7 +302,7 @@ $tpl->assign('on_hover_info', $options);
 $templateName = $tpl->get_template('agenda/month.tpl');
 $content = $tpl->fetch($templateName);
 $tpl->assign('content', $content);
-if (api_is_student()) {
+if (api_is_student() || api_is_teacher()) {
     // Lista de videoconferencias de zoom
     $zoomHtml = '<div class="alert alert-warning">Sin salas de videoconferencia próximas</div>';
     $zoomMeetingList = $zoomMeetingDate = [];
