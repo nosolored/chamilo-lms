@@ -18,6 +18,9 @@ if (!api_is_teacher()) {
 }
 
 $sessionId = isset($_REQUEST['id_session']) ? (int) $_REQUEST['id_session'] : 0;
+$keyWord = isset($_REQUEST['keyword']) ? $_REQUEST['keyword'] : '';
+
+$queryString = 'id_session='.intval($_REQUEST['id_session']);
 
 $codePath = api_get_path(WEB_CODE_PATH);
 $coursePath = api_get_path(WEB_COURSE_PATH);
@@ -47,9 +50,11 @@ $htmlHeadXtra[] = '
         }
     </style>';
 
+$user_table = Database::get_main_table(TABLE_MAIN_USER);
 $session_table = Database::get_main_table(TABLE_MAIN_SESSION);
 $session_rel_course_rel_user_table = Database::get_main_table(TABLE_MAIN_SESSION_COURSE_USER);
 $sessionList = [];
+
 $sql = "SELECT DISTINCT session_id FROM $session_rel_course_rel_user_table WHERE user_id='".$userId."' AND status = 2";
 
 if (!empty($sessionId)) {
@@ -128,10 +133,44 @@ echo '</div>';
 
 echo '</div>';
 
+echo '
+<div id="toolbarUser" class="actions">
+    <div class="row">
+        <div class="col-sm-4">
+            <form class="form-inline" action="teacher_student_list.php" method="get" name="search_simple"
+                id="search_simple">
+                <fieldset>
+                    <div class="form-group ">
+                        <label for="search_simple_keyword">
+                            Buscar
+                        </label>
+                        <input aria-label="Buscar usuarios" class=" form-control" name="keyword" type="text"
+                            id="search_simple_keyword">
+                    </div>
+                    <div class="form-group">
+                        <button class=" btn btn-default " type="submit" id="search_simple_submit"><em
+                                class="fa fa-search"></em> Buscar</button>
+                    </div>
+                </fieldset>
+                <input name="id_session" type="hidden" value="'.$sessionId.'" id="id_session">
+            </form>
+        </div>
+        <div class="col-sm-4 text-center">
+        </div>
+        <div class="col-sm-4 text-right">
+        </div>
+    </div>
+</div>';
+
+$extraConditions = "";
+if (!empty($keyWord)) {
+    $extraConditions = " AND (u.username LIKE '%$keyWord%' OR u.email LIKE '%$keyWord%' OR u.firstname LIKE '%$keyWord%' OR u.lastname LIKE '%$keyWord%') ";
+}
+
 echo '<h2>'.$toolName.'</h2>';
 echo '<div class="row">';
 echo '<div class="col-md-12">';
-$sql = "SELECT DISTINCT user_id FROM $session_rel_course_rel_user_table WHERE session_id IN (".implode(',', $sessionList).") AND status = 0";
+$sql = "SELECT DISTINCT sr.user_id FROM $session_rel_course_rel_user_table sr LEFT JOIN $user_table u ON sr.user_id = u.user_id  WHERE sr.session_id IN (".implode(',', $sessionList).") AND sr.status = 0 $extraConditions";
 $res = Database::query($sql);
 if (Database::num_rows($res) > 0) {
     echo '<table class="table data_table">';
