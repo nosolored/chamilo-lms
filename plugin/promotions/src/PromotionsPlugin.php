@@ -33,7 +33,7 @@ class PromotionsPlugin extends Plugin
 
         return $result ? $result : $result = new self();
     }
-    
+
     /**
      * Creates this plugin's related tables in the internal database.
      * Installs course fields in all courses.
@@ -54,9 +54,9 @@ class PromotionsPlugin extends Plugin
                 )";
         Database::query($sql);
     }
-    
+
     /**
-     * Uninstall
+     * Uninstall.
      */
     public function uninstall()
     {
@@ -66,8 +66,9 @@ class PromotionsPlugin extends Plugin
             Database::query("DROP TABLE IF EXISTS ".self::TABLE_PROMOTIONS);
         }
     }
-    
-    public function getPromotions() {
+
+    public function getPromotions()
+    {
         $result = '';
 
         $promotionsData = Database::select(
@@ -79,7 +80,7 @@ class PromotionsPlugin extends Plugin
                 ],
             ]
         );
-        
+
         foreach ($promotionsData as $item) {
             $result .= '<div id="promo'.$item['id'].'" class="panel panel-default">';
             $result .= '<div class="panel-body">';
@@ -87,7 +88,7 @@ class PromotionsPlugin extends Plugin
             $result .= '</div>';
             $result .= '</div>';
         }
-        
+
         return $result;
     }
 }
