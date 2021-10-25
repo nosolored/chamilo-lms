@@ -200,7 +200,7 @@ class MeetingRepository extends EntityRepository
                         Criteria::expr()->eq('session', $session)
                     )
                 )
-                ->orderBy(array('startTime' => Criteria::ASC))
+                ->orderBy(['startTime' => Criteria::ASC])
         );
     }
 }
