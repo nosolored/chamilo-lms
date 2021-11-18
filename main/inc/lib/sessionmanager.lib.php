@@ -6116,7 +6116,8 @@ class SessionManager
         $lastConnectionDate = null,
         $sessionIdList = [],
         $studentIdList = [],
-        $filterByStatus = null
+        $filterByStatus = null,
+        $onlyCourseFollowed = false
     ) {
         $filterByStatus = (int) $filterByStatus;
         $userId = (int) $userId;
@@ -6148,6 +6149,8 @@ class SessionManager
         if (!empty($courseList)) {
             $courseIdList = array_column($courseList, 'id');
             $courseConditions = ' AND c.id IN ("'.implode('","', $courseIdList).'")';
+        } else if ($onlyCourseFollowed) {
+            return [];
         }
 
         $userConditionsFromDrh = '';

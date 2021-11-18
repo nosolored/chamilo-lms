@@ -69,10 +69,10 @@ function get_users($from, $limit, $column, $direction)
 
     $is_western_name_order = api_is_western_name_order();
     $coach_id = api_get_user_id();
-    $getTeachersSameCourseSession = api_get_configuration_value('myspace_teacher_drh_user_hide_all_sessions_courses_teachers');
+    $onlyCourseFollowed = api_get_configuration_value('myspace_teacher_drh_user_hide_all_sessions_courses_teachers');
 
     $drhLoaded = false;
-    if (api_is_drh() && api_drh_can_access_all_session_content() && !$getTeachersSameCourseSession) {
+    if (api_is_drh() && api_drh_can_access_all_session_content()) {
         $students = SessionManager::getAllUsersFromCoursesFromAllSessionFromStatus(
             'drh_all',
             api_get_user_id(),
@@ -86,7 +86,8 @@ function get_users($from, $limit, $column, $direction)
             $lastConnectionDate,
             null,
             null,
-            COURSEMANAGER
+            COURSEMANAGER,
+            $onlyCourseFollowed
         );
         $drhLoaded = true;
     }
