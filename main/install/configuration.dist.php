@@ -1813,6 +1813,9 @@ ALTER TABLE gradebook_comment ADD CONSTRAINT FK_C3B70763AD3ED51C FOREIGN KEY (gr
 // Add certificate footer. Add your template main/template/default/export/pdf_certificate_footer.tpl
 // $_configuration['add_certificate_pdf_footer'] = true;
 
+// Option to show on mySpace/teachers.php only users from the same session as the DHR user, excluding the others sessions / courses.
+// $_configuration['myspace_teacher_drh_user_hide_all_sessions_courses_teachers'] = true;
+
 // KEEP THIS AT THE END
 // -------- Custom DB changes
 // Add user activation by confirmation email
