@@ -1,3 +1,10 @@
+v7.2 - 2021-11-22
+====
+Add Strype payments support.
+
+The file update.php must be executed to update the structure of the tables
+ in the database.
+
 v7.0 - 2021-06-14
 ====
 Added support for discount coupons
