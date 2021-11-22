@@ -85,7 +85,7 @@ $strings['CancelOrder'] = "Cancelar Orden";
 $strings['BankAccountInformation'] = "Información de la Cuenta Bancaria";
 $strings['BankAccount'] = "Cuenta Bancaria";
 $strings['OnceItIsConfirmedYouWillReceiveAnEmailWithTheBankInformationAndAnOrderReference'] = "Una vez confirmado, recibira un e-mail con los datos bancarios y una referencia del pedido.";
-$strings['SubscriptionToCourseXSuccessful'] = "<p class=\"lead\">Tu subscripción a <a href=\"%s\"><strong>\"%s\"</strong></a> se realizó correctamente.</p>";
+$strings['SubscriptionToCourseXSuccessful'] = "<p class=\"lead\">Proceso completado. Tu subscripción a <a href=\"%s\"><strong>\"%s\"</strong></a> se realizó correctamente.</p>";
 $strings['OrderCanceled'] = "Pedido cancelado";
 $strings['OrderStatus'] = "Estado del pedido";
 $strings['PayoutStatus'] = "Estado del pago";
