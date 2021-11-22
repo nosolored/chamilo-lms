@@ -743,6 +743,7 @@ class BuyCoursesPlugin extends Plugin
             [
                 'account_id' => $params['account_id'],
                 'secret_key' => $params['secret_key'],
+                'endpoint_secret' => $params['endpoint_secret'],
             ],
             ['id = ?' => 1]
         );

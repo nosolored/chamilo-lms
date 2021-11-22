@@ -528,7 +528,7 @@ $stripeForm->addText(
 );
 $stripeForm->addText(
     'endpoint_secret',
-    $plugin->get_lang('StripeEndpointScret'),
+    $plugin->get_lang('StripeEndpointSecret'),
     false,
     ['cols-size' => [3, 8, 1]]
 );
