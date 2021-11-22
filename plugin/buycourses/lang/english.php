@@ -291,4 +291,9 @@ $strings['SelecSubscription'] = "Select a subscription";
 $strings['ConfigureSubscriptionsFrequencies'] = "Configure subscriptions periods";
 $strings['FrequencyAdd'] = "Add Frequency";
 $strings['SubscriptionAlreadyExists'] = "Subscription already exists";
-
+$strings['stripe_enable'] = "Enable Stripe";
+$strings['StripeConfig'] = "Stripe configuration:";
+$strings['InfoStripeCredentials'] = "To obtain your credentials, you will need to create an account on Stripe and enter the development mode, copy the account id in your profile, then enter the API Keys section and copy the corresponding key to paste it here.";
+$strings['StripeAccountId'] = "Account id:";
+$strings['StripeSecret'] = "Secret key:";
+$strings['StripeEndpointSecret'] = "Endpoint secret:";

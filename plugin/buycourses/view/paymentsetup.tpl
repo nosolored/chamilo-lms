@@ -151,3 +151,20 @@
     </div>
 </div>
 
+{% if stripe_enable == "true" %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ 'StripeConfig'|get_plugin_lang('BuyCoursesPlugin') }}</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <p>{{ 'InfoStripeCredentials'|get_plugin_lang('BuyCoursesPlugin') }}</p>
+                </div>
+                <div class="col-md-7">
+                    {{ stripe_form }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

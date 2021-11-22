@@ -44,6 +44,7 @@ class BuyCoursesPlugin extends Plugin
     const TABLE_COUPON_SALE = 'plugin_buycourses_coupon_rel_sale';
     const TABLE_COUPON_SERVICE_SALE = 'plugin_buycourses_coupon_rel_service_sale';
     const TABLE_COUPON_SUBSCRIPTION_SALE = 'plugin_buycourses_coupon_rel_subscription_sale';
+    const TABLE_STRIPE = 'plugin_buycourses_stripe_account';
     const COUPON_SUBSCRIPTION_WEEKLY = 7;
     const COUPON_SUBSCRIPTION_MONTHLY = 30;
     const COUPON_SUBSCRIPTION_QUARTERLY = 60;
@@ -56,6 +57,7 @@ class BuyCoursesPlugin extends Plugin
     const PAYMENT_TYPE_TRANSFER = 2;
     const PAYMENT_TYPE_CULQI = 3;
     const PAYMENT_TYPE_TPV_REDSYS = 4;
+    const PAYMENT_TYPE_STRIPE = 6;
     const PAYOUT_STATUS_CANCELED = 2;
     const PAYOUT_STATUS_PENDING = 0;
     const PAYOUT_STATUS_COMPLETED = 1;
@@ -114,6 +116,7 @@ class BuyCoursesPlugin extends Plugin
                 'tax_enable' => 'boolean',
                 'use_currency_symbol' => 'boolean',
                 'tpv_redsys_enable' => 'boolean',
+                'stripe_enable' => 'boolean',
             ]
         );
     }
@@ -170,6 +173,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUPON_SUBSCRIPTION_SALE,
+            self::TABLE_STRIPE,
         ];
         $em = Database::getManager();
         $cn = $em->getConnection();
@@ -213,6 +217,7 @@ class BuyCoursesPlugin extends Plugin
             self::TABLE_COUPON_SALE,
             self::TABLE_COUPON_SERVICE_SALE,
             self::TABLE_COUPON_SUBSCRIPTION_SALE,
+            self::TABLE_STRIPE,
         ];
 
         foreach ($tablesToBeDeleted as $tableToBeDeleted) {
@@ -497,6 +502,15 @@ class BuyCoursesPlugin extends Plugin
         )";
         Database::query($sql);
 
+        $table = self::TABLE_STRIPE;
+        $sql = "CREATE TABLE IF NOT EXISTS $table (
+            id int unsigned NOT NULL AUTO_INCREMENT,
+            account_id varchar(255) NOT NULL,
+            secret_key varchar(255) NOT NULL,
+            PRIMARY KEY (id)
+        )";
+        Database::query($sql);
+
         Display::addFlash(
             Display::return_message(
                 $this->get_lang('Updated'),
@@ -712,6 +726,40 @@ class BuyCoursesPlugin extends Plugin
                 'sandbox' => isset($params['sandbox']),
             ],
             ['id = ?' => 1]
+        );
+    }
+
+    /**
+     * Save Stripe configuration params.
+     *
+     * @param array $params
+     *
+     * @return int Rows affected. Otherwise return false
+     */
+    public function saveStripeParameters($params)
+    {
+        return Database::update(
+            Database::get_main_table(self::TABLE_STRIPE),
+            [
+                'account_id' => $params['account_id'],
+                'secret_key' => $params['secret_key'],
+            ],
+            ['id = ?' => 1]
+        );
+    }
+
+    /**
+     * Gets the stored Stripe params.
+     *
+     * @return array
+     */
+    public function getStripeParams()
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_STRIPE),
+            ['id = ?' => 1],
+            'first'
         );
     }
 
@@ -1722,6 +1770,7 @@ class BuyCoursesPlugin extends Plugin
                     self::PAYMENT_TYPE_TRANSFER,
                     self::PAYMENT_TYPE_CULQI,
                     self::PAYMENT_TYPE_TPV_REDSYS,
+                    self::PAYMENT_TYPE_STRIPE,
                 ]
             )
         ) {
@@ -1818,6 +1867,25 @@ class BuyCoursesPlugin extends Plugin
     }
 
     /**
+     * Update the sale reference.
+     *
+     * @param int $saleId    The sale ID
+     * @param int $saleReference The new saleReference
+     *
+     * @return bool
+     */
+    public function updateSaleReference($saleId, $saleReference)
+    {
+        $saleTable = Database::get_main_table(self::TABLE_SALE);
+
+        return Database::update(
+            $saleTable,
+            ['reference' => $saleReference],
+            ['id = ?' => (int) $saleId]
+        );
+    }
+
+    /**
      * Get sale data by ID.
      *
      * @param int $saleId The sale ID
@@ -1831,6 +1899,25 @@ class BuyCoursesPlugin extends Plugin
             Database::get_main_table(self::TABLE_SALE),
             [
                 'where' => ['id = ?' => (int) $saleId],
+            ],
+            'first'
+        );
+    }
+
+    /**
+     * Get sale data by reference.
+     *
+     * @param int $reference The sale reference
+     *
+     * @return array
+     */
+    public function getSaleFromReference($reference)
+    {
+        return Database::select(
+            '*',
+            Database::get_main_table(self::TABLE_SALE),
+            [
+                'where' => ['reference = ?' => $reference],
             ],
             'first'
         );
@@ -2018,6 +2105,7 @@ class BuyCoursesPlugin extends Plugin
             self::PAYMENT_TYPE_TRANSFER => $this->get_lang('BankTransfer'),
             self::PAYMENT_TYPE_CULQI => 'Culqi',
             self::PAYMENT_TYPE_TPV_REDSYS => $this->get_lang('TpvPayment'),
+            self::PAYMENT_TYPE_STRIPE => 'Stripe',
         ];
     }
 

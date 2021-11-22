@@ -296,4 +296,9 @@ $strings['SelecSubscription'] = "Seleccione una suscripción";
 $strings['ConfigureSubscriptionsFrequencies'] = "Configurar los períodos de suscripciones";
 $strings['FrequencyAdd'] = "Agregar período";
 $strings['SubscriptionAlreadyExists'] = "La suscripción ya existe";
-
+$strings['stripe_enable'] = "Activar Stripe";
+$strings['StripeConfig'] = "Configuración de Stripe:";
+$strings['InfoStripeCredentials'] = "Para obtener las credenciales debes crear una cuenta en Stripe, copiar el id de cuenta de tu perfil, y después ir a la sección de configuración de las API para utilizar aquí.";
+$strings['StripeAccountId'] = "Id de la cuenta:";
+$strings['StripeSecret'] = "Secret key:";
+$strings['StripeEndpointSecret'] = "Endpoint secret:";
