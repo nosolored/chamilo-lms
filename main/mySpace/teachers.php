@@ -43,13 +43,16 @@ function get_count_users()
         $lastConnectionDate = api_get_utc_datetime(strtotime($sleepingDays.' days ago'));
     }
 
+    $onlyCourseFollowed = api_get_configuration_value('myspace_teacher_drh_user_hide_all_sessions_courses_teachers');
+
     $count = SessionManager::getCountUserTracking(
         $keyword,
         $active,
         $lastConnectionDate,
         null,
         null,
-        COURSEMANAGER
+        COURSEMANAGER,
+        $onlyCourseFollowed
     );
 
     return $count;

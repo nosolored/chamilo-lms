@@ -6150,8 +6150,8 @@ class SessionManager
             $courseIdList = array_column($courseList, 'id');
             $courseConditions = ' AND c.id IN ("'.implode('","', $courseIdList).'")';
         } else if ($onlyCourseFollowed) {
-            return [];
-        }
+            $courseConditions = ' AND c.id IN ("0")';
+       }
 
         $userConditionsFromDrh = '';
 
@@ -6199,6 +6199,8 @@ class SessionManager
                     $sessionIdList = array_map('intval', $sessionIdList);
                     $sessionsListSql = "'".implode("','", $sessionIdList)."'";
                     $sessionConditions = " AND s.id IN ($sessionsListSql) ";
+                } else if ($onlyCourseFollowed) {
+                    $sessionConditions = ' AND s.id IN ("0")';
                 }
 
                 break;
@@ -6503,7 +6505,8 @@ class SessionManager
         $lastConnectionDate = null,
         $sessionIdList = [],
         $studentIdList = [],
-        $filterUserStatus = null
+        $filterUserStatus = null,
+        $onlyCourseFollowed = false
     ) {
         $userId = api_get_user_id();
         $drhLoaded = false;
@@ -6523,7 +6526,8 @@ class SessionManager
                     $lastConnectionDate,
                     $sessionIdList,
                     $studentIdList,
-                    $filterUserStatus
+                    $filterUserStatus,
+                    $onlyCourseFollowed
                 );
                 $drhLoaded = true;
             }
