@@ -340,6 +340,18 @@ if (is_array($forumCategories)) {
 
         if (!empty($forumsInCategory)) {
             $forumsDetailsList = [];
+
+            if (count($forumsInCategory) == 1) {
+                $forum = reset($forumsInCategory)['forum_id'];
+
+                $linkForum = api_get_path(WEB_CODE_PATH).'forum/viewforum.php?'.api_get_cidreq()
+                .'&gidReq='.$groupid.'&forum='.$forum['forum_id'];
+
+                header('Location: '.$linkForum);
+
+                exit;
+            }
+
             // We display all the forums in this category.
             foreach ($allCourseForums as $forum) {
                 // Here we clean the whatnew_post_info array a little bit because to display the icon we
