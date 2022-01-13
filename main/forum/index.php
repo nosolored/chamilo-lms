@@ -345,7 +345,7 @@ if (is_array($forumCategories)) {
                 $forum = reset($forumsInCategory)['forum_id'];
 
                 $linkForum = api_get_path(WEB_CODE_PATH).'forum/viewforum.php?'.api_get_cidreq()
-                .'&gidReq='.$groupid.'&forum='.$forum['forum_id'];
+                .'&gidReq='.$groupid.'&forum='.$forum;
 
                 header('Location: '.$linkForum);
 
