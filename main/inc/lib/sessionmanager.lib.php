@@ -2859,7 +2859,7 @@ class SessionManager
                 $forumParams['allow_anonymous_group']['allow_anonymous'] = 0;
                 $forumParams['default_view_type_group']['default_view_type'] = 'flat';
                 $forumParams['public_private_group_forum_group']['public_private_group_forum'] = 'public';
-                $forumParams['moderated']['moderated'] = 1;
+                $forumParams['moderated']['moderated'] = 0;
                 $forumId = store_forum($forumParams, $courseInfo, true, $sessionId);
             }
 
