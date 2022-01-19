@@ -97,6 +97,65 @@ if (!empty($groupId)) {
     }
 }
 
+/* Forum tools */
+
+$toolActions = '';
+
+if (api_is_allowed_to_edit(false, true)
+&& !($current_forum['session_id'] == 0 && $sessionId != 0)
+) {
+$toolActions .= '<a href="'.api_get_path(WEB_CODE_PATH).'forum/index.php?'.api_get_cidreq()
+    .'&action=edit&content=forum&id='.$my_forum.'">'
+    .Display::return_icon('edit.png', get_lang('Edit'), [], ICON_SIZE_SMALL)
+    .'</a>';
+$toolActions .= '<a href="'.api_get_path(WEB_CODE_PATH).'forum/index.php?'.api_get_cidreq()
+    .'&action=delete&content=forum&id='.$my_forum
+    ."\" onclick=\"javascript:if(!confirm('".addslashes(
+        api_htmlentities(get_lang('DeleteForum'), ENT_QUOTES)
+    )
+    ."')) return false;\">"
+    .Display::return_icon('delete.png', get_lang('Delete'), [], ICON_SIZE_SMALL)
+    .'</a>';
+
+$toolActions .= return_visible_invisible_icon(
+    'forum',
+    $my_forum,
+    $current_forum['visibility']
+);
+
+$toolActions .= return_lock_unlock_icon(
+    'forum',
+    $my_forum,
+    $current_forum['locked']
+);
+
+$forumsInCategory = get_forums_in_category($current_forum_category);
+
+$toolActions .= return_up_down_icon(
+    'forum',
+    $my_forum,
+    $forumsInCategory
+);
+}
+
+$iconnotify = 'notification_mail_na.png';
+$session_forum_notification = isset($_SESSION['forum_notification']['forum'])
+? $_SESSION['forum_notification']['forum']
+: false;
+
+if (is_array($session_forum_notification)) {
+if (in_array($my_forum, $session_forum_notification)) {
+    $iconnotify = 'notification_mail.png';
+}
+}
+
+if ($hideNotifications == false && !api_is_anonymous() && api_is_allowed_to_session_edit(false, true)) {
+$toolActions .= '<a href="'.api_get_path(WEB_CODE_PATH).'forum/index.php?'.api_get_cidreq()
+    .'&action=notify&content=forum&id='.$my_forum.'">'
+    .Display::return_icon($iconnotify, get_lang('NotifyMe'), null, ICON_SIZE_SMALL)
+    .'</a>';
+}
+
 /* Header and Breadcrumbs */
 $my_search = isset($_GET['search']) ? $_GET['search'] : '';
 $my_action = isset($_GET['action']) ? $_GET['action'] : '';
@@ -387,12 +446,26 @@ $html = '';
 $html .= '<div class="topic-forum">';
 // The current forum
 if ($origin != 'learnpath') {
-    $html .= Display::tag(
+
+    $html .= '<h3 class="title-forum">';
+    $html .= $iconForum.' '.$titleForum;
+
+    $html .= '<div class="pull-right">';
+    $html .= '<div class="toolbar">';
+    $html .= $toolActions;
+    $html .= '</div>';
+    $html .= '</div>';
+
+
+    $html .= '</h3>';
+    /*$html .= Display::tag(
         'h3',
         $iconForum.' '.$titleForum,
         [
             'class' => 'title-forum', ]
-    );
+    );*/
+
+
 
     if (!empty($descriptionForum)) {
         $html .= Display::tag(

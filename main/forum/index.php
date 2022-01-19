@@ -341,7 +341,7 @@ if (is_array($forumCategories)) {
         if (!empty($forumsInCategory)) {
             $forumsDetailsList = [];
 
-            if (count($forumsInCategory) == 1) {
+            if (count($forumsInCategory) == 1 && empty($action)) {
                 $forum = reset($forumsInCategory)['forum_id'];
 
                 $linkForum = api_get_path(WEB_CODE_PATH).'forum/viewforum.php?'.api_get_cidreq()
