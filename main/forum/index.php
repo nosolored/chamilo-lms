@@ -343,6 +343,11 @@ if (is_array($forumCategories)) {
 
             if (count($forumsInCategory) == 1 && empty($action)) {
                 $forum = reset($forumsInCategory)['forum_id'];
+                $sessionId = reset($forumsInCategory)['session_id'];
+
+                if ($sessionId != api_get_session_id()){
+                    continue;
+                }
 
                 $linkForum = api_get_path(WEB_CODE_PATH).'forum/viewforum.php?'.api_get_cidreq()
                 .'&gidReq='.$groupid.'&forum='.$forum;
