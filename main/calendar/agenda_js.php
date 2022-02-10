@@ -378,7 +378,7 @@ if (api_is_student() || api_is_teacher()) {
             if (!$meeting->checkStartDateTime()) {
                 $zoomHtml .= 'No disponible';
             } else {
-                $zoomHtml .= '<a class="btn btn-primary btn-xs" href="'.$pluginPath.'zoom/join_meeting.php?meetingId='.$meetingItemId.'&cidReq='.$infoCourse['code'].'&id_session='.$meeting->getSession()->getId().'">';
+                $zoomHtml .= '<a class="btn btn-primary btn-xs" href="'.api_get_path(WEB_PATH).'plugin/zoom/join_meeting.php?meetingId='.$meetingItemId.'&cidReq='.$infoCourse['code'].'&id_session='.$meeting->getSession()->getId().'">';
                 $zoomHtml .= $pluginZoom->get_lang('Join');
                 $zoomHtml .= '</a>';
             }
