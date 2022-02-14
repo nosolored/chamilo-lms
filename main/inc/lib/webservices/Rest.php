@@ -2008,6 +2008,23 @@ class Rest extends WebService
     }
 
     /**
+     * Returns the user infp.
+     *
+     * @param string $userId the user id
+     *
+     * @return array
+     */
+    public function getUserInfo($userId)
+    {
+        $userInfo = api_get_user_info($userId);
+        if (empty($userInfo)) {
+            throw new Exception(get_lang('UserDoesNotExist'));
+        }
+
+        return $userInfo;
+    }    
+
+    /**
      * This service roughly matches what the call to MDL's API core_course_get_contents function returns.
      *
      * @return array

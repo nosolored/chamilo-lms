@@ -96,6 +96,11 @@ try {
 
             $restResponse->setData($data);
             break;
+        case Rest::GET_USER_INFO:
+            $userId = isset($_POST['user']) ? $_POST['user'] : null;
+            $userInfo = $restApi->getUserInfo($userId);
+            $restResponse->setData($userInfo);
+            break;            
         case Rest::GET_USER_COURSES:
             $userId = isset($_REQUEST['user_id']) ? (int) $_REQUEST['user_id'] : 0;
             $courses = $restApi->getUserCourses($userId);
