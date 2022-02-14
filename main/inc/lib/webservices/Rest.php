@@ -23,6 +23,7 @@ class Rest extends WebService
     const POST_USER_MESSAGE_READ = 'user_message_read';
     const POST_USER_MESSAGE_UNREAD = 'user_message_unread';
     const SAVE_GCM_ID = 'gcm_id';
+    const GET_USER_INFO = "user_info";
     const GET_USER_COURSES = 'user_courses';
     const GET_PROFILE = 'user_profile';
     const GET_COURSE_INFO = 'course_info';
