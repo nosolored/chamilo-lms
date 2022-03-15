@@ -397,10 +397,13 @@ if ($origin != 'learnpath') {
             .Display::return_icon('back.png', get_lang('BackTo')
             .' '.get_lang('Groups'), '', ICON_SIZE_MEDIUM).'</a>';
     } else {
-        echo '<span style="float:right;">'.search_link().'</span>';
-        echo '<a href="'.$forumUrl.'index.php?'.api_get_cidreq().'">'
-            .Display::return_icon('back.png', get_lang('BackToForumOverview'), '', ICON_SIZE_MEDIUM)
-            .'</a>';
+        $hideBackButton = api_get_configuration_value('hide_forum_back_button');
+        if ($hideBackButton) {
+            echo '<span style="float:right;">'.search_link().'</span>';
+            echo '<a href="'.$forumUrl.'index.php?'.api_get_cidreq().'">'
+                .Display::return_icon('back.png', get_lang('BackToForumOverview'), '', ICON_SIZE_MEDIUM)
+                .'</a>';
+        }
     }
 }
 
