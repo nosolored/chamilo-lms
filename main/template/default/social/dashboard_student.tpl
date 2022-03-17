@@ -24,10 +24,10 @@
         <div class="col-md-9">
             <div class="row">
                 <div class="col-md-12">
-                    {{ zoom }}
+                    {{ content }}
                 </div>
                 <div class="col-md-12">
-                    {{ content }}
+                    {{ zoom }}
                 </div>
             </div>
 
