@@ -15,14 +15,22 @@
             <div class="social-network-menu">
             {{ social_menu_block }}
             </div>
-            
+
             <!-- BLOCK HELP -->
             {% if help_block %}
                 {{ display.collapse('help', 'MenuGeneral'|get_lang, help_block, true) }}
             {% endif %}
         </div>
         <div class="col-md-9">
-            {{ content }}
+            <div class="row">
+                <div class="col-md-12">
+                    {{ zoom }}
+                </div>
+                <div class="col-md-12">
+                    {{ content }}
+                </div>
+            </div>
+
         </div>
     </div>
 {% endblock %}
