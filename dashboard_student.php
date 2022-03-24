@@ -538,9 +538,8 @@ if (api_is_student() || api_is_teacher()) {
             }
             $meeting = $pluginZoom->getMeetingRepository()->findOneBy(['meetingId' => $meetingItemId]);
             $meetingInfoGet = $meeting->getMeetingInfoGet();
-            $infoCourse = api_get_course_info_by_id($meeting->getCourse());
             $zoomHtml .= '<tr>';
-            $zoomHtml .= '<td>'.$infoCourse['title'].'</td>';
+            $zoomHtml .= '<td>'.$meeting->getMeetingInfoGet().'</td>';
             /*
             $min = $meetingInfoGet->duration > 0 ? ' ('.$meetingInfoGet->duration.' min)' : '';
             $zoomHtml .= '<td>'.$meetingInfoGet->topic.$min.'</td>';
