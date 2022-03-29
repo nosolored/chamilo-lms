@@ -3,6 +3,7 @@
 /* For license terms, see /license.txt */
 
 use Chamilo\PluginBundle\Zoom\Meeting;
+use Chamilo\PluginBundle\Zoom\Webinar;
 
 require_once __DIR__.'/config.php';
 
@@ -55,7 +56,11 @@ $tpl = new Template($meeting->getMeetingId());
 if ($plugin->userIsConferenceManager($meeting)) {
     // user can edit, start and delete meeting
     $tpl->assign('isConferenceManager', true);
-    if (api_is_platform_admin(true)) {
+
+    if ($meeting instanceof Webinar) {
+        $tpl->assign('editMeetingForm', $plugin->getEditWebinarForm($meeting)->returnForm());
+        $tpl->assign('deleteMeetingForm', $plugin->getDeleteWebinarForm($meeting, $returnURL)->returnForm());
+    } elseif ($meeting instanceof Meeting) {
         $tpl->assign('editMeetingForm', $plugin->getEditMeetingForm($meeting)->returnForm());
         $tpl->assign('deleteMeetingForm', $plugin->getDeleteMeetingForm($meeting, $returnURL)->returnForm());
     }

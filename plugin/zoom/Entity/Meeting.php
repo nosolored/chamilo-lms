@@ -18,6 +18,7 @@ use DateInterval;
 use DateTime;
 use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
@@ -34,6 +35,9 @@ use Exception;
  *     }
  * )
  * @ORM\HasLifecycleCallbacks
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap({"meeting" = "Chamilo\PluginBundle\Zoom\Meeting", "webinar" = "Chamilo\PluginBundle\Zoom\Webinar"})
  */
 class Meeting
 {
@@ -149,6 +153,13 @@ class Meeting
      * @ORM\OneToMany(targetEntity="Recording", mappedBy="meeting", cascade={"persist"}, orphanRemoval=true)
      */
     protected $recordings;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(type="string", name="account_email", nullable=true)
+     */
+    protected $accountEmail;
 
     public function __construct()
     {
@@ -540,7 +551,7 @@ class Meeting
      */
     public function requiresRegistration()
     {
-        return MeetingSettings::APPROVAL_TYPE_AUTOMATICALLY_APPROVE === $this->meetingInfoGet->settings->approval_type;
+        return true; //MeetingSettings::APPROVAL_TYPE_AUTOMATICALLY_APPROVE === $this->meetingInfoGet->settings->approval_type;
         /*return
             MeetingSettings::APPROVAL_TYPE_NO_REGISTRATION_REQUIRED != $this->meetingInfoGet->settings->approval_type;*/
     }
@@ -551,6 +562,19 @@ class Meeting
     public function hasCloudAutoRecordingEnabled()
     {
         return \ZoomPlugin::RECORDING_TYPE_NONE !== $this->meetingInfoGet->settings->auto_recording;
+    }
+
+    public function getRegistrantByUser(User $user): ?Registrant
+    {
+        $criteria = Criteria::create();
+        $criteria
+            ->where(
+                Criteria::expr()->eq('user', $user)
+            );
+
+        $registrant = $this->registrants->matching($criteria)->first();
+
+        return $registrant ?: null;
     }
 
     /**
@@ -615,7 +639,29 @@ class Meeting
 
         return $introduction;
     }
-    
+
+    public function getAccountEmail(): ?string
+    {
+        return $this->accountEmail;
+    }
+
+    public function setAccountEmail(?string $accountEmail): self
+    {
+        $this->accountEmail = $accountEmail;
+
+        return $this;
+    }
+
+    public function getTopic(): string
+    {
+        return $this->meetingInfoGet->topic;
+    }
+
+    public function getAgenda(): ?string
+    {
+        return $this->meetingInfoGet->agenda;
+    }
+
     /**
      * Check starDateTime
      *
@@ -645,7 +691,7 @@ class Meeting
     /**
      * @throws Exception on unexpected start_time or duration
      */
-    private function initializeDisplayableProperties()
+    protected function initializeDisplayableProperties()
     {
         $zoomPlugin = new \ZoomPlugin();
 

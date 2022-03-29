@@ -22,6 +22,7 @@
             {% if is_manager %}
                 <th>&nbsp;</th>
             {% endif %}
+            <th>{{ 'Type'|get_lang }}</th>
             <th>{{ 'Topic'|get_plugin_lang('ZoomPlugin') }}</th>
             <th>{{ 'Agenda'|get_plugin_lang('ZoomPlugin') }}</th>
             <th>{{ 'StartTime'|get_lang }}</th>
@@ -39,11 +40,14 @@
                     />
                 </td>
             {% endif %}
+            <td>{{ meeting.typeName }}</td>
             <td>
                 {{ meeting.meetingInfoGet.topic }}
+                {{ meeting.webinarSchema.topic }}
             </td>
             <td>
                 {{ meeting.meetingInfoGet.agenda|nl2br }}
+                {{ meeting.webinarSchema.agenda|nl2br }}
             </td>
             <td>{{ meeting.formattedStartTime }}</td>
             <td>{{ meeting.formattedDuration }}</td>

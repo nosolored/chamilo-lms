@@ -11,6 +11,9 @@ use Chamilo\PluginBundle\Zoom\API\MeetingRegistrant;
 use Chamilo\PluginBundle\Zoom\API\MeetingSettings;
 use Chamilo\PluginBundle\Zoom\API\RecordingFile;
 use Chamilo\PluginBundle\Zoom\API\RecordingList;
+use Chamilo\PluginBundle\Zoom\API\WebinarRegistrantSchema;
+use Chamilo\PluginBundle\Zoom\API\WebinarSchema;
+use Chamilo\PluginBundle\Zoom\API\WebinarSettings;
 use Chamilo\PluginBundle\Zoom\Meeting;
 use Chamilo\PluginBundle\Zoom\MeetingActivity;
 use Chamilo\PluginBundle\Zoom\MeetingRepository;
@@ -18,6 +21,7 @@ use Chamilo\PluginBundle\Zoom\Recording;
 use Chamilo\PluginBundle\Zoom\RecordingRepository;
 use Chamilo\PluginBundle\Zoom\Registrant;
 use Chamilo\PluginBundle\Zoom\RegistrantRepository;
+use Chamilo\PluginBundle\Zoom\Webinar;
 use Chamilo\UserBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -47,7 +51,7 @@ class ZoomPlugin extends Plugin
     public function __construct()
     {
         parent::__construct(
-            '0.3',
+            '0.4',
             'Sébastien Ducoulombier, Julio Montoya',
             [
                 'tool_enable' => 'boolean',
@@ -74,6 +78,7 @@ class ZoomPlugin extends Plugin
                     ],
                     'attributes' => ['multiple' => 'multiple'],
                 ],
+                'accountSelector' => 'text',
             ]
         );
 
@@ -155,11 +160,12 @@ class ZoomPlugin extends Plugin
         $items = [];
         foreach ($meetings as $registrant) {
             $meeting = $registrant->getMeeting();
+
             $items[sprintf(
                 $this->get_lang('DateMeetingTitle'),
                 $meeting->formattedStartTime,
-                $meeting->getMeetingInfoGet()->topic
-            )] = sprintf($linkTemplate, $meeting->getId());
+                $meeting->getTopic()
+            )] = sprintf($linkTemplate, $meeting->getMeetingId());
         }
 
         return $items;
@@ -199,6 +205,7 @@ class ZoomPlugin extends Plugin
         (new SchemaTool(Database::getManager()))->createSchema(
             [
                 Database::getManager()->getClassMetadata(Meeting::class),
+                Database::getManager()->getClassMetadata(Webinar::class),
                 Database::getManager()->getClassMetadata(MeetingActivity::class),
                 Database::getManager()->getClassMetadata(Recording::class),
                 Database::getManager()->getClassMetadata(Registrant::class),
@@ -235,6 +242,7 @@ class ZoomPlugin extends Plugin
         (new SchemaTool(Database::getManager()))->dropSchema(
             [
                 Database::getManager()->getClassMetadata(Meeting::class),
+                Database::getManager()->getClassMetadata(Webinar::class),
                 Database::getManager()->getClassMetadata(MeetingActivity::class),
                 Database::getManager()->getClassMetadata(Recording::class),
                 Database::getManager()->getClassMetadata(Registrant::class),
@@ -336,7 +344,7 @@ class ZoomPlugin extends Plugin
         if ($form->validate()) {
             if ($meeting->requiresDateAndDuration()) {
                 $meetingInfoGet->start_time = (new DateTime($form->getSubmitValue('startTime')))->format(
-                        DateTime::ISO8601
+                    DATE_ATOM
                 );
                 $meetingInfoGet->timezone = date_default_timezone_get();
                 $meetingInfoGet->duration = (int) $form->getSubmitValue('duration');
@@ -348,39 +356,6 @@ class ZoomPlugin extends Plugin
                 $meeting->setMeetingInfoGet($meetingInfoGet);
                 Database::getManager()->persist($meeting);
                 Database::getManager()->flush();
-                
-                // Update star_time in plugin_zoom_meeting
-                $startTime = $meetingInfoGet->start_time;
-                $sql = "UPDATE plugin_zoom_meeting SET start_time='".$startTime."'WHERE id=".$meeting->getId();
-                Database::query($sql);
-                
-                // Update calendar event
-                $eventData = Database::select(
-                    '*',
-                    Database::get_course_table(TABLE_AGENDA),
-                    ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
-                    'first'
-                );
-                
-                if (!empty($eventData)) {
-                    $meetingId = $meeting->getId();
-                    $agenda = new Agenda('course');
-                    $startTime = $form->getSubmitValue('startTime');
-                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
-                    $allDay = 'false';
-                    $userToSend = ['everyone'];
-
-                    $eventId = $agenda->editEvent(
-                        $eventData['id'],
-                        $startTime,
-                        $endTime,
-                        $allDay,
-                        $form->getSubmitValue('topic'),
-                        $form->getSubmitValue('agenda'),
-                        $userToSend
-                    );
-                }
-
                 Display::addFlash(
                     Display::return_message($this->get_lang('MeetingUpdated'), 'confirm')
                 );
@@ -398,6 +373,75 @@ class ZoomPlugin extends Plugin
             $defaults['startTime'] = $meeting->startDateTime->format('Y-m-d H:i');
             $defaults['duration'] = $meetingInfoGet->duration;
         }
+        $form->setDefaults($defaults);
+
+        return $form;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getEditWebinarForm(Webinar $webinar): FormValidator
+    {
+        $schema = $webinar->getWebinarSchema();
+        $requiresDateAndDuration = $webinar->requiresDateAndDuration();
+
+        $form = new FormValidator('edit', 'post', $_SERVER['REQUEST_URI']);
+        $form->addHeader($this->get_lang('UpdateWebinar'));
+        $form->addText('topic', $this->get_lang('Topic'));
+
+        if ($requiresDateAndDuration) {
+            $startTimeDatePicker = $form->addDateTimePicker('startTime', get_lang('StartTime'));
+            $durationNumeric = $form->addNumeric('duration', $this->get_lang('DurationInMinutes'));
+
+            $form->setRequired($startTimeDatePicker);
+            $form->setRequired($durationNumeric);
+        }
+
+        $form->addTextarea('agenda', get_lang('Agenda'), ['maxlength' => 2000]);
+        $form->addButtonUpdate(get_lang('Update'));
+
+        if ($form->validate()) {
+            $formValues = $form->exportValues();
+
+            if ($requiresDateAndDuration) {
+                $schema->start_time = (new DateTime($formValues['startTime']))
+                    ->format(DATE_ATOM);
+                $schema->timezone = date_default_timezone_get();
+                $schema->duration = (int) $formValues['duration'];
+            }
+
+            $schema->topic = $formValues['topic'];
+            $schema->agenda = $formValues['agenda'];
+
+            try {
+                $schema->update();
+                $webinar->setWebinarSchema($schema);
+
+                $em = Database::getManager();
+                $em->persist($webinar);
+                $em->flush();
+
+                Display::addFlash(
+                    Display::return_message($this->get_lang('WebinarUpdated'), 'success')
+                );
+            } catch (Exception $exception) {
+                Display::addFlash(
+                    Display::return_message($exception->getMessage(), 'error')
+                );
+            }
+        }
+
+        $defaults = [
+            'topic' => $schema->topic,
+            'agenda' => $schema->agenda,
+        ];
+
+        if ($requiresDateAndDuration) {
+            $defaults['startTime'] = $webinar->startDateTime->format('Y-m-d H:i');
+            $defaults['duration'] = $schema->duration;
+        }
+
         $form->setDefaults($defaults);
 
         return $form;
@@ -425,6 +469,19 @@ class ZoomPlugin extends Plugin
         return $form;
     }
 
+    public function getDeleteWebinarForm(Webinar $webinar, string $returnURL): FormValidator
+    {
+        $id = $webinar->getMeetingId();
+        $form = new FormValidator('delete', 'post', api_get_self()."?meetingId=$id");
+        $form->addButtonDelete($this->get_lang('DeleteWebinar'));
+
+        if ($form->validate()) {
+            $this->deleteWebinar($webinar, $returnURL);
+        }
+
+        return $form;
+    }
+
     /**
      * @param Meeting $meeting
      * @param string  $returnURL
@@ -439,19 +496,6 @@ class ZoomPlugin extends Plugin
 
         $em = Database::getManager();
         try {
-            // Delete calendar event
-            $eventData = Database::select(
-                '*',
-                Database::get_course_table(TABLE_AGENDA),
-                ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
-                'first'
-            );
-            
-            if (!empty($eventData)) {
-                $agenda = new Agenda('course');
-                $agenda->deleteEvent($eventData['id']);
-            }
-            
             // No need to delete a instant meeting.
             if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT != $meeting->getMeetingInfoGet()->type) {
                 $meeting->getMeetingInfoGet()->delete();
@@ -463,6 +507,26 @@ class ZoomPlugin extends Plugin
             Display::addFlash(
                 Display::return_message($this->get_lang('MeetingDeleted'), 'confirm')
             );
+            api_location($returnURL);
+        } catch (Exception $exception) {
+            $this->handleException($exception);
+        }
+    }
+
+    public function deleteWebinar(Webinar $webinar, string $returnURL)
+    {
+        $em = Database::getManager();
+
+        try {
+            $webinar->getWebinarSchema()->delete();
+
+            $em->remove($webinar);
+            $em->flush();
+
+            Display::addFlash(
+                Display::return_message($this->get_lang('WebinarDeleted'), 'success')
+            );
+
             api_location($returnURL);
         } catch (Exception $exception) {
             $this->handleException($exception);
@@ -502,6 +566,26 @@ class ZoomPlugin extends Plugin
         $userIdSelect = $form->addSelect('userIds', $this->get_lang('RegisteredUsers'));
         $userIdSelect->setMultiple(true);
         $form->addButtonSend($this->get_lang('UpdateRegisteredUserList'));
+
+        $selfRegistrationUrl = api_get_path(WEB_PLUGIN_PATH)
+            .'zoom/subscription.php?meetingId='.$meeting->getMeetingId();
+
+        $form->addHtml(
+            '<div class="form-group"><div class="col-sm-8 col-sm-offset-2">
+                <hr style="margin-top: 0;">
+                <label for="frm-registration__txt-self-registration">'
+            .$this->get_lang('UrlForSelfRegistration').'</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="frm-registration__txt-self-registration" value="'
+            .$selfRegistrationUrl.'">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button"
+                         onclick="copyTextToClipBoard(\'frm-registration__txt-self-registration\');">'
+            .$this->get_lang('CopyTextToClipboard').'</button>
+                    </span>
+                </div>
+            </div></div>'
+        );
 
         $users = $meeting->getRegistrableUsers();
         foreach ($users as $user) {
@@ -813,41 +897,16 @@ class ZoomPlugin extends Plugin
         }
         $form = new FormValidator('scheduleMeetingForm', 'post', api_get_self().'?'.$extraUrl);
         $form->addHeader($this->get_lang('ScheduleAMeeting'));
-        
-        $userIdSelect = $form->addSelect('host_id', get_lang('Teacher'));
-        $users = [];
-        if (null === $session) {
-            if (null !== $course) {
-                /** @var CourseRelUser $courseRelUser */
-                foreach ($course->getTeachers() as $courseRelUser) {
-                    $users[] = $courseRelUser->getUser();
-                }
-            }
-        } else {
-            if (null !== $course) {
-                $subscriptions = $session->getUserCourseSubscriptionsByStatus($course, Session::COACH);
-                if ($subscriptions) {
-                    /** @var SessionRelCourseRelUser $sessionCourseUser */
-                    foreach ($subscriptions as $sessionCourseUser) {
-                        $users[] = $sessionCourseUser->getUser();
-                    }
-                }
-            }
-        }
-        
-        $activeUsersWithEmail = [];
-        foreach ($users as $userItem) {
-            if ($user->isActive() && !empty($userItem->getEmail())) {
-                $userIdSelect->addOption(
-                        api_get_person_name(
-                            $userItem->getFirstname(),
-                            $userItem->getLastname()
-                        ).' ['.$userItem->getEmail().']',
-                    $userItem->getId()
-                );
-            }
-        }
-        $form->setRequired($userIdSelect);
+
+        $form->addSelect(
+            'conference_type',
+            $this->get_lang('ConferenceType'),
+            [
+                'meeting' => $this->get_lang('Meeting'),
+                'webinar' => $this->get_lang('Webinar'),
+            ]
+        );
+        $form->addRule('conference_type', get_lang('ThisFieldIsRequired'), 'required');
 
         $startTimeDatePicker = $form->addDateTimePicker('startTime', get_lang('StartTime'));
         $form->setRequired($startTimeDatePicker);
@@ -866,7 +925,7 @@ class ZoomPlugin extends Plugin
                 if (1 === count($options)) {
                     $form->addHidden('type', key($options));
                 } else {
-                    $form->addSelect('type', $this->get_lang('ConferenceType'), $options);
+                    $form->addSelect('type', $this->get_lang('AudienceType'), $options);
                 }
             }
         } else {
@@ -906,66 +965,24 @@ class ZoomPlugin extends Plugin
                    $groupIdsSelect->getAttribute('id'),
                    $userRegistrationRadio->getelements()[1]->getAttribute('id')
                );
-
                $form->setAttribute('onchange', $jsCode);
            }
        }*/
-        
-        $form->addElement(
-            'checkbox',
-            'repeat',
-            null,
-            get_lang('RepeatEvent'),
-            ['onclick' => 'return plus_repeated_event();']
-        );
-        $form->addElement(
-            'html',
-            '<div id="options2" style="display:none">'
-        );
-        $form->addElement(
-            'select',
-            'repeat_type',
-            get_lang('RepeatType'),
-            [
-                'daily' => get_lang('RepeatDaily'),
-                'weekly' => get_lang('RepeatWeekly'),
-                'monthlyByDate' => get_lang('RepeatMonthlyByDate'),
-                'yearly' => get_lang('RepeatYearly'),
-            ]
-        );
-        $form->addElement(
-            'date_picker',
-            'repeat_end_day',
-            get_lang('RepeatEnd'),
-            ['id' => 'repeat_end_date_form']
-        );
-        
-        $form->addElement('html', '</div>');
+
+        $accountEmails = $this->getAccountEmails();
+
+        if (!empty($accountEmails)) {
+            $form->addSelect('account_email', $this->get_lang('AccountEmail'), $accountEmails);
+        }
 
         $form->addButtonCreate(get_lang('Save'));
 
         if ($form->validate()) {
-            $now = new DateTime("now");
-            $startTime = new DateTime($form->getSubmitValue('startTime'));
-            if ($now > $startTime) {
-                Display::addFlash(
-                    Display::return_message($this->get_lang("DateNoValid"), 'error')
-                );
-                
-                api_location('start.php?'.$extraUrl);
-            }
-            
-            if (!empty($form->getSubmitValue('repeat')) && empty($form->getSubmitValue('repeat_end_day'))) {
-                Display::addFlash(
-                    Display::return_message($this->get_lang("DateEndNotValid"), 'error')
-                );
-                
-                api_location('start.php?'.$extraUrl);
-            }
-            
-            $type = $form->getSubmitValue('type');
+            $formValues = $form->exportValues();
+            $conferenceType = $formValues['conference_type'];
+            $password = substr(uniqid('z', true), 0, 10);
 
-            switch ($type) {
+            switch ($formValues['type']) {
                 case 'everyone':
                     $user = null;
                     $group = null;
@@ -987,50 +1004,50 @@ class ZoomPlugin extends Plugin
                     break;
             }
 
+            $accountEmail = $formValues['account_email'] ?? null;
+            $accountEmail = $accountEmail && in_array($accountEmail, $accountEmails) ? $accountEmail : null;
+
             try {
-                $em = Database::getManager();
-                
-                /** @var User $host */
-                $host = $em->find('ChamiloUserBundle:User', (int) $form->getSubmitValue('host_id'));
-                $newMeeting = $this->createScheduleMeeting(
-                    $user,
-                    $course,
-                    $group,
-                    $session,
-                    new DateTime($form->getSubmitValue('startTime')),
-                    $form->getSubmitValue('duration'),
-                    $form->getSubmitValue('topic'),
-                    $form->getSubmitValue('agenda'),
-                    substr(uniqid('z', true), 0, 10),
-                    $host
-                );
+                $startTime = new DateTime($formValues['startTime']);
 
-                if (!empty($newMeeting->getId())) {
-                    $meetingId = $newMeeting->getId();
-                    $agenda = new Agenda('course');
-                    $startTime = $form->getSubmitValue('startTime');
-                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
-                    $allDay = 'false';
-                    $userToSend = ['everyone'];
-
-                    $eventId = $agenda->addEvent(
+                if ('meeting' === $conferenceType) {
+                    $newMeeting = $this->createScheduleMeeting(
+                        $user,
+                        $course,
+                        $group,
+                        $session,
                         $startTime,
-                        $endTime,
-                        $allDay,
-                        $form->getSubmitValue('topic'),
-                        $form->getSubmitValue('agenda'),
-                        $userToSend
+                        $formValues['duration'],
+                        $formValues['topic'],
+                        $formValues['agenda'],
+                        $password,
+                        $accountEmail
                     );
 
-                    if ($eventId) {
-                        Database::update(
-                            Database::get_course_table(TABLE_AGENDA),
-                            ['zoom_meeting_id' => $meetingId],
-                            ['iid = ? ' => $eventId]
-                        );
-                    }
+                    Display::addFlash(
+                        Display::return_message($this->get_lang('NewWebinarCreated'))
+                    );
+                } elseif ('webinar' === $conferenceType) {
+                    $newMeeting = $this->createScheduleWebinar(
+                        $user,
+                        $course,
+                        $group,
+                        $session,
+                        $startTime,
+                        $formValues['duration'],
+                        $formValues['topic'],
+                        $formValues['agenda'],
+                        $password,
+                        $accountEmail
+                    );
+
+                    Display::addFlash(
+                        Display::return_message($this->get_lang('NewMeetingCreated'))
+                    );
+                } else {
+                    throw new Exception('Invalid conference type');
                 }
-                
+
                 if ($newMeeting->isCourseMeeting()) {
                     if ('RegisterAllCourseUsers' === $form->getSubmitValue('userRegistration')) {
                         $this->registerAllCourseUsers($newMeeting);
@@ -1051,100 +1068,7 @@ class ZoomPlugin extends Plugin
                         );
                     }
                 }
-                
-                if (!empty($form->getSubmitValue('repeat'))) {
-                    $repeatType = $form->getSubmitValue('repeat_type');
-                    $startTime = $form->getSubmitValue('startTime');
-                    $endDate = substr($form->getSubmitValue('repeat_end_day'), 0, 10).' 23:59:59';
-                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
-
-                    $generatedDates = $this->generateDatesByType(
-                        $repeatType,
-                        $startTime,
-                        $endTime,
-                        $endDate
-                    );
-
-                    if (!empty($generatedDates)) {
-                        foreach ($generatedDates as $dateInfo) {
-                            $start = $dateInfo['start'];
-                            $newMeetingRep = $this->createScheduleMeeting(
-                                $user,
-                                $course,
-                                $group,
-                                $session,
-                                new DateTime($start),
-                                $form->getSubmitValue('duration'),
-                                $form->getSubmitValue('topic'),
-                                $form->getSubmitValue('agenda'),
-                                substr(uniqid('z', true), 0, 10),
-                                $host
-                            );
-                            
-                            if (!empty($newMeetingRep->getId())) {
-                                $meetingId = $newMeetingRep->getId();
-                                $agenda = new Agenda('course');
-                                $endTime = date("Y-m-d H:i:s", strtotime($start.' + '.(int) $form->getSubmitValue('duration').' minutes'));
-                                $allDay = 'false';
-                                $userToSend = ['everyone'];
-                                
-                                $eventId = $agenda->addEvent(
-                                    $start,
-                                    $endTime,
-                                    $allDay,
-                                    $form->getSubmitValue('topic'),
-                                    $form->getSubmitValue('agenda'),
-                                    $userToSend
-                                );
-                                
-                                if ($eventId) {
-                                    Database::update(
-                                        Database::get_course_table(TABLE_AGENDA),
-                                        ['zoom_meeting_id' => $meetingId],
-                                        ['iid = ? ' => $eventId]
-                                    );
-                                }
-                            }
-                            
-                            if ($newMeetingRep->isCourseMeeting()) {
-                                if ('RegisterAllCourseUsers' === $form->getSubmitValue('userRegistration')) {
-                                    $this->registerAllCourseUsers($newMeetingRep);
-                                    /*
-                                    Display::addFlash(
-                                        Display::return_message($this->get_lang('AllCourseUsersWereRegistered'))
-                                    );
-                                    */
-                                } elseif ('RegisterTheseGroupMembers' === $form->getSubmitValue('userRegistration')) {
-                                    $userIds = [];
-                                    foreach ($form->getSubmitValue('groupIds') as $groupId) {
-                                        $userIds = array_unique(array_merge($userIds, GroupManager::get_users($groupId)));
-                                    }
-                                    $users = Database::getManager()->getRepository('ChamiloUserBundle:User')->findBy(
-                                        ['id' => $userIds]
-                                    );
-                                    $this->registerUsers($newMeetingRep, $users);
-                                    /*
-                                    Display::addFlash(
-                                        Display::return_message($this->get_lang('GroupUsersWereRegistered'))
-                                    );
-                                    */
-                                }
-                            }
-                        }
-
-                        Display::addFlash(
-                            Display::return_message($this->get_lang('NewMeetingsCreated'))
-                        );
-                        
-                        api_location('start.php?'.$extraUrl);
-                    }
-                } else {
-                    Display::addFlash(
-                        Display::return_message($this->get_lang('NewMeetingCreated'))
-                    );
-                    
-                    api_location('meeting.php?meetingId='.$newMeeting->getMeetingId().'&'.$extraUrl);
-                }
+                api_location('meeting.php?meetingId='.$newMeeting->getMeetingId().'&'.$extraUrl);
             } catch (Exception $exception) {
                 Display::addFlash(
                     Display::return_message($exception->getMessage(), 'error')
@@ -1160,99 +1084,6 @@ class ZoomPlugin extends Plugin
         }
 
         return $form;
-    }
-    
-    /**
-     * @param string $type
-     * @param string $startEvent      in UTC
-     * @param string $endEvent        in UTC
-     * @param string $repeatUntilDate in UTC
-     *
-     * @throws Exception
-     *
-     * @return array
-     */
-    public function generateDatesByType($type, $startEvent, $endEvent, $repeatUntilDate)
-    {
-        $continue = true;
-        $repeatUntilDate = new DateTime($repeatUntilDate, new DateTimeZone('UTC'));
-        $loopMax = 365;
-        $counter = 0;
-        $list = [];
-        
-        switch ($type) {
-            case 'daily':
-                $interval = 'P1D';
-                break;
-            case 'weekly':
-                $interval = 'P1W';
-                break;
-            case 'monthlyByDate':
-                $interval = 'P1M';
-                break;
-            case 'monthlyByDay':
-                // not yet implemented
-                break;
-            case 'monthlyByDayR':
-                // not yet implemented
-                break;
-            case 'yearly':
-                $interval = 'P1Y';
-                break;
-        }
-        
-        if (empty($interval)) {
-            return [];
-        }
-        $timeZone = api_get_timezone();
-        
-        while ($continue) {
-            $startDate = new DateTime($startEvent, new DateTimeZone('UTC'));
-            $endDate = new DateTime($endEvent, new DateTimeZone('UTC'));
-            
-            $startDate->add(new DateInterval($interval));
-            $endDate->add(new DateInterval($interval));
-            
-            $newStartDate = $startDate->format('Y-m-d H:i:s');
-            $newEndDate = $endDate->format('Y-m-d H:i:s');
-            
-            $startEvent = $newStartDate;
-            $endEvent = $newEndDate;
-            
-            if ($endDate > $repeatUntilDate) {
-                break;
-            }
-            
-            // @todo remove comment code
-            $startDateInLocal = new DateTime($newStartDate);
-            if ($startDateInLocal->format('I') == 0) {
-                // Is saving time? Then fix UTC time to add time
-                $seconds = $startDateInLocal->getOffset();
-                //$startDate->add(new DateInterval("PT".$seconds."S"));
-                $startDateFixed = $startDate->format('Y-m-d H:i:s');
-                $startDateInLocalFixed = new DateTime($startDateFixed);
-                $newStartDate = $startDateInLocalFixed->format('Y-m-d H:i:s');
-            }
-            $endDateInLocal = new DateTime($newEndDate);
-            
-            if ($endDateInLocal->format('I') == 0) {
-                // Is saving time? Then fix UTC time to add time
-                $seconds = $endDateInLocal->getOffset();
-                $endDate->add(new DateInterval("PT".$seconds."S"));
-                $endDateFixed = $endDate->format('Y-m-d H:i:s');
-                $endDateInLocalFixed = new DateTime($endDateFixed);
-                $newEndDate = $endDateInLocalFixed->format('Y-m-d H:i:s');
-            }
-            $list[] = ['start' => $newStartDate, 'end' => $newEndDate, 'i' => $startDateInLocal->format('I')];
-            $counter++;
-            
-            // just in case stop if more than $loopMax
-            if ($counter > $loopMax) {
-                break;
-            }
-        }
-        
-        return $list;
     }
 
     /**
@@ -1283,16 +1114,19 @@ class ZoomPlugin extends Plugin
      * Returns the URL to enter (start or join) a meeting or null if not possible to enter the meeting,
      * The returned URL depends on the meeting current status (waiting, started or finished) and the current user.
      *
-     * @param Meeting $meeting
-     *
      * @throws OptimisticLockException
      * @throws Exception
      *
      * @return string|null
      */
-    public function getStartOrJoinMeetingURL($meeting)
+    public function getStartOrJoinMeetingURL(Meeting $meeting)
     {
-        $status = $meeting->getMeetingInfoGet()->status;
+        if ($meeting instanceof Webinar) {
+            $status = 'started';
+        } else {
+            $status = $meeting->getMeetingInfoGet()->status;
+        }
+
         $userId = api_get_user_id();
         $currentUser = api_get_user_entity($userId);
         $isGlobal = 'true' === $this->get('enableGlobalConference') && $meeting->isGlobalMeeting();
@@ -1318,7 +1152,9 @@ class ZoomPlugin extends Plugin
             case 'started':
                 // User per conference.
                 if ($currentUser === $meeting->getUser()) {
-                    return $meeting->getMeetingInfoGet()->join_url;
+                    return $meeting instanceof Webinar
+                        ? $meeting->getWebinarSchema()->start_url
+                        : $meeting->getMeetingInfoGet()->join_url;
                 }
 
                 // The participant is not registered, he can join only the global meeting (automatic registration).
@@ -1328,7 +1164,9 @@ class ZoomPlugin extends Plugin
 
                 if ($meeting->isCourseMeeting()) {
                     if ($this->userIsCourseConferenceManager()) {
-                        return $meeting->getMeetingInfoGet()->start_url;
+                        return $meeting instanceof Webinar
+                            ? $meeting->getWebinarSchema()->start_url
+                            : $meeting->getMeetingInfoGet()->start_url;
                     }
 
                     $sessionId = api_get_session_id();
@@ -1358,7 +1196,9 @@ class ZoomPlugin extends Plugin
                             }
                         }
 
-                        if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT == $meeting->getMeetingInfoGet()->type) {
+                        if (!$meeting instanceof Webinar
+                            && \Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT == $meeting->getMeetingInfoGet()->type
+                        ) {
                             return $meeting->getMeetingInfoGet()->join_url;
                         }
 
@@ -1371,7 +1211,7 @@ class ZoomPlugin extends Plugin
                 //if ('true' === $this->get('enableParticipantRegistration')) {
                     //if ('true' === $this->get('enableParticipantRegistration') && $meeting->requiresRegistration()) {
                     // the participant must be registered
-                    $registrant = $meeting->getRegistrant($currentUser);
+                    $registrant = $meeting->getRegistrantByUser($currentUser);
                     if (null == $registrant) {
                         throw new Exception($this->get_lang('YouAreNotRegisteredToThisMeeting'));
                     }
@@ -1397,7 +1237,7 @@ class ZoomPlugin extends Plugin
             return false;
         }
 
-        if (api_is_coach() || api_is_platform_admin(true)) {
+        if (api_is_coach() || api_is_platform_admin()) {
             return true;
         }
 
@@ -1412,13 +1252,13 @@ class ZoomPlugin extends Plugin
      * @return bool whether the logged-in user can manage conferences in this context, that is either
      *              the current course or session coach, the platform admin or the current course admin
      */
-    public function userIsCourseConferenceManager($allowSessionAdmins = false, $allowCourseAdmin = true)
+    public function userIsCourseConferenceManager()
     {
-        if ((api_is_coach() && $allowCourseAdmin) || api_is_platform_admin($allowSessionAdmins)) {
+        if (api_is_coach() || api_is_platform_admin()) {
             return true;
         }
 
-        if (api_get_course_id() && api_is_course_admin() && $allowCourseAdmin) {
+        if (api_get_course_id() && api_is_course_admin()) {
             return true;
         }
 
@@ -1480,7 +1320,7 @@ class ZoomPlugin extends Plugin
 
     public function getToolbar($returnUrl = '')
     {
-        if (!api_is_platform_admin(true)) {
+        if (!api_is_platform_admin()) {
             return '';
         }
 
@@ -1509,6 +1349,10 @@ class ZoomPlugin extends Plugin
         }
 
         if (api_is_platform_admin()) {
+            $actionsLeft .= Display::url(
+                Display::return_icon('agenda.png', get_lang('Calendar'), [], ICON_SIZE_MEDIUM),
+                'calendar.php'
+            );
             $actionsLeft .=
                 Display::url(
                     Display::return_icon('settings.png', get_lang('Settings'), null, ICON_SIZE_MEDIUM),
@@ -1535,6 +1379,98 @@ class ZoomPlugin extends Plugin
         $recording = $this->getRecordingSetting();
 
         return self::RECORDING_TYPE_NONE !== $recording;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function createWebinarFromSchema(Webinar $webinar, WebinarSchema $schema): Webinar
+    {
+        $currentUser = api_get_user_entity(api_get_user_id());
+
+        $schema->settings->contact_email = $currentUser->getEmail();
+        $schema->settings->contact_name = $currentUser->getFullname();
+        $schema->settings->auto_recording = $this->getRecordingSetting();
+        $schema->settings->registrants_email_notification = false;
+        $schema->settings->attendees_and_panelists_reminder_email_notification->enable = false;
+        $schema->settings->follow_up_attendees_email_notification->enable = false;
+        $schema->settings->follow_up_absentees_email_notification->enable = false;
+
+        $schema = $schema->create($webinar->getAccountEmail());
+
+        $webinar->setWebinarSchema($schema);
+
+        $em = Database::getManager();
+        $em->persist($webinar);
+        $em->flush();
+
+        return $webinar;
+    }
+
+    public function getAccountEmails(): array
+    {
+        $currentValue = $this->get('accountSelector');
+
+        if (empty($currentValue)) {
+            return [];
+        }
+
+        $emails = explode(';', $currentValue);
+        $trimmed = array_map('trim', $emails);
+        $filtered = array_filter($trimmed);
+
+        return array_combine($filtered, $filtered);
+    }
+
+    /**
+     * Register users to a meeting.
+     *
+     * @param User[] $users
+     *
+     * @throws OptimisticLockException
+     *
+     * @return User[] failed registrations [ user id => errorMessage ]
+     */
+    public function registerUsers(Meeting $meeting, array $users)
+    {
+        $failedUsers = [];
+        foreach ($users as $user) {
+            try {
+                $this->registerUser($meeting, $user, false);
+            } catch (Exception $exception) {
+                $failedUsers[$user->getId()] = $exception->getMessage();
+            }
+        }
+        Database::getManager()->flush();
+
+        return $failedUsers;
+    }
+
+    /**
+     * Removes registrants from a meeting.
+     *
+     * @param Registrant[] $registrants
+     *
+     * @throws Exception
+     */
+    public function unregister(Meeting $meeting, array $registrants)
+    {
+        $meetingRegistrants = [];
+        foreach ($registrants as $registrant) {
+            $meetingRegistrants[] = $registrant->getMeetingRegistrant();
+        }
+
+        if ($meeting instanceof Webinar) {
+            $meeting->getWebinarSchema()->removeRegistrants($meetingRegistrants);
+        } else {
+            $meeting->getMeetingInfoGet()->removeRegistrants($meetingRegistrants);
+        }
+
+        $em = Database::getManager();
+        foreach ($registrants as $registrant) {
+            $em->remove($registrant);
+        }
+        $em->flush();
     }
 
     /**
@@ -1578,31 +1514,6 @@ class ZoomPlugin extends Plugin
     }
 
     /**
-     * Register users to a meeting.
-     *
-     * @param Meeting $meeting
-     * @param User[]  $users
-     *
-     * @throws OptimisticLockException
-     *
-     * @return User[] failed registrations [ user id => errorMessage ]
-     */
-    private function registerUsers($meeting, $users)
-    {
-        $failedUsers = [];
-        foreach ($users as $user) {
-            try {
-                $this->registerUser($meeting, $user, false);
-            } catch (Exception $exception) {
-                $failedUsers[$user->getId()] = $exception->getMessage();
-            }
-        }
-        Database::getManager()->flush();
-
-        return $failedUsers;
-    }
-
-    /**
      * @throws Exception
      * @throws OptimisticLockException
      *
@@ -1614,17 +1525,32 @@ class ZoomPlugin extends Plugin
             throw new Exception($this->get_lang('CannotRegisterWithoutEmailAddress'));
         }
 
-        $meetingRegistrant = MeetingRegistrant::fromEmailAndFirstName(
-            $user->getEmail(),
-            $user->getFirstname(),
-            $user->getLastname()
-        );
+        if ($meeting instanceof Webinar) {
+            $meetingRegistrant = WebinarRegistrantSchema::fromEmailAndFirstName(
+                $user->getEmail(),
+                $user->getFirstname(),
+                $user->getLastname()
+            );
+        } else {
+            $meetingRegistrant = MeetingRegistrant::fromEmailAndFirstName(
+                $user->getEmail(),
+                $user->getFirstname(),
+                $user->getLastname()
+            );
+        }
 
         $registrantEntity = (new Registrant())
             ->setMeeting($meeting)
             ->setUser($user)
             ->setMeetingRegistrant($meetingRegistrant)
-            ->setCreatedRegistration($meeting->getMeetingInfoGet()->addRegistrant($meetingRegistrant));
+        ;
+
+        if ($meeting instanceof Webinar) {
+            $registrantEntity->setCreatedRegistration($meeting->getWebinarSchema()->addRegistrant($meetingRegistrant));
+        } else {
+            $registrantEntity->setCreatedRegistration($meeting->getMeetingInfoGet()->addRegistrant($meetingRegistrant));
+        }
+
         Database::getManager()->persist($registrantEntity);
 
         if ($andFlush) {
@@ -1632,28 +1558,6 @@ class ZoomPlugin extends Plugin
         }
 
         return $registrantEntity;
-    }
-
-    /**
-     * Removes registrants from a meeting.
-     *
-     * @param Meeting      $meeting
-     * @param Registrant[] $registrants
-     *
-     * @throws Exception
-     */
-    private function unregister($meeting, $registrants)
-    {
-        $meetingRegistrants = [];
-        foreach ($registrants as $registrant) {
-            $meetingRegistrants[] = $registrant->getMeetingRegistrant();
-        }
-        $meeting->getMeetingInfoGet()->removeRegistrants($meetingRegistrants);
-        $em = Database::getManager();
-        foreach ($registrants as $registrant) {
-            $em->remove($registrant);
-        }
-        $em->flush();
     }
 
     /**
@@ -1700,21 +1604,16 @@ class ZoomPlugin extends Plugin
         $meeting->getMeetingInfoGet()->settings->auto_recording = $this->getRecordingSetting();
         $meeting->getMeetingInfoGet()->settings->registrants_email_notification = false;
 
-        if (api_get_configuration_value('use_host_email_teacher') === true) {
-            $meeting->getMeetingInfoGet()->host_email = $meeting->getHost()->getEmail(); //$currentUser->getEmail();
-            $meeting->getMeetingInfoGet()->settings->alternative_hosts = $meeting->getHost()->getEmail(); //$currentUser->getEmail();
-        }
+        //$meeting->getMeetingInfoGet()->host_email = $currentUser->getEmail();
+        //$meeting->getMeetingInfoGet()->settings->alternative_hosts = $currentUser->getEmail();
 
         // Send create to Zoom.
-        $meeting->setMeetingInfoGet($meeting->getMeetingInfoGet()->create());
-        
-        // Get start Time
-        if (!empty($meeting->getMeetingInfoGet()->start_time)) {
-            $startDateTime = new DateTime($meeting->getMeetingInfoGet()->start_time);
-            $startDateTime->setTimezone(new DateTimeZone(api_get_timezone()));
-            $meeting->setStartTime($startDateTime);
-        }
-        
+        $meeting->setMeetingInfoGet(
+            $meeting->getMeetingInfoGet()->create(
+                $meeting->getAccountEmail()
+            )
+        );
+
         Database::getManager()->persist($meeting);
         Database::getManager()->flush();
 
@@ -1732,7 +1631,7 @@ class ZoomPlugin extends Plugin
             $this->get_lang('GlobalMeeting'),
             MeetingInfoGet::TYPE_SCHEDULED
         );
-        $meetingInfoGet->start_time = (new DateTime())->format(DateTime::ISO8601);
+        $meetingInfoGet->start_time = (new DateTime())->format(DATE_ATOM);
         $meetingInfoGet->duration = 60;
         $meetingInfoGet->settings->approval_type =
             ('true' === $this->get('enableParticipantRegistration'))
@@ -1770,11 +1669,11 @@ class ZoomPlugin extends Plugin
         $topic,
         $agenda,
         $password,
-        User $host = null
+        string $accountEmail = null
     ) {
         $meetingInfoGet = MeetingInfoGet::fromTopicAndType($topic, MeetingInfoGet::TYPE_SCHEDULED);
         $meetingInfoGet->duration = $duration;
-        $meetingInfoGet->start_time = $startTime->format(DateTime::ISO8601);
+        $meetingInfoGet->start_time = $startTime->format(DATE_ATOM);
         $meetingInfoGet->agenda = $agenda;
         $meetingInfoGet->password = $password;
         $meetingInfoGet->settings->approval_type = MeetingSettings::APPROVAL_TYPE_NO_REGISTRATION_REQUIRED;
@@ -1789,8 +1688,44 @@ class ZoomPlugin extends Plugin
                 ->setCourse($course)
                 ->setGroup($group)
                 ->setSession($session)
-                ->setHost($host)
+                ->setAccountEmail($accountEmail)
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function createScheduleWebinar(
+        ?User $user,
+        ?Course $course,
+        ?CGroupInfo $group,
+        ?Session $session,
+        DateTime $startTime,
+        $duration,
+        $topic,
+        $agenda,
+        $password,
+        string $accountEmail = null
+    ): Webinar {
+        $webinarSchema = WebinarSchema::fromTopicAndType($topic);
+        $webinarSchema->duration = $duration;
+        $webinarSchema->start_time = $startTime->format(DATE_ATOM);
+        $webinarSchema->agenda = $agenda;
+        $webinarSchema->password = $password;
+
+        if ('true' === $this->get('enableParticipantRegistration')) {
+            $webinarSchema->settings->approval_type = WebinarSettings::APPROVAL_TYPE_AUTOMATICALLY_APPROVE;
+        }
+
+        $webinar = (new Webinar())
+            ->setUser($user)
+            ->setCourse($course)
+            ->setGroup($group)
+            ->setSession($session)
+            ->setAccountEmail($accountEmail)
+        ;
+
+        return $this->createWebinarFromSchema($webinar, $webinarSchema);
     }
 
     /**
