@@ -53,7 +53,7 @@ try {
         $content .= '&nbsp;'.Display::url(
             get_lang('Details'),
             api_get_path(WEB_PLUGIN_PATH).'zoom/meeting.php?meetingId='.$meeting->getMeetingId(),
-            ['class' => 'btn btn-default']
+            ['target' => '_blank', 'class' => 'btn btn-default']
         );
     }
 } catch (Exception $exception) {

@@ -14,6 +14,8 @@ $strings['enableGlobalConference'] = "Activar las conferencias globales";
 $strings['enableGlobalConferencePerUser'] = "Activar las conferencias globales por usuario";
 $strings['globalConferenceAllowRoles'] = "Visibilidad del enlace global de videoconferencia para los perfiles siguientes";
 $strings['globalConferencePerUserAllowRoles'] = "Visibilidad del enlace global de videoconferencia por usuario para los perfiles siguientes";
+$strings['accountSelector'] = 'Selector de cuentas';
+$strings['accountSelector_help'] = 'Te permite declarar los correos de las diferentes cuentas con las que quieres abrir los videos de Zoom. Separados por punto y coma (account_one@example.come;account_two@exaple.com).';
 
 $strings['tool_enable_help'] = "Escoja si desea activar la herramienta Zoom.
 Una vez activada, aparecerá en las páginas principales de todos los cursos. Los profesores podrán
@@ -42,6 +44,10 @@ y agrega este tipo de eventos:
 <br/>- End Meeting
 <br/>- Participant/Host joined meeting
 <br/>- Participant/Host left meeting
+<br/>- Start Webinar
+<br/>- End Webinar
+<br/>- Participant/Host joined webinar
+<br/>- Participant/Host left webinar
 <br/>- All Recordings have completed
 <br/>- Recording transcript files have completed
 <br/>de clic en <em>Done</em> y luego en <em>Save</em>
@@ -95,7 +101,6 @@ $strings['JoinURLToSendToParticipants'] = "URL para asistir a la conferencia (pa
 $strings['LiveMeetings'] = "Conferencias activas";
 $strings['LinkToFileWasCreatedInCourse'] = "Un enlace al archivo ha sido añadido al curso";
 $strings['MeetingDeleted'] = "Conferencia borrada";
-$strings['MeetingsDeleted'] = "Conferencias borradas";
 $strings['MeetingsFound'] = "Conferencias encontradas";
 $strings['MeetingUpdated'] = "Conferencias actualizadas";
 $strings['NewMeetingCreated'] = "Nueva conferencia creada";
@@ -137,9 +142,15 @@ $strings['JoinURLNotAvailable'] = "URL no disponible";
 $strings['Meetings'] = "Conferencias";
 $strings['Activity'] = "Actividad";
 $strings['ConferenceNotAvailable'] = "Conferencia no disponible";
-$strings['AreYouSureToDeleteSelected'] = "¿Está seguro de querer eliminar las conferencias seleccionadas?";
-$strings['DeleteSelected'] = "Eliminar seleccionados";
-$strings['NoMeetingSelected'] = "Ninguna conferencia seleccionada";
-$strings['DateNoValid'] = "La fecha debe ser posterior a la fecha actual";
-$strings['NewMeetingsCreated'] = "Nuevas conferencias creadas";
-$strings['DateEndNotValid'] = "Fecha de finalizar repeticiones no puede estar vacía";
+$strings['Meeting'] = "Conferencia";
+$strings['Webinar'] = "Seminario web";
+$strings['AudienceType'] = 'Tipo de público';
+$strings['AccountEmail'] = 'Correo electrónico de la cuenta';
+$strings['NewWebinarCreated'] = "Nuevo seminario web creado";
+$strings['UpdateWebinar'] = 'Actualizar seminario web';
+$strings['WebinarUpdated'] = "Seminario web actualizado";
+$strings['DeleteWebinar'] = "Borrar seminario web";
+$strings['WebinarDeleted'] = "Seminario web borrado";
+$strings['UrlForSelfRegistration'] = "URL para auto registro";
+$strings['RegisterMeToConference'] = "Registrarme a la conferencia";
+$strings['UnregisterMeToConference'] = "Cancelar registro a la conferencia";
