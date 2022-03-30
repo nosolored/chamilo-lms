@@ -44,7 +44,7 @@ try {
         $startJoinURL = null;
     }
     if (!empty($startJoinURL)) {
-        $content .= Display::url($plugin->get_lang('EnterMeeting'), $startJoinURL, ['class' => 'btn btn-primary']);
+        $content .= Display::url($plugin->get_lang('EnterMeeting'), $startJoinURL, ['target' => '_blank', 'class' => 'btn btn-primary']);
     } else {
         $content .= Display::return_message($plugin->get_lang('ConferenceNotAvailable'), 'warning');
     }
@@ -53,7 +53,7 @@ try {
         $content .= '&nbsp;'.Display::url(
             get_lang('Details'),
             api_get_path(WEB_PLUGIN_PATH).'zoom/meeting.php?meetingId='.$meeting->getMeetingId(),
-            ['target' => '_blank', 'class' => 'btn btn-default']
+            ['class' => 'btn btn-default']
         );
     }
 } catch (Exception $exception) {
