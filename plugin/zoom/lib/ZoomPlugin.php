@@ -356,6 +356,39 @@ class ZoomPlugin extends Plugin
                 $meeting->setMeetingInfoGet($meetingInfoGet);
                 Database::getManager()->persist($meeting);
                 Database::getManager()->flush();
+
+                // Update star_time in plugin_zoom_meeting
+                $startTime = $meetingInfoGet->start_time;
+                $sql = "UPDATE plugin_zoom_meeting SET start_time='".$startTime."'WHERE id=".$meeting->getId();
+                Database::query($sql);
+
+                // Update calendar event
+                $eventData = Database::select(
+                    '*',
+                    Database::get_course_table(TABLE_AGENDA),
+                    ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
+                    'first'
+                );
+
+                if (!empty($eventData)) {
+                    $meetingId = $meeting->getId();
+                    $agenda = new Agenda('course');
+                    $startTime = $form->getSubmitValue('startTime');
+                    $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                    $allDay = 'false';
+                    $userToSend = ['everyone'];
+
+                    $eventId = $agenda->editEvent(
+                        $eventData['id'],
+                        $startTime,
+                        $endTime,
+                        $allDay,
+                        $form->getSubmitValue('topic'),
+                        $form->getSubmitValue('agenda'),
+                        $userToSend
+                    );
+                }
+
                 Display::addFlash(
                     Display::return_message($this->get_lang('MeetingUpdated'), 'confirm')
                 );
@@ -496,6 +529,19 @@ class ZoomPlugin extends Plugin
 
         $em = Database::getManager();
         try {
+            // Delete calendar event
+            $eventData = Database::select(
+                '*',
+                Database::get_course_table(TABLE_AGENDA),
+                ['where' => ['zoom_meeting_id = ?' => [$meeting->getId()]]],
+                'first'
+            );
+
+            if (!empty($eventData)) {
+                $agenda = new Agenda('course');
+                $agenda->deleteEvent($eventData['id']);
+            }
+
             // No need to delete a instant meeting.
             if (\Chamilo\PluginBundle\Zoom\API\Meeting::TYPE_INSTANT != $meeting->getMeetingInfoGet()->type) {
                 $meeting->getMeetingInfoGet()->delete();
@@ -975,6 +1021,37 @@ class ZoomPlugin extends Plugin
             $form->addSelect('account_email', $this->get_lang('AccountEmail'), $accountEmails);
         }
 
+        $form->addElement(
+            'checkbox',
+            'repeat',
+            null,
+            get_lang('RepeatEvent'),
+            ['onclick' => 'return plus_repeated_event();']
+        );
+        $form->addElement(
+            'html',
+            '<div id="options2" style="display:none">'
+        );
+        $form->addElement(
+            'select',
+            'repeat_type',
+            get_lang('RepeatType'),
+            [
+                'daily' => get_lang('RepeatDaily'),
+                'weekly' => get_lang('RepeatWeekly'),
+                'monthlyByDate' => get_lang('RepeatMonthlyByDate'),
+                'yearly' => get_lang('RepeatYearly'),
+            ]
+        );
+        $form->addElement(
+            'date_picker',
+            'repeat_end_day',
+            get_lang('RepeatEnd'),
+            ['id' => 'repeat_end_date_form']
+        );
+
+        $form->addElement('html', '</div>');
+
         $form->addButtonCreate(get_lang('Save'));
 
         if ($form->validate()) {
@@ -1024,6 +1101,41 @@ class ZoomPlugin extends Plugin
                         $accountEmail
                     );
 
+                    if (!empty($newMeeting->getId())) {
+                        $meetingId = $newMeeting->getId();
+                        $agenda = new Agenda('course');
+                        $startTime = $form->getSubmitValue('startTime');
+                        $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                        $allDay = 'false';
+                        $userToSend = ['everyone'];
+
+                        $eventId = $agenda->addEvent(
+                            $startTime,
+                            $endTime,
+                            $allDay,
+                            $form->getSubmitValue('topic'),
+                            $form->getSubmitValue('agenda'),
+                            $userToSend
+                        );
+
+                        if ($eventId) {
+                            Database::update(
+                                Database::get_course_table(TABLE_AGENDA),
+                                ['zoom_meeting_id' => $meetingId],
+                                ['iid = ? ' => $eventId]
+                            );
+                        }
+                    }
+
+                    if (!empty($form->getSubmitValue('repeat'))) {
+                        $this->RepeatMeeting($form,
+                         $conferenceType,
+                         $user,
+                         $course,
+                         $group,
+                         $session);
+                    }
+
                     Display::addFlash(
                         Display::return_message($this->get_lang('NewWebinarCreated'))
                     );
@@ -1040,6 +1152,41 @@ class ZoomPlugin extends Plugin
                         $password,
                         $accountEmail
                     );
+
+                    if (!empty($newMeeting->getId())) {
+                        $meetingId = $newMeeting->getId();
+                        $agenda = new Agenda('course');
+                        $startTime = $form->getSubmitValue('startTime');
+                        $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                        $allDay = 'false';
+                        $userToSend = ['everyone'];
+
+                        $eventId = $agenda->addEvent(
+                            $startTime,
+                            $endTime,
+                            $allDay,
+                            $form->getSubmitValue('topic'),
+                            $form->getSubmitValue('agenda'),
+                            $userToSend
+                        );
+
+                        if ($eventId) {
+                            Database::update(
+                                Database::get_course_table(TABLE_AGENDA),
+                                ['zoom_meeting_id' => $meetingId],
+                                ['iid = ? ' => $eventId]
+                            );
+                        }
+                    }
+
+                    if (!empty($form->getSubmitValue('repeat'))) {
+                        $this->RepeatMeeting($form,
+                         $conferenceType,
+                         $user,
+                         $course,
+                         $group,
+                         $session);
+                    }
 
                     Display::addFlash(
                         Display::return_message($this->get_lang('NewMeetingCreated'))
@@ -1084,6 +1231,204 @@ class ZoomPlugin extends Plugin
         }
 
         return $form;
+    }
+
+    public function RepeatMeeting($form, $conferenceType, $user, $course, $group, $session) {
+        $formValues = $form->exportValues();
+        $password = substr(uniqid('z', true), 0, 10);
+
+        $accountEmails = $this->getAccountEmails();
+        $accountEmail = $formValues['account_email'] ?? null;
+        $accountEmail = $accountEmail && in_array($accountEmail, $accountEmails) ? $accountEmail : null;
+
+        $repeatType = $form->getSubmitValue('repeat_type');
+        $startTime = $form->getSubmitValue('startTime');
+        $endDate = substr($form->getSubmitValue('repeat_end_day'), 0, 10).' 23:59:59';
+        $endTime = date("Y-m-d H:i:s", strtotime($startTime.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+
+        $generatedDates = $this->generateDatesByType(
+            $repeatType,
+            $startTime,
+            $endTime,
+            $endDate
+        );
+
+        if (!empty($generatedDates)) {
+            foreach ($generatedDates as $dateInfo) {
+                $start = $dateInfo['start'];
+
+                if ('meeting' === $conferenceType) {
+                    $newMeetingRep = $this->createScheduleMeeting(
+                        $user,
+                        $course,
+                        $group,
+                        $session,
+                        new DateTime($start),
+                        $formValues['duration'],
+                        $formValues['topic'],
+                        $formValues['agenda'],
+                        $password,
+                        $accountEmail
+                    );
+                } elseif ('webinar' === $conferenceType) {
+                    $newMeetingRep = $this->createScheduleWebinar(
+                        $user,
+                        $course,
+                        $group,
+                        $session,
+                        new DateTime($start),
+                        $formValues['duration'],
+                        $formValues['topic'],
+                        $formValues['agenda'],
+                        $password,
+                        $accountEmail
+                    );
+                }
+
+                if (!empty($newMeetingRep->getId())) {
+                    $meetingId = $newMeetingRep->getId();
+                    $agenda = new Agenda('course');
+                    $endTime = date("Y-m-d H:i:s", strtotime($start.' + '.(int) $form->getSubmitValue('duration').' minutes'));
+                    $allDay = 'false';
+                    $userToSend = ['everyone'];
+
+                    $eventId = $agenda->addEvent(
+                        $start,
+                        $endTime,
+                        $allDay,
+                        $form->getSubmitValue('topic'),
+                        $form->getSubmitValue('agenda'),
+                        $userToSend
+                    );
+
+                    if ($eventId) {
+                        Database::update(
+                            Database::get_course_table(TABLE_AGENDA),
+                            ['zoom_meeting_id' => $meetingId],
+                            ['iid = ? ' => $eventId]
+                        );
+                    }
+                }
+
+                if ($newMeetingRep->isCourseMeeting()) {
+                    if ('RegisterAllCourseUsers' === $form->getSubmitValue('userRegistration')) {
+                        $this->registerAllCourseUsers($newMeetingRep);
+                        /*
+                        Display::addFlash(
+                            Display::return_message($this->get_lang('AllCourseUsersWereRegistered'))
+                        );
+                        */
+                    } elseif ('RegisterTheseGroupMembers' === $form->getSubmitValue('userRegistration')) {
+                        $userIds = [];
+                        foreach ($form->getSubmitValue('groupIds') as $groupId) {
+                            $userIds = array_unique(array_merge($userIds, GroupManager::get_users($groupId)));
+                        }
+                        $users = Database::getManager()->getRepository('ChamiloUserBundle:User')->findBy(
+                            ['id' => $userIds]
+                        );
+                        $this->registerUsers($newMeetingRep, $users);
+                        /*
+                        Display::addFlash(
+                            Display::return_message($this->get_lang('GroupUsersWereRegistered'))
+                        );
+                        */
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $type
+     * @param string $startEvent      in UTC
+     * @param string $endEvent        in UTC
+     * @param string $repeatUntilDate in UTC
+     *
+     * @throws Exception
+     *
+     * @return array
+     */
+    public function generateDatesByType($type, $startEvent, $endEvent, $repeatUntilDate)
+    {
+        $continue = true;
+        $repeatUntilDate = new DateTime($repeatUntilDate, new DateTimeZone('UTC'));
+        $loopMax = 365;
+        $counter = 0;
+        $list = [];
+
+        switch ($type) {
+            case 'daily':
+                $interval = 'P1D';
+                break;
+            case 'weekly':
+                $interval = 'P1W';
+                break;
+            case 'monthlyByDate':
+                $interval = 'P1M';
+                break;
+            case 'monthlyByDay':
+                // not yet implemented
+                break;
+            case 'monthlyByDayR':
+                // not yet implemented
+                break;
+            case 'yearly':
+                $interval = 'P1Y';
+                break;
+        }
+
+        if (empty($interval)) {
+            return [];
+        }
+        $timeZone = api_get_timezone();
+
+        while ($continue) {
+            $startDate = new DateTime($startEvent, new DateTimeZone('UTC'));
+            $endDate = new DateTime($endEvent, new DateTimeZone('UTC'));
+
+            $startDate->add(new DateInterval($interval));
+            $endDate->add(new DateInterval($interval));
+
+            $newStartDate = $startDate->format('Y-m-d H:i:s');
+            $newEndDate = $endDate->format('Y-m-d H:i:s');
+
+            $startEvent = $newStartDate;
+            $endEvent = $newEndDate;
+
+            if ($endDate > $repeatUntilDate) {
+                break;
+            }
+
+            // @todo remove comment code
+            $startDateInLocal = new DateTime($newStartDate);
+            if ($startDateInLocal->format('I') == 0) {
+                // Is saving time? Then fix UTC time to add time
+                $seconds = $startDateInLocal->getOffset();
+                //$startDate->add(new DateInterval("PT".$seconds."S"));
+                $startDateFixed = $startDate->format('Y-m-d H:i:s');
+                $startDateInLocalFixed = new DateTime($startDateFixed);
+                $newStartDate = $startDateInLocalFixed->format('Y-m-d H:i:s');
+            }
+            $endDateInLocal = new DateTime($newEndDate);
+
+            if ($endDateInLocal->format('I') == 0) {
+                // Is saving time? Then fix UTC time to add time
+                $seconds = $endDateInLocal->getOffset();
+                $endDate->add(new DateInterval("PT".$seconds."S"));
+                $endDateFixed = $endDate->format('Y-m-d H:i:s');
+                $endDateInLocalFixed = new DateTime($endDateFixed);
+                $newEndDate = $endDateInLocalFixed->format('Y-m-d H:i:s');
+            }
+            $list[] = ['start' => $newStartDate, 'end' => $newEndDate, 'i' => $startDateInLocal->format('I')];
+            $counter++;
+
+            // just in case stop if more than $loopMax
+            if ($counter > $loopMax) {
+                break;
+            }
+        }
+
+        return $list;
     }
 
     /**
