@@ -2073,7 +2073,7 @@ class Agenda
                     );
                     
                     if (is_array($zoomInfo) && isset($zoomInfo['meeting_id'])) {
-                        $event['zoom_meeting_url'] = api_get_path(WEB_PLUGIN_PATH).'zoom/join_meeting.php?meetingId='.$zoomInfo['meeting_id'];
+                        $event['zoom_meeting_url'] = api_get_path(WEB_PLUGIN_PATH).'zoom/join_meeting.php?meetingId='.$zoomInfo['meeting_id'].'&cidReq='.$courseInfo['code'].'&sessionId='.$sessionId;
                     }
                 }
                 $this->events[] = $event;
