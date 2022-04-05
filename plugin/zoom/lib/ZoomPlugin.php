@@ -1694,10 +1694,6 @@ class ZoomPlugin extends Plugin
         }
 
         if (api_is_platform_admin()) {
-            $actionsLeft .= Display::url(
-                Display::return_icon('agenda.png', get_lang('Calendar'), [], ICON_SIZE_MEDIUM),
-                'calendar.php'
-            );
             $actionsLeft .=
                 Display::url(
                     Display::return_icon('settings.png', get_lang('Settings'), null, ICON_SIZE_MEDIUM),
