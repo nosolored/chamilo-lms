@@ -272,4 +272,3 @@ $strings['PaymentType'] = "Tipo de pago";
 $strings['CountryRelPaymentConfig'] = "Configuración del tipo de pago por país";
 $strings['CountryRelPaymentMessage'] = "Para realizar un pedido es necesario definir el tipo de pago por país, en caso contrario no se permite la realización del pedido";
 $strings['CountryEmpty'] = "Para realizar un pedido es necesario definir en el perfil del usuario el campo país";
-
