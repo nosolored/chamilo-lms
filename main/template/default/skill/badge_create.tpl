@@ -675,13 +675,7 @@
         </div>
 
         <div class="create-openbadges">
-            <a id="btn-open-designer" href="https://badge.design" class="btn btn-primary btn-large btn-block"
-               target="_blank" title="{{ 'DesignANewBadgeComment' | get_lang }}">
-                <em class="fa fa-pencil"></em> {{ 'DesignNewBadge' | get_lang }}
-            </a>
-        </div>
-        <div class="create-openbadges">
-            <button id="btn-open-badge-studio" class="help-badges btn btn-default btn-large btn-block" data-toggle="collapse" data-target="#badge-studio-frame" aria-expanded="false" aria-controls="badge-studio-frame" title="{{ 'DesignWithBadgeStudioComment' | get_lang }}" type="button">
+            <button id="btn-open-badge-studio" class="help-badges btn btn-primary btn-large btn-block" data-toggle="collapse" data-target="#badge-studio-frame" aria-expanded="false" aria-controls="badge-studio-frame" title="{{ 'DesignWithBadgeStudioComment' | get_lang }}" type="button">
                 <em class="fa fa-cogs"></em> {{ 'DesignWithBadgeStudio' | get_lang }}
             </button>
         </div>
